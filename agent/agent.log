@@ -1,0 +1,587 @@
+2025-12-11 15:54:53,222 - asyncio - DEBUG - Using selector: EpollSelector
+2025-12-11 15:54:53,228 - livekit.agents - DEV - Watching /home/morimoves/Projects/just-testing/livekit-groq-testing/agent/src
+2025-12-11 15:54:56,259 - asyncio - DEBUG - Using selector: EpollSelector
+2025-12-11 15:54:56,270 - livekit.agents - INFO - starting worker
+2025-12-11 15:54:56,273 - livekit.agents - INFO - preloading plugins
+2025-12-11 15:54:56,281 - livekit.agents - INFO - starting inference executor
+2025-12-11 15:54:58,674 - livekit.agents - INFO - initializing process
+2025-12-11 15:54:59,589 - livekit.agents - DEBUG - initializing inference runner
+2025-12-11 15:55:04,797 - livekit.agents - DEBUG - inference runner initialized
+2025-12-11 15:55:04,798 - livekit.agents - INFO - process initialized
+2025-12-11 15:55:04,799 - asyncio - DEBUG - Using selector: EpollSelector
+2025-12-11 15:55:04,806 - livekit.agents - INFO - HTTP server listening on :40447
+2025-12-11 15:55:04,965 - livekit.agents - INFO - registered worker
+2025-12-11 15:55:05,024 - livekit.agents - INFO - received job request
+2025-12-11 15:55:05,055 - livekit.agents - DEBUG - received assignment
+2025-12-11 15:55:05,066 - livekit.agents - INFO - initializing process
+2025-12-11 15:55:06,176 - livekit.agents - INFO - process initialized
+2025-12-11 15:55:06,176 - asyncio - DEBUG - Using selector: EpollSelector
+2025-12-11 15:55:06,176 - asyncio - DEBUG - Using selector: EpollSelector
+2025-12-11 15:55:06,511 - livekit.agents - DEBUG - input stream attached
+2025-12-11 15:55:06,511 - livekit.agents - DEBUG - input stream attached
+2025-12-11 15:55:06,528 - livekit.agents - DEBUG - http_session(): creating a new httpclient ctx
+2025-12-11 15:55:06,535 - agent - CHECKPOINT - Assistant agent has entered the session.
+2025-12-11 15:55:06,528 - livekit.agents - DEBUG - http_session(): creating a new httpclient ctx
+2025-12-11 15:55:06,535 - agent - CHECKPOINT - Assistant agent has entered the session.
+2025-12-11 15:55:07,131 - livekit.plugins.cartesia - DEBUG - Established new Cartesia TTS WebSocket connection
+2025-12-11 15:55:07,131 - livekit.plugins.cartesia - DEBUG - Established new Cartesia TTS WebSocket connection
+2025-12-11 15:55:07,453 - livekit.agents - DEBUG - start reading stream
+2025-12-11 15:55:07,453 - livekit.agents - DEBUG - start reading stream
+2025-12-11 15:55:07,455 - livekit.agents - DEBUG - using audio io: `RoomIO` -> `AgentSession` -> `TranscriptSynchronizer` -> `RoomIO`
+2025-12-11 15:55:07,455 - livekit.agents - DEBUG - using transcript io: `AgentSession` -> `TranscriptSynchronizer` -> `RoomIO`
+2025-12-11 15:55:07,455 - livekit.agents - DEBUG - using audio io: `RoomIO` -> `AgentSession` -> `TranscriptSynchronizer` -> `RoomIO`
+2025-12-11 15:55:07,455 - livekit.agents - DEBUG - using transcript io: `AgentSession` -> `TranscriptSynchronizer` -> `RoomIO`
+2025-12-11 15:55:13,628 - agent - CHECKPOINT - TakeInfo task started
+2025-12-11 15:55:13,628 - agent - CHECKPOINT - TakeInfo task started
+2025-12-11 15:55:13,633 - agent - CHECKPOINT - TakeInfo agent has entered the session.
+2025-12-11 15:55:13,633 - agent - CHECKPOINT - TakeInfo agent has entered the session.
+2025-12-11 15:55:22,041 - livekit.agents - DEBUG - received user transcript
+2025-12-11 15:55:22,041 - livekit.agents - DEBUG - received user transcript
+2025-12-11 15:55:24,061 - livekit.plugins.turn_detector - DEBUG - eou prediction
+2025-12-11 15:55:24,062 - livekit.agents - DEBUG - using preemptive generation
+2025-12-11 15:55:24,061 - livekit.plugins.turn_detector - DEBUG - eou prediction
+2025-12-11 15:55:24,062 - livekit.agents - DEBUG - using preemptive generation
+2025-12-11 15:55:24,275 - livekit.agents - DEBUG - received user transcript
+2025-12-11 15:55:24,275 - livekit.agents - DEBUG - received user transcript
+2025-12-11 15:55:24,294 - livekit.agents - WARNING - _SegmentSynchronizerImpl.resume called after close
+2025-12-11 15:55:24,294 - livekit.agents - WARNING - _SegmentSynchronizerImpl.resume called after close
+2025-12-11 15:55:24,546 - livekit.plugins.turn_detector - DEBUG - eou prediction
+2025-12-11 15:55:24,546 - livekit.plugins.turn_detector - DEBUG - eou prediction
+2025-12-11 15:55:25,376 - livekit.agents - DEBUG - executing tool
+2025-12-11 15:55:25,377 - agent - INFO - Collecting guest name: Avinas
+2025-12-11 15:55:25,376 - livekit.agents - DEBUG - executing tool
+2025-12-11 15:55:25,382 - livekit.agents - DEBUG - tools execution completed
+2025-12-11 15:55:25,377 - agent - INFO - Collecting guest name: Avinas
+2025-12-11 15:55:25,382 - livekit.agents - DEBUG - tools execution completed
+2025-12-11 15:55:27,791 - livekit.agents - DEBUG - received user transcript
+2025-12-11 15:55:27,791 - livekit.agents - DEBUG - received user transcript
+2025-12-11 15:55:28,096 - livekit.plugins.turn_detector - DEBUG - eou prediction
+2025-12-11 15:55:28,096 - livekit.plugins.turn_detector - DEBUG - eou prediction
+2025-12-11 15:55:28,440 - livekit.agents - DEBUG - executing tool
+2025-12-11 15:55:28,440 - livekit.agents - DEBUG - executing tool
+2025-12-11 15:55:28,442 - agent - INFO - Collecting guest name: Abhinaz Jaa
+2025-12-11 15:55:28,442 - agent - INFO - Collecting guest name: Abhinaz Jaa
+2025-12-11 15:55:28,452 - livekit.agents - DEBUG - tools execution completed
+2025-12-11 15:55:28,452 - livekit.agents - DEBUG - tools execution completed
+2025-12-11 15:55:36,919 - livekit.agents - DEBUG - received user transcript
+2025-12-11 15:55:36,919 - livekit.agents - DEBUG - received user transcript
+2025-12-11 15:55:37,359 - livekit.plugins.turn_detector - DEBUG - eou prediction
+2025-12-11 15:55:37,361 - livekit.agents - DEBUG - using preemptive generation
+2025-12-11 15:55:37,359 - livekit.plugins.turn_detector - DEBUG - eou prediction
+2025-12-11 15:55:37,361 - livekit.agents - DEBUG - using preemptive generation
+2025-12-11 15:55:38,924 - livekit.agents - DEBUG - received user transcript
+2025-12-11 15:55:38,924 - livekit.agents - DEBUG - received user transcript
+2025-12-11 15:55:39,333 - livekit.plugins.turn_detector - DEBUG - eou prediction
+2025-12-11 15:55:39,333 - livekit.plugins.turn_detector - DEBUG - eou prediction
+2025-12-11 15:55:39,673 - livekit.agents - DEBUG - executing tool
+2025-12-11 15:55:39,673 - livekit.agents - DEBUG - executing tool
+2025-12-11 15:55:39,682 - agent - INFO - Collecting number of guests: 2
+2025-12-11 15:55:39,682 - agent - INFO - Collecting number of guests: 2
+2025-12-11 15:55:39,696 - livekit.agents - DEBUG - tools execution completed
+2025-12-11 15:55:39,696 - livekit.agents - DEBUG - tools execution completed
+2025-12-11 15:55:50,433 - livekit.agents - DEBUG - received user transcript
+2025-12-11 15:55:50,433 - livekit.agents - DEBUG - received user transcript
+2025-12-11 15:55:51,057 - livekit.plugins.turn_detector - DEBUG - eou prediction
+2025-12-11 15:55:51,057 - livekit.plugins.turn_detector - DEBUG - eou prediction
+2025-12-11 15:55:54,494 - livekit.agents - DEBUG - received user transcript
+2025-12-11 15:55:54,494 - livekit.agents - DEBUG - received user transcript
+2025-12-11 15:55:54,982 - livekit.plugins.turn_detector - DEBUG - eou prediction
+2025-12-11 15:55:54,984 - livekit.agents - DEBUG - using preemptive generation
+2025-12-11 15:55:54,982 - livekit.plugins.turn_detector - DEBUG - eou prediction
+2025-12-11 15:55:54,984 - livekit.agents - DEBUG - using preemptive generation
+2025-12-11 15:55:54,988 - livekit.agents - DEBUG - executing tool
+2025-12-11 15:55:54,991 - agent - INFO - Collecting preferred date/time: 2:45 pm
+2025-12-11 15:55:54,988 - livekit.agents - DEBUG - executing tool
+2025-12-11 15:55:55,002 - livekit.agents - DEBUG - tools execution completed
+2025-12-11 15:55:54,991 - agent - INFO - Collecting preferred date/time: 2:45 pm
+2025-12-11 15:55:55,002 - livekit.agents - DEBUG - tools execution completed
+2025-12-11 15:56:08,474 - livekit.agents - DEBUG - received user transcript
+2025-12-11 15:56:08,474 - livekit.agents - DEBUG - received user transcript
+2025-12-11 15:56:08,927 - livekit.plugins.turn_detector - DEBUG - eou prediction
+2025-12-11 15:56:08,929 - livekit.agents - DEBUG - using preemptive generation
+2025-12-11 15:56:08,927 - livekit.plugins.turn_detector - DEBUG - eou prediction
+2025-12-11 15:56:08,933 - livekit.agents - DEBUG - executing tool
+2025-12-11 15:56:08,935 - agent - INFO - Collecting cuisine preference: Indian cuisine
+2025-12-11 15:56:08,936 - livekit.agents - DEBUG - tools execution completed
+2025-12-11 15:56:08,929 - livekit.agents - DEBUG - using preemptive generation
+2025-12-11 15:56:08,933 - livekit.agents - DEBUG - executing tool
+2025-12-11 15:56:08,935 - agent - INFO - Collecting cuisine preference: Indian cuisine
+2025-12-11 15:56:08,936 - livekit.agents - DEBUG - tools execution completed
+2025-12-11 15:56:17,532 - livekit.agents - DEBUG - received user transcript
+2025-12-11 15:56:17,532 - livekit.agents - DEBUG - received user transcript
+2025-12-11 15:56:18,105 - livekit.plugins.turn_detector - DEBUG - eou prediction
+2025-12-11 15:56:18,105 - livekit.plugins.turn_detector - DEBUG - eou prediction
+2025-12-11 15:56:19,541 - livekit.agents - DEBUG - using preemptive generation
+2025-12-11 15:56:19,541 - livekit.agents - DEBUG - using preemptive generation
+2025-12-11 15:56:21,400 - livekit.agents - DEBUG - received user transcript
+2025-12-11 15:56:21,400 - livekit.agents - DEBUG - received user transcript
+2025-12-11 15:56:23,940 - livekit.plugins.turn_detector - DEBUG - eou prediction
+2025-12-11 15:56:23,940 - livekit.plugins.turn_detector - DEBUG - eou prediction
+2025-12-11 15:56:24,027 - livekit.agents - DEBUG - received user transcript
+2025-12-11 15:56:24,027 - livekit.agents - DEBUG - received user transcript
+2025-12-11 15:56:24,314 - livekit.plugins.turn_detector - DEBUG - eou prediction
+2025-12-11 15:56:24,314 - livekit.plugins.turn_detector - DEBUG - eou prediction
+2025-12-11 15:56:25,104 - livekit.plugins.cartesia - DEBUG - Established new Cartesia TTS WebSocket connection
+2025-12-11 15:56:25,104 - livekit.plugins.cartesia - DEBUG - Established new Cartesia TTS WebSocket connection
+2025-12-11 15:56:25,245 - livekit.agents - DEBUG - executing tool
+2025-12-11 15:56:25,245 - livekit.agents - DEBUG - executing tool
+2025-12-11 15:56:25,246 - agent - INFO - Collecting special requests: None
+2025-12-11 15:56:25,248 - livekit.agents - DEBUG - tools execution completed
+2025-12-11 15:56:25,246 - agent - INFO - Collecting special requests: None
+2025-12-11 15:56:25,248 - livekit.agents - DEBUG - tools execution completed
+2025-12-11 15:56:44,029 - livekit.agents - DEBUG - received user transcript
+2025-12-11 15:56:44,029 - livekit.agents - DEBUG - received user transcript
+2025-12-11 15:56:44,497 - livekit.plugins.turn_detector - DEBUG - eou prediction
+2025-12-11 15:56:44,497 - livekit.plugins.turn_detector - DEBUG - eou prediction
+2025-12-11 15:56:47,610 - livekit.agents - DEBUG - received user transcript
+2025-12-11 15:56:47,610 - livekit.agents - DEBUG - received user transcript
+2025-12-11 15:56:47,840 - livekit.plugins.cartesia - DEBUG - Established new Cartesia TTS WebSocket connection
+2025-12-11 15:56:47,840 - livekit.plugins.cartesia - DEBUG - Established new Cartesia TTS WebSocket connection
+2025-12-11 15:56:48,504 - livekit.agents - DEBUG - received user transcript
+2025-12-11 15:56:48,504 - livekit.agents - DEBUG - received user transcript
+2025-12-11 15:56:48,812 - livekit.plugins.cartesia - DEBUG - Established new Cartesia TTS WebSocket connection
+2025-12-11 15:56:48,812 - livekit.plugins.cartesia - DEBUG - Established new Cartesia TTS WebSocket connection
+2025-12-11 15:56:49,189 - livekit.plugins.turn_detector - DEBUG - eou prediction
+2025-12-11 15:56:49,190 - livekit.agents - DEBUG - using preemptive generation
+2025-12-11 15:56:49,189 - livekit.plugins.turn_detector - DEBUG - eou prediction
+2025-12-11 15:56:49,190 - livekit.agents - DEBUG - using preemptive generation
+2025-12-11 15:56:58,918 - livekit.agents - DEBUG - received user transcript
+2025-12-11 15:56:58,918 - livekit.agents - DEBUG - received user transcript
+2025-12-11 15:56:59,682 - livekit.plugins.turn_detector - DEBUG - eou prediction
+2025-12-11 15:56:59,685 - livekit.agents - DEBUG - using preemptive generation
+2025-12-11 15:56:59,682 - livekit.plugins.turn_detector - DEBUG - eou prediction
+2025-12-11 15:56:59,685 - livekit.agents - DEBUG - using preemptive generation
+2025-12-11 15:57:09,765 - livekit.agents - INFO - closing agent session due to participant disconnect (disable via `RoomInputOptions.close_on_disconnect=False`)
+2025-12-11 15:57:09,765 - livekit.agents - INFO - closing agent session due to participant disconnect (disable via `RoomInputOptions.close_on_disconnect=False`)
+2025-12-11 15:57:09,768 - livekit.agents - DEBUG - input stream detached
+2025-12-11 15:57:09,770 - livekit.agents - DEBUG - stream closed
+2025-12-11 15:57:09,774 - livekit.agents - DEBUG - session closed
+2025-12-11 15:57:09,768 - livekit.agents - DEBUG - input stream detached
+2025-12-11 15:57:09,770 - livekit.agents - DEBUG - stream closed
+2025-12-11 15:57:09,774 - livekit.agents - DEBUG - session closed
+2025-12-11 15:57:10,630 - livekit.agents - INFO - received job request
+2025-12-11 15:57:10,671 - livekit.agents - DEBUG - received assignment
+2025-12-11 15:57:10,692 - livekit.agents - INFO - initializing process
+2025-12-11 15:57:11,845 - livekit.agents - INFO - process initialized
+2025-12-11 15:57:11,845 - asyncio - DEBUG - Using selector: EpollSelector
+2025-12-11 15:57:11,845 - asyncio - DEBUG - Using selector: EpollSelector
+2025-12-11 15:57:12,205 - livekit.agents - DEBUG - input stream attached
+2025-12-11 15:57:12,205 - livekit.agents - DEBUG - input stream attached
+2025-12-11 15:57:12,220 - livekit.agents - DEBUG - http_session(): creating a new httpclient ctx
+2025-12-11 15:57:12,220 - livekit.agents - DEBUG - http_session(): creating a new httpclient ctx
+2025-12-11 15:57:12,226 - agent - CHECKPOINT - Assistant agent has entered the session.
+2025-12-11 15:57:12,226 - agent - CHECKPOINT - Assistant agent has entered the session.
+2025-12-11 15:57:13,103 - livekit.agents - DEBUG - start reading stream
+2025-12-11 15:57:13,103 - livekit.agents - DEBUG - start reading stream
+2025-12-11 15:57:13,104 - livekit.agents - DEBUG - using audio io: `RoomIO` -> `AgentSession` -> `TranscriptSynchronizer` -> `RoomIO`
+2025-12-11 15:57:13,105 - livekit.agents - DEBUG - using transcript io: `AgentSession` -> `TranscriptSynchronizer` -> `RoomIO`
+2025-12-11 15:57:13,104 - livekit.agents - DEBUG - using audio io: `RoomIO` -> `AgentSession` -> `TranscriptSynchronizer` -> `RoomIO`
+2025-12-11 15:57:13,112 - livekit.plugins.cartesia - DEBUG - Established new Cartesia TTS WebSocket connection
+2025-12-11 15:57:13,105 - livekit.agents - DEBUG - using transcript io: `AgentSession` -> `TranscriptSynchronizer` -> `RoomIO`
+2025-12-11 15:57:13,112 - livekit.plugins.cartesia - DEBUG - Established new Cartesia TTS WebSocket connection
+2025-12-11 15:57:13,398 - livekit.agents - INFO - closing agent session due to participant disconnect (disable via `RoomInputOptions.close_on_disconnect=False`)
+2025-12-11 15:57:13,398 - livekit.agents - INFO - closing agent session due to participant disconnect (disable via `RoomInputOptions.close_on_disconnect=False`)
+2025-12-11 15:57:13,422 - livekit.agents - DEBUG - stream closed
+2025-12-11 15:57:13,422 - livekit.agents - DEBUG - stream closed
+2025-12-11 15:57:13,452 - agent - CHECKPOINT - TakeInfo task started
+2025-12-11 15:57:13,454 - agent - CHECKPOINT - Assistant agent is exiting the session.
+2025-12-11 15:57:13,452 - agent - CHECKPOINT - TakeInfo task started
+2025-12-11 15:57:13,454 - agent - CHECKPOINT - Assistant agent is exiting the session.
+2025-12-11 15:57:13,662 - livekit.plugins.cartesia - DEBUG - Established new Cartesia TTS WebSocket connection
+2025-12-11 15:57:13,662 - livekit.plugins.cartesia - DEBUG - Established new Cartesia TTS WebSocket connection
+2025-12-11 15:57:13,965 - livekit.agents - DEBUG - received user transcript
+2025-12-11 15:57:13,965 - livekit.agents - DEBUG - received user transcript
+2025-12-11 15:57:14,041 - livekit.plugins.turn_detector - DEBUG - eou prediction
+2025-12-11 15:57:14,042 - livekit.agents - WARNING - skipping user input, speech scheduling is paused
+2025-12-11 15:57:14,041 - livekit.plugins.turn_detector - DEBUG - eou prediction
+2025-12-11 15:57:14,042 - livekit.agents - WARNING - skipping user input, speech scheduling is paused
+2026-01-15 20:15:45,945 - asyncio - DEBUG - Using selector: EpollSelector
+2026-01-15 20:15:45,958 - livekit.agents - DEV - Watching /home/morimoves/Projects/livekit-groq-testing/agent/src
+2026-01-15 20:15:52,869 - asyncio - DEBUG - Using selector: EpollSelector
+2026-01-15 20:15:52,896 - livekit.agents - INFO - starting worker
+2026-01-15 20:15:52,903 - livekit.agents - INFO - preloading plugins
+2026-01-15 20:15:52,916 - livekit.agents - INFO - starting inference executor
+2026-01-15 20:16:01,233 - livekit.agents - INFO - initializing process
+2026-01-15 20:16:03,161 - livekit.agents - DEBUG - initializing inference runner
+2026-01-15 20:16:14,969 - livekit.agents - DEBUG - inference runner initialized
+2026-01-15 20:16:14,970 - livekit.agents - INFO - process initialized
+2026-01-15 20:16:14,970 - asyncio - DEBUG - Using selector: EpollSelector
+2026-01-15 20:16:14,983 - livekit.agents - INFO - HTTP server listening on :45851
+2026-01-15 20:16:15,390 - livekit.agents - INFO - registered worker
+2026-01-15 20:18:45,000 - livekit.agents - INFO - received job request
+2026-01-15 20:18:45,073 - livekit.agents - DEBUG - received assignment
+2026-01-15 20:18:45,186 - livekit.agents - INFO - initializing process
+2026-01-15 20:18:48,546 - livekit.agents - INFO - process initialized
+2026-01-15 20:18:48,540 - asyncio - DEBUG - Using selector: EpollSelector
+2026-01-15 20:18:48,540 - asyncio - DEBUG - Using selector: EpollSelector
+2026-01-15 20:18:49,434 - livekit.agents - DEBUG - input stream attached
+2026-01-15 20:18:49,434 - livekit.agents - DEBUG - input stream attached
+2026-01-15 20:18:49,532 - livekit.agents - DEBUG - http_session(): creating a new httpclient ctx
+2026-01-15 20:18:49,532 - livekit.agents - DEBUG - http_session(): creating a new httpclient ctx
+2026-01-15 20:18:49,574 - agent - CHECKPOINT - Assistant agent has entered the session.
+2026-01-15 20:18:49,574 - agent - CHECKPOINT - Assistant agent has entered the session.
+2026-01-15 20:18:52,328 - livekit.agents - DEBUG - start reading stream
+2026-01-15 20:18:52,328 - livekit.agents - DEBUG - start reading stream
+2026-01-15 20:18:52,384 - livekit.agents - DEBUG - using audio io: `RoomIO` -> `AgentSession` -> `TranscriptSynchronizer` -> `RoomIO`
+2026-01-15 20:18:52,389 - livekit.agents - DEBUG - using transcript io: `AgentSession` -> `TranscriptSynchronizer` -> `RoomIO`
+2026-01-15 20:18:52,384 - livekit.agents - DEBUG - using audio io: `RoomIO` -> `AgentSession` -> `TranscriptSynchronizer` -> `RoomIO`
+2026-01-15 20:18:52,389 - livekit.agents - DEBUG - using transcript io: `AgentSession` -> `TranscriptSynchronizer` -> `RoomIO`
+2026-01-15 20:18:53,073 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:53,091 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:53,073 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:53,091 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:55,548 - livekit.agents - DEBUG - flush audio emitter due to slow audio generation
+2026-01-15 20:18:55,550 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:55,548 - livekit.agents - DEBUG - flush audio emitter due to slow audio generation
+2026-01-15 20:18:55,595 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:55,550 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:55,595 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:56,014 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:56,024 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:56,014 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:56,024 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:56,460 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:56,460 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:56,521 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:56,521 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:56,736 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:56,763 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:56,736 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:56,763 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:57,240 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:57,244 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:57,240 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:57,244 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:57,570 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:57,570 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:57,576 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:57,576 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:57,796 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:57,796 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:57,805 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:57,805 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:58,076 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:58,076 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:58,401 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:58,401 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:58,651 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:58,651 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:58,773 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:58,773 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:58,997 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:59,001 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:58,997 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:59,001 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:59,228 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:59,231 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:59,228 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:59,231 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:59,753 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:59,753 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:59,790 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:18:59,790 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:19:00,251 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:19:00,251 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:19:00,612 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:19:00,624 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:19:00,612 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:19:00,624 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:19:01,067 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:19:01,080 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:19:01,067 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:19:01,080 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:19:07,166 - agent - CHECKPOINT - TakeInfo task started
+2026-01-15 20:19:07,174 - agent - CHECKPOINT - TakeInfo agent has entered the session.
+2026-01-15 20:19:07,166 - agent - CHECKPOINT - TakeInfo task started
+2026-01-15 20:19:07,174 - agent - CHECKPOINT - TakeInfo agent has entered the session.
+2026-01-15 20:19:12,012 - livekit.agents - INFO - closing agent session due to participant disconnect (disable via `RoomInputOptions.close_on_disconnect=False`)
+2026-01-15 20:19:12,016 - livekit.agents - DEBUG - input stream detached
+2026-01-15 20:19:12,012 - livekit.agents - INFO - closing agent session due to participant disconnect (disable via `RoomInputOptions.close_on_disconnect=False`)
+2026-01-15 20:19:12,042 - livekit.agents - DEBUG - stream closed
+2026-01-15 20:19:12,073 - livekit.agents - DEBUG - session closed
+2026-01-15 20:19:12,016 - livekit.agents - DEBUG - input stream detached
+2026-01-15 20:19:12,042 - livekit.agents - DEBUG - stream closed
+2026-01-15 20:19:12,073 - livekit.agents - DEBUG - session closed
+2026-01-15 20:19:36,850 - livekit.agents - DEBUG - shutting down job task
+2026-01-15 20:19:36,853 - livekit.agents - INFO - process exiting
+2026-01-15 20:19:36,863 - livekit.agents - DEBUG - http_session(): closing the httpclient ctx
+2026-01-15 20:19:36,850 - livekit.agents - DEBUG - shutting down job task
+2026-01-15 20:19:36,863 - livekit.agents - DEBUG - http_session(): closing the httpclient ctx
+2026-01-15 20:21:34,666 - livekit.agents - INFO - received job request
+2026-01-15 20:21:34,717 - livekit.agents - DEBUG - received assignment
+2026-01-15 20:21:34,753 - livekit.agents - INFO - initializing process
+2026-01-15 20:21:37,795 - livekit.agents - INFO - process initialized
+2026-01-15 20:21:37,794 - asyncio - DEBUG - Using selector: EpollSelector
+2026-01-15 20:21:37,794 - asyncio - DEBUG - Using selector: EpollSelector
+2026-01-15 20:21:38,599 - livekit.agents - DEBUG - input stream attached
+2026-01-15 20:21:38,599 - livekit.agents - DEBUG - input stream attached
+2026-01-15 20:21:38,649 - livekit.agents - DEBUG - http_session(): creating a new httpclient ctx
+2026-01-15 20:21:38,659 - agent - CHECKPOINT - Assistant agent has entered the session.
+2026-01-15 20:21:38,649 - livekit.agents - DEBUG - http_session(): creating a new httpclient ctx
+2026-01-15 20:21:38,659 - agent - CHECKPOINT - Assistant agent has entered the session.
+2026-01-15 20:21:41,691 - livekit.agents - DEBUG - start reading stream
+2026-01-15 20:21:41,691 - livekit.agents - DEBUG - start reading stream
+2026-01-15 20:21:41,739 - livekit.agents - DEBUG - using audio io: `RoomIO` -> `AgentSession` -> `TranscriptSynchronizer` -> `RoomIO`
+2026-01-15 20:21:41,740 - livekit.agents - DEBUG - using transcript io: `AgentSession` -> `TranscriptSynchronizer` -> `RoomIO`
+2026-01-15 20:21:41,739 - livekit.agents - DEBUG - using audio io: `RoomIO` -> `AgentSession` -> `TranscriptSynchronizer` -> `RoomIO`
+2026-01-15 20:21:41,740 - livekit.agents - DEBUG - using transcript io: `AgentSession` -> `TranscriptSynchronizer` -> `RoomIO`
+2026-01-15 20:21:43,006 - livekit.agents - DEBUG - flush audio emitter due to slow audio generation
+2026-01-15 20:21:43,008 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:21:43,006 - livekit.agents - DEBUG - flush audio emitter due to slow audio generation
+2026-01-15 20:21:43,014 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:21:43,008 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:21:43,014 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:21:44,215 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:21:44,215 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:21:44,224 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:21:44,224 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:21:44,436 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:21:44,436 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:21:44,669 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:21:44,669 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:21:44,716 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:21:44,716 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:21:44,929 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:21:44,952 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:21:44,929 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:21:44,952 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:21:45,260 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:21:45,281 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:21:45,260 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:21:45,281 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:21:45,993 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:21:45,993 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:21:46,045 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:21:46,045 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:21:46,311 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:21:46,311 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:21:46,470 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:21:46,470 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:21:47,059 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:21:47,059 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:21:47,151 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:21:47,151 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:21:47,404 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:21:47,404 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:21:47,500 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:21:47,500 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:21:51,432 - livekit.agents - DEBUG - stream closed
+2026-01-15 20:21:51,432 - livekit.agents - DEBUG - stream closed
+2026-01-15 20:21:51,439 - livekit.agents - INFO - closing agent session due to participant disconnect (disable via `RoomInputOptions.close_on_disconnect=False`)
+2026-01-15 20:21:51,456 - agent - CHECKPOINT - TakeInfo task started
+2026-01-15 20:21:51,458 - agent - CHECKPOINT - Assistant agent is exiting the session.
+2026-01-15 20:21:51,439 - livekit.agents - INFO - closing agent session due to participant disconnect (disable via `RoomInputOptions.close_on_disconnect=False`)
+2026-01-15 20:21:51,456 - agent - CHECKPOINT - TakeInfo task started
+2026-01-15 20:21:51,458 - agent - CHECKPOINT - Assistant agent is exiting the session.
+2026-01-15 20:22:09,504 - livekit.agents - INFO - shutting down worker
+2026-01-15 20:22:14,512 - watchfiles.main - WARNING - process has not terminated, sending SIGKILL
+2026-01-15 20:22:26,400 - asyncio - DEBUG - Using selector: EpollSelector
+2026-01-15 20:22:26,435 - livekit.agents - INFO - starting worker
+2026-01-15 20:22:26,446 - livekit.agents - INFO - preloading plugins
+2026-01-15 20:22:26,462 - livekit.agents - INFO - starting inference executor
+2026-01-15 20:22:26,480 - livekit.agents - DEV - reloading job
+2026-01-15 20:22:34,581 - livekit.agents - INFO - initializing process
+2026-01-15 20:22:34,621 - livekit.agents - INFO - initializing process
+2026-01-15 20:22:36,979 - livekit.agents - DEBUG - initializing inference runner
+2026-01-15 20:22:37,290 - livekit.agents - INFO - process initialized
+2026-01-15 20:22:37,290 - asyncio - DEBUG - Using selector: EpollSelector
+2026-01-15 20:22:37,290 - asyncio - DEBUG - Using selector: EpollSelector
+2026-01-15 20:22:38,233 - livekit.agents - DEBUG - input stream attached
+2026-01-15 20:22:38,233 - livekit.agents - DEBUG - input stream attached
+2026-01-15 20:22:38,284 - livekit.agents - DEBUG - http_session(): creating a new httpclient ctx
+2026-01-15 20:22:38,284 - livekit.agents - DEBUG - http_session(): creating a new httpclient ctx
+2026-01-15 20:22:38,307 - agent - CHECKPOINT - Assistant agent has entered the session.
+2026-01-15 20:22:38,307 - agent - CHECKPOINT - Assistant agent has entered the session.
+2026-01-15 20:22:40,416 - livekit.agents - DEBUG - using audio io: `RoomIO` -> `AgentSession` -> `TranscriptSynchronizer` -> `RoomIO`
+2026-01-15 20:22:40,424 - livekit.agents - DEBUG - using transcript io: `AgentSession` -> `TranscriptSynchronizer` -> `RoomIO`
+2026-01-15 20:22:40,416 - livekit.agents - DEBUG - using audio io: `RoomIO` -> `AgentSession` -> `TranscriptSynchronizer` -> `RoomIO`
+2026-01-15 20:22:40,424 - livekit.agents - DEBUG - using transcript io: `AgentSession` -> `TranscriptSynchronizer` -> `RoomIO`
+2026-01-15 20:22:47,750 - livekit.agents - DEBUG - inference runner initialized
+2026-01-15 20:22:47,752 - livekit.agents - INFO - process initialized
+2026-01-15 20:22:47,752 - asyncio - DEBUG - Using selector: EpollSelector
+2026-01-15 20:22:47,763 - livekit.agents - INFO - HTTP server listening on :46261
+2026-01-15 20:22:48,139 - livekit.agents - INFO - registered worker
+2026-01-15 20:22:48,299 - livekit.agents - INFO - received job request
+2026-01-15 20:22:48,401 - livekit.agents - DEBUG - received assignment
+2026-01-15 20:22:48,420 - livekit.agents - INFO - initializing process
+2026-01-15 20:22:50,342 - livekit.agents - INFO - process initialized
+2026-01-15 20:22:50,342 - asyncio - DEBUG - Using selector: EpollSelector
+2026-01-15 20:22:50,342 - asyncio - DEBUG - Using selector: EpollSelector
+2026-01-15 20:22:50,672 - livekit.agents - DEBUG - input stream attached
+2026-01-15 20:22:50,672 - livekit.agents - DEBUG - input stream attached
+2026-01-15 20:22:50,700 - livekit.agents - DEBUG - http_session(): creating a new httpclient ctx
+2026-01-15 20:22:50,700 - livekit.agents - DEBUG - http_session(): creating a new httpclient ctx
+2026-01-15 20:22:50,709 - agent - CHECKPOINT - Assistant agent has entered the session.
+2026-01-15 20:22:50,709 - agent - CHECKPOINT - Assistant agent has entered the session.
+2026-01-15 20:22:51,509 - livekit.agents - DEBUG - using audio io: `RoomIO` -> `AgentSession` -> `TranscriptSynchronizer` -> `RoomIO`
+2026-01-15 20:22:51,509 - livekit.agents - DEBUG - using transcript io: `AgentSession` -> `TranscriptSynchronizer` -> `RoomIO`
+2026-01-15 20:22:51,509 - livekit.agents - DEBUG - using audio io: `RoomIO` -> `AgentSession` -> `TranscriptSynchronizer` -> `RoomIO`
+2026-01-15 20:22:51,509 - livekit.agents - DEBUG - using transcript io: `AgentSession` -> `TranscriptSynchronizer` -> `RoomIO`
+2026-01-15 20:23:06,391 - livekit.agents - INFO - received job request
+2026-01-15 20:23:06,439 - livekit.agents - DEBUG - received assignment
+2026-01-15 20:23:06,487 - livekit.agents - INFO - initializing process
+2026-01-15 20:23:09,754 - livekit.agents - INFO - process initialized
+2026-01-15 20:23:09,750 - asyncio - DEBUG - Using selector: EpollSelector
+2026-01-15 20:23:09,750 - asyncio - DEBUG - Using selector: EpollSelector
+2026-01-15 20:23:10,530 - livekit.agents - DEBUG - input stream attached
+2026-01-15 20:23:10,530 - livekit.agents - DEBUG - input stream attached
+2026-01-15 20:23:10,567 - livekit.agents - DEBUG - http_session(): creating a new httpclient ctx
+2026-01-15 20:23:10,567 - livekit.agents - DEBUG - http_session(): creating a new httpclient ctx
+2026-01-15 20:23:10,602 - agent - CHECKPOINT - Assistant agent has entered the session.
+2026-01-15 20:23:10,602 - agent - CHECKPOINT - Assistant agent has entered the session.
+2026-01-15 20:23:13,203 - livekit.agents - DEBUG - start reading stream
+2026-01-15 20:23:13,203 - livekit.agents - DEBUG - start reading stream
+2026-01-15 20:23:13,311 - livekit.agents - DEBUG - using audio io: `RoomIO` -> `AgentSession` -> `TranscriptSynchronizer` -> `RoomIO`
+2026-01-15 20:23:13,316 - livekit.agents - DEBUG - using transcript io: `AgentSession` -> `TranscriptSynchronizer` -> `RoomIO`
+2026-01-15 20:23:13,311 - livekit.agents - DEBUG - using audio io: `RoomIO` -> `AgentSession` -> `TranscriptSynchronizer` -> `RoomIO`
+2026-01-15 20:23:13,316 - livekit.agents - DEBUG - using transcript io: `AgentSession` -> `TranscriptSynchronizer` -> `RoomIO`
+2026-01-15 20:23:13,664 - livekit.agents - ERROR - process did not exit in time, killing process
+2026-01-15 20:23:13,723 - livekit.agents - INFO - killing process
+2026-01-15 20:23:13,773 - livekit.agents - INFO - sending SIGUSR1 signal to process
+2026-01-15 20:23:14,007 - livekit.agents - ERROR - process exited with non-zero exit code -10
+2026-01-15 20:23:16,532 - livekit.agents - DEBUG - flush audio emitter due to slow audio generation
+2026-01-15 20:23:16,534 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:23:16,536 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:23:16,532 - livekit.agents - DEBUG - flush audio emitter due to slow audio generation
+2026-01-15 20:23:16,534 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:23:16,536 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:23:19,054 - agent - CHECKPOINT - TakeInfo task started
+2026-01-15 20:23:19,054 - agent - CHECKPOINT - TakeInfo task started
+2026-01-15 20:23:19,158 - agent - CHECKPOINT - TakeInfo agent has entered the session.
+2026-01-15 20:23:19,158 - agent - CHECKPOINT - TakeInfo agent has entered the session.
+2026-01-15 20:23:27,498 - livekit.agents - DEBUG - executing tool
+2026-01-15 20:23:27,501 - agent - INFO - Collecting guest name: ajay
+2026-01-15 20:23:27,498 - livekit.agents - DEBUG - executing tool
+2026-01-15 20:23:27,521 - livekit.agents - DEBUG - tools execution completed
+2026-01-15 20:23:27,501 - agent - INFO - Collecting guest name: ajay
+2026-01-15 20:23:27,521 - livekit.agents - DEBUG - tools execution completed
+2026-01-15 20:23:33,524 - livekit.agents - DEBUG - executing tool
+2026-01-15 20:23:33,524 - livekit.agents - DEBUG - executing tool
+2026-01-15 20:23:33,534 - agent - INFO - Collecting number of guests: 4
+2026-01-15 20:23:33,534 - agent - INFO - Collecting number of guests: 4
+2026-01-15 20:23:33,582 - livekit.agents - DEBUG - tools execution completed
+2026-01-15 20:23:33,582 - livekit.agents - DEBUG - tools execution completed
+2026-01-15 20:23:45,321 - livekit.agents - DEBUG - executing tool
+2026-01-15 20:23:45,321 - livekit.agents - DEBUG - executing tool
+2026-01-15 20:23:45,327 - agent - INFO - Collecting preferred date/time: tommorow 4pm
+2026-01-15 20:23:45,327 - agent - INFO - Collecting preferred date/time: tommorow 4pm
+2026-01-15 20:23:45,359 - livekit.agents - DEBUG - tools execution completed
+2026-01-15 20:23:45,359 - livekit.agents - DEBUG - tools execution completed
+2026-01-15 20:23:54,391 - livekit.agents - DEBUG - executing tool
+2026-01-15 20:23:54,394 - agent - INFO - Collecting cuisine preference: indian
+2026-01-15 20:23:54,391 - livekit.agents - DEBUG - executing tool
+2026-01-15 20:23:54,424 - livekit.agents - DEBUG - tools execution completed
+2026-01-15 20:23:54,394 - agent - INFO - Collecting cuisine preference: indian
+2026-01-15 20:23:54,424 - livekit.agents - DEBUG - tools execution completed
+2026-01-15 20:23:54,763 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:23:54,768 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:23:54,763 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:23:54,768 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:24:09,184 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:24:09,184 - livekit.plugins.silero - WARNING - inference is slower than realtime
+2026-01-15 20:24:09,531 - livekit.agents - DEBUG - executing tool
+2026-01-15 20:24:09,531 - livekit.agents - DEBUG - executing tool
+2026-01-15 20:24:09,537 - agent - INFO - Collecting special requests: no special reserveation
+2026-01-15 20:24:09,537 - agent - INFO - Collecting special requests: no special reserveation
+2026-01-15 20:24:09,580 - livekit.agents - DEBUG - tools execution completed
+2026-01-15 20:24:09,580 - livekit.agents - DEBUG - tools execution completed
+2026-01-15 20:24:29,466 - livekit.agents - INFO - closing agent session due to participant disconnect (disable via `RoomInputOptions.close_on_disconnect=False`)
+2026-01-15 20:24:29,466 - livekit.agents - INFO - closing agent session due to participant disconnect (disable via `RoomInputOptions.close_on_disconnect=False`)
+2026-01-15 20:24:29,486 - livekit.agents - DEBUG - stream closed
+2026-01-15 20:24:29,486 - livekit.agents - DEBUG - stream closed
+2026-01-15 20:24:29,538 - livekit.agents - DEBUG - input stream detached
+2026-01-15 20:24:29,538 - livekit.agents - DEBUG - input stream detached
+2026-01-15 20:24:29,577 - livekit.agents - DEBUG - session closed
+2026-01-15 20:24:29,577 - livekit.agents - DEBUG - session closed
+2026-01-15 20:24:53,767 - asyncio - ERROR - Task exception was never retrieved
+future: <Task finished name='agent_job_termination' coro=<AgentServer._handle_termination() done, defined at /home/morimoves/Projects/livekit-groq-testing/agent/.venv/lib/python3.10/site-packages/livekit/agents/worker.py:1256> exception=ValueError('process object is closed')>
+Traceback (most recent call last):
+  File "/home/morimoves/.local/share/uv/python/cpython-3.10.19-linux-x86_64-gnu/lib/python3.10/asyncio/tasks.py", line 456, in wait_for
+    return fut.result()
+asyncio.exceptions.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/morimoves/Projects/livekit-groq-testing/agent/.venv/lib/python3.10/site-packages/livekit/agents/ipc/supervised_proc.py", line 252, in aclose
+    await asyncio.wait_for(
+  File "/home/morimoves/.local/share/uv/python/cpython-3.10.19-linux-x86_64-gnu/lib/python3.10/asyncio/tasks.py", line 458, in wait_for
+    raise exceptions.TimeoutError() from exc
+asyncio.exceptions.TimeoutError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/morimoves/Projects/livekit-groq-testing/agent/.venv/lib/python3.10/site-packages/livekit/agents/worker.py", line 1261, in _handle_termination
+    await proc.aclose()
+  File "/home/morimoves/Projects/livekit-groq-testing/agent/.venv/lib/python3.10/site-packages/livekit/agents/ipc/supervised_proc.py", line 261, in aclose
+    await self._send_kill_signal()
+  File "/home/morimoves/Projects/livekit-groq-testing/agent/.venv/lib/python3.10/site-packages/livekit/agents/ipc/supervised_proc.py", line 317, in _send_kill_signal
+    self._proc.kill()
+  File "/home/morimoves/.local/share/uv/python/cpython-3.10.19-linux-x86_64-gnu/lib/python3.10/multiprocessing/process.py", line 139, in kill
+    self._check_closed()
+  File "/home/morimoves/.local/share/uv/python/cpython-3.10.19-linux-x86_64-gnu/lib/python3.10/multiprocessing/process.py", line 101, in _check_closed
+    raise ValueError("process object is closed")
+ValueError: process object is closed
+2026-01-15 20:24:53,792 - livekit.agents - DEBUG - shutting down job task
+2026-01-15 20:24:53,800 - livekit.agents - DEBUG - http_session(): closing the httpclient ctx
+2026-01-15 20:24:53,792 - livekit.agents - DEBUG - shutting down job task
+2026-01-15 20:24:53,800 - livekit.agents - DEBUG - http_session(): closing the httpclient ctx
+2026-01-15 20:26:36,281 - livekit.agents - INFO - shutting down worker
+2026-01-15 20:26:41,286 - watchfiles.main - WARNING - process has not terminated, sending SIGKILL
+2026-01-15 20:26:47,935 - asyncio - DEBUG - Using selector: EpollSelector
+2026-01-15 20:26:47,960 - livekit.agents - INFO - starting worker
+2026-01-15 20:26:47,965 - livekit.agents - INFO - preloading plugins
+2026-01-15 20:26:47,980 - livekit.agents - INFO - starting inference executor
+2026-01-15 20:26:48,009 - livekit.agents - DEV - reloading job
+2026-01-15 20:26:52,598 - livekit.agents - INFO - initializing process
+2026-01-15 20:26:52,614 - livekit.agents - INFO - initializing process
+2026-01-15 20:26:54,206 - livekit.agents - DEBUG - initializing inference runner
+2026-01-15 20:26:54,556 - livekit.agents - INFO - process initialized
+2026-01-15 20:26:54,555 - asyncio - DEBUG - Using selector: EpollSelector
+2026-01-15 20:26:54,555 - asyncio - DEBUG - Using selector: EpollSelector
+2026-01-15 20:26:54,945 - livekit.agents - DEBUG - input stream attached
+2026-01-15 20:26:54,945 - livekit.agents - DEBUG - input stream attached
+2026-01-15 20:26:54,979 - livekit.agents - DEBUG - http_session(): creating a new httpclient ctx
+2026-01-15 20:26:54,989 - agent - CHECKPOINT - Assistant agent has entered the session.
+2026-01-15 20:26:54,979 - livekit.agents - DEBUG - http_session(): creating a new httpclient ctx
+2026-01-15 20:26:54,989 - agent - CHECKPOINT - Assistant agent has entered the session.
+2026-01-15 20:26:56,005 - livekit.agents - DEBUG - using audio io: `RoomIO` -> `AgentSession` -> `TranscriptSynchronizer` -> `RoomIO`
+2026-01-15 20:26:56,006 - livekit.agents - DEBUG - using transcript io: `AgentSession` -> `TranscriptSynchronizer` -> `RoomIO`
+2026-01-15 20:26:56,005 - livekit.agents - DEBUG - using audio io: `RoomIO` -> `AgentSession` -> `TranscriptSynchronizer` -> `RoomIO`
+2026-01-15 20:26:56,006 - livekit.agents - DEBUG - using transcript io: `AgentSession` -> `TranscriptSynchronizer` -> `RoomIO`
+2026-01-15 20:27:03,629 - livekit.agents - DEBUG - inference runner initialized
+2026-01-15 20:27:03,631 - livekit.agents - INFO - process initialized
+2026-01-15 20:27:03,630 - asyncio - DEBUG - Using selector: EpollSelector
+2026-01-15 20:27:03,645 - livekit.agents - INFO - HTTP server listening on :39681
+2026-01-15 20:27:03,819 - livekit.agents - INFO - registered worker
+2026-01-15 20:45:32,777 - livekit.agents - INFO - shutting down worker
+2026-01-15 20:45:42,797 - livekit.agents - ERROR - process did not exit in time, killing process
+2026-01-15 20:45:42,805 - livekit.agents - INFO - killing process
+2026-01-15 20:45:42,812 - livekit.agents - INFO - sending SIGUSR1 signal to process
+2026-01-15 20:45:42,872 - livekit.agents - ERROR - process exited with non-zero exit code -10
+2026-01-15 20:45:43,321 - livekit.agents - ERROR - Error in _main_task
+Traceback (most recent call last):
+  File "/home/morimoves/Projects/livekit-groq-testing/agent/.venv/lib/python3.10/site-packages/livekit/agents/ipc/proc_pool.py", line 209, in _main_task
+    await asyncio.sleep(0.1)
+  File "/home/morimoves/.local/share/uv/python/cpython-3.10.19-linux-x86_64-gnu/lib/python3.10/asyncio/tasks.py", line 605, in sleep
+    return await future
+asyncio.exceptions.CancelledError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/morimoves/Projects/livekit-groq-testing/agent/.venv/lib/python3.10/site-packages/livekit/agents/utils/log.py", line 16, in async_fn_logs
+    return await fn(*args, **kwargs)
+  File "/home/morimoves/Projects/livekit-groq-testing/agent/.venv/lib/python3.10/site-packages/livekit/agents/ipc/proc_pool.py", line 211, in _main_task
+    await asyncio.gather(*[proc.aclose() for proc in self._executors])
+  File "/home/morimoves/Projects/livekit-groq-testing/agent/.venv/lib/python3.10/site-packages/livekit/agents/ipc/supervised_proc.py", line 261, in aclose
+    await self._send_kill_signal()
+  File "/home/morimoves/Projects/livekit-groq-testing/agent/.venv/lib/python3.10/site-packages/livekit/agents/ipc/supervised_proc.py", line 317, in _send_kill_signal
+    self._proc.kill()
+  File "/home/morimoves/.local/share/uv/python/cpython-3.10.19-linux-x86_64-gnu/lib/python3.10/multiprocessing/process.py", line 139, in kill
+    self._check_closed()
+  File "/home/morimoves/.local/share/uv/python/cpython-3.10.19-linux-x86_64-gnu/lib/python3.10/multiprocessing/process.py", line 101, in _check_closed
+    raise ValueError("process object is closed")
+ValueError: process object is closed
+2026-01-15 20:45:43,343 - livekit.agents - INFO - process exiting

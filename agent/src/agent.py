@@ -1,5 +1,7 @@
 import logging
 
+import os
+
 from dotenv import load_dotenv
 from livekit import rtc
 from livekit.agents import (
@@ -12,9 +14,14 @@ from livekit.agents import (
     inference,
     room_io,
 )
+
 from livekit.plugins import noise_cancellation, silero
 from livekit.plugins.turn_detector.multilingual import MultilingualModel
 from livekit.agents import function_tool, RunContext
+from livekit.agents import AgentTask, function_tool
+from livekit.plugins import silero, openai
+from livekit.plugins import groq
+from livekit.plugins import cartesia
 
 logger = logging.getLogger("agent")
 
@@ -25,118 +32,233 @@ from livekit.agents import AgentSession
 from dataclasses import dataclass
 
 @dataclass
-class MySessionInfo:
-    """
-    Number of guests
-○​ Preferred date and time
-○​ Cuisine preference (Italian, Chinese, Indian, etc.)
-○​ Special requests (birthday, anniversary, dietary restrictions)
-    """
+class BookingInfo:
+    """Store all booking information across agents"""
     guest_name: str | None = None
     number_of_guests: int | None = None
     preferred_date_time: str | None = None
     cuisine_preference: str | None = None
     special_requests: str | None = None
+    seating_preference: str | None = None  # indoor/outdoor
+    weather_checked: bool = False
+
 
 class Assistant(Agent):
+    """Main greeter and final confirmation agent"""
     def __init__(self) -> None:
         super().__init__(
-            instructions="""you are representing a restuarant. your job is to greet customers calling in and send them to the info taker to take their booking. be polite and friendly.""",
+            instructions="""You are the main host at Pista Bella restaurant. 
+            When customer first arrives: Greet warmly and transfer to info taker.
+            When customer returns after all info collected: Review all booking details and confirm the reservation.""",
         )
 
     async def on_enter(self) -> None:
-        await self.session.generate_reply(instructions="Greet the user and tell them your restuarant name pista bella. and you send them to the info taker to take their booking.")
+        booking_info: BookingInfo = self.session.userdata
         
-
-    # To add tools, use the @function_tool decorator.
-    # Here's an example that adds a simple weather tool.
-    # You also have to add `from livekit.agents import function_tool, RunContext` to the top of this file
-    # @function_tool
-    # async def lookup_weather(self, context: RunContext, location: str):
-    #     """Use this tool to look up current weather information in the given location.
-    #
-    #     If the location is not supported by the weather service, the tool will indicate this. You must tell the user the location's weather is unavailable.
-    #
-    #     Args:
-    #         location: The location to look up weather information for (e.g. city name)
-    #     """
-    #
-    #     logger.info(f"Looking up weather for {location}")
-    #
-    #     return "sunny with a temperature of 70 degrees."
-
-
-server = AgentServer()
-
-class InfoTaker(Agent):
-    def __init__(self) -> None:
-        super().__init__(
-            instructions="""you are representing a restuarant. your job is to take bookings from customers calling in. be polite and friendly. collect the following information from the customer: name, number of guests, preferred date and time, cuisine preference, special requests. confirm the booking details with the customer at the end of the call.""",
-        )
-
-    async def on_enter(self) -> None:
-        await self.session.generate_reply(instructions="tell them you will take their booking details now.")
+        # Check if this is initial greeting or final confirmation
+        if booking_info.guest_name is None:
+            # Initial greeting
+            await self.session.generate_reply(
+                instructions="Greet the customer warmly. Introduce yourself as the host of Pista Bella restaurant. Tell them you'll connect them with our booking specialist to take their reservation details."
+            )
+        else:
+            # Final confirmation after all info collected
+            await self._confirm_booking()
 
     @function_tool()
-    async def collect_booking_info(self, context: RunContext):
-        """Use this tool to collect booking information from the customer.
-
-        Collect the following information:
-        - Name
-        - Number of guests
-        - Preferred date and time
-        - Cuisine preference
-        - Special requests
+    async def transfer_to_info_taker(self, context: RunContext, reason: str):
+        """
+        Transfer the session to the InfoTaker agent.
 
         Args:
-            context: The run context containing session information.
+            context: The run context provided by LiveKit (internal use only).
+            reason: A brief summary of why the user needs to be transferred to the information taker. 
+                    This field is required for the AI model's JSON schema generation.
         """
+        print(f"Transferring based on reason: {reason}")
+        return InfoTaker(context=context.session.job_ctx)
 
-        session_info: MySessionInfo = self.session.userdata
-
-        # Collect each piece of information if not already collected
-        if session_info.guest_name is None:
-            await self.session.generate_reply(instructions="ask for the customer's name.")
-            # Assume we get the response and set it
-            session_info.guest_name = "John Doe"  # Replace with actual response handling
-
-        if session_info.number_of_guests is None:
-            await self.session.generate_reply(instructions="ask for the number of guests.")
-            session_info.number_of_guests = 4  # Replace with actual response handling
-
-        if session_info.preferred_date_time is None:
-            await self.session.generate_reply(instructions="ask for the preferred date and time.")
-            session_info.preferred_date_time = "July 20th at 7 PM"  # Replace with actual response handling
-
-        if session_info.cuisine_preference is None:
-            await self.session.generate_reply(instructions="ask for the cuisine preference.")
-            session_info.cuisine_preference = "Italian"  # Replace with actual response handling
-
-        if session_info.special_requests is None:
-            await self.session.generate_reply(instructions="ask for any special requests.")
-            session_info.special_requests = "Vegetarian options"  # Replace with actual response handling
-
-        # Confirm booking details with the customer
+    
+    async def _confirm_booking(self):
+        """Final confirmation of all booking details"""
+        booking_info: BookingInfo = self.session.userdata
+        
         await self.session.generate_reply(
-            instructions=f"confirm the booking details: Name: {session_info.guest_name}, Number of Guests: {session_info.number_of_guests}, Date and Time: {session_info.preferred_date_time}, Cuisine Preference: {session_info.cuisine_preference}, Special Requests: {session_info.special_requests}. Thank the customer for their booking."
+            instructions=f"""Review and confirm the complete reservation:
+            - Guest Name: {booking_info.guest_name}
+            - Number of Guests: {booking_info.number_of_guests}
+            - Date & Time: {booking_info.preferred_date_time}
+            - Cuisine Preference: {booking_info.cuisine_preference}
+            - Seating: {booking_info.seating_preference}
+            - Special Requests: {booking_info.special_requests or 'None'}
+            
+            Ask if everything looks correct. If yes, confirm the booking is complete and thank them. 
+            """
         )
 
-        return self._handoff_if_done()
-    
-    def _handoff_if_done(self):
-        session_info: MySessionInfo = self.session.userdata
-        if all([
-            session_info.guest_name,
-            session_info.number_of_guests,
-            session_info.preferred_date_time,
-            session_info.cuisine_preference,
-            session_info.special_requests
-        ]):
-            self.session.transition_to(Assistant())
 
+class InfoTaker(Agent):
+    """Collects basic booking information"""
+    def __init__(self, context:JobContext) -> None:
+        super().__init__(
+            instructions="""You are the booking specialist at Pista Bella. 
+            Collect: guest name, number of guests, preferred date/time, cuisine preference, and special requests.
+            Be conversational - ask questions naturally, one at a time. """,
+        )
+        self.job_ctx = context 
+
+    async def on_enter(self) -> None:
+        await self.session.generate_reply(
+            instructions="Tell the customer you'll take their booking details now. Start by asking for their name."
+        )
+
+    @function_tool()
+    async def save_guest_name(self, context: RunContext, name: str):
+        """Save the customer's name.
+        
+        Args:
+            name: The guest's full name
+        """
+        booking_info: BookingInfo = self.session.userdata
+        booking_info.guest_name = name
+        logger.info(f"Saved guest name: {name}")
+        return f"Name saved: {name}"
+
+    @function_tool()
+    async def save_number_of_guests(self, context: RunContext, count: int):
+        """Save the number of guests.
+        
+        Args:
+            count: Number of guests (1-20)
+        """
+        booking_info: BookingInfo = self.session.userdata
+        booking_info.number_of_guests = count
+        logger.info(f"Saved guest count: {count}")
+        return f"Guest count saved: {count}"
+
+    @function_tool()
+    async def save_date_time(self, context: RunContext, datetime: str):
+        """Save the preferred date and time.
+        
+        Args:
+            datetime: Preferred date and time (e.g., "July 20th at 7 PM")
+        """
+        booking_info: BookingInfo = self.session.userdata
+        booking_info.preferred_date_time = datetime
+        logger.info(f"Saved date/time: {datetime}")
+        return f"Date/time saved: {datetime}"
+
+    @function_tool()
+    async def save_cuisine_preference(self, context: RunContext, cuisine: str):
+        """Save cuisine preference.
+        
+        Args:
+            cuisine: Type of cuisine (Italian, Chinese, Indian, etc.)
+        """
+        booking_info: BookingInfo = self.session.userdata
+        booking_info.cuisine_preference = cuisine
+        logger.info(f"Saved cuisine: {cuisine}")
+        return f"Cuisine preference saved: {cuisine}"
+
+    @function_tool()
+    async def save_special_requests(self, context: RunContext, requests: str):
+        """Save any special requests.
+        
+        Args:
+            requests: Special requests like dietary restrictions, celebrations, etc.
+        """
+        booking_info: BookingInfo = self.session.userdata
+        booking_info.special_requests = requests
+        logger.info(f"Saved special requests: {requests}")
+        return f"Special requests saved: {requests}"
+
+    @function_tool()
+    async def complete_info_collection(self, context: RunContext):
+        """Call this when you believe all booking information is collected.
+        Will transfer to seating specialist if complete."""
+        booking: BookingInfo = context.userdata
+        
+        missing = []
+        if not booking.guest_name: missing.append("name")
+        if not booking.number_of_guests: missing.append("guest count")
+        if not booking.preferred_date_time: missing.append("date/time")
+        if not booking.cuisine_preference: missing.append("cuisine")
+        
+        if missing:
+            return f"Cannot transfer yet. Still need: {', '.join(missing)}"
+        
+        # All info collected - return new agent for handoff
+        return SeatingSuggestion()
+
+
+
+class SeatingSuggestion(Agent):
+    """Suggests seating based on weather"""
+    def __init__(self) -> None:
+        super().__init__(
+            instructions="""You are the seating specialist at Pista Bella. 
+            Check the weather for the customer's booking date, then suggest seating.
+            If weather is nice (sunny, clear), suggest outdoor seating.
+            If weather is poor (rainy, hot, cold), recommend indoor seating.
+            After suggesting, save their seating preference and transfer back to main host for final confirmation.
+            """
+        )
+
+    async def on_enter(self) -> None:
+        booking: BookingInfo = self.session.userdata
+        await self.session.generate_reply(
+            instructions=f"""Guest {booking.guest_name} with party of {booking.number_of_guests} 
+            on {booking.preferred_date_time}. Greet them and check the weather."""
+        )
+
+    @function_tool()
+    async def check_weather(self, context: RunContext):
+        """Check weather for the reservation date.
+        
+        Use this to get weather information before suggesting seating.
+        """
+        booking_info: BookingInfo = self.session.userdata
+        
+        # In real implementation, call a weather API using booking_info.preferred_date_time
+        # For now, simulate weather
+        weather = "sunny and pleasant at 75°F"  # Replace with actual API call
+        
+        booking_info.weather_checked = True
+        logger.info(f"Weather checked: {weather}")
+        
+        return f"Weather for {booking_info.preferred_date_time}: {weather}."
+
+    @function_tool()
+    async def save_seating_preference(self, context: RunContext, seating: str):
+        """Save the customer's seating preference.
+        
+        Args:
+            seating: Either "indoor" or "outdoor"
+        """
+        booking_info: BookingInfo = self.session.userdata
+        booking_info.seating_preference = seating.lower()
+        logger.info(f"Saved seating preference: {seating}")
+        return f"Seating preference saved: {seating}"
+
+    @function_tool()
+    async def complete_seating_selection(self, context: RunContext):
+        """Complete seating selection and return to host for confirmation"""
+        booking: BookingInfo = context.userdata
+        
+        if not booking.seating_preference:
+            return "Please save seating preference first"
+        
+        return "Seating preference saved. Transfer to host for final confirmation."
+        
+    @function_tool()
+    async def transfer_to_host(self, context: RunContext):
+        """Transfer back to the main host agent for final confirmation"""
+        return Assistant()
+        
 def prewarm(proc: JobProcess):
     proc.userdata["vad"] = silero.VAD.load()
 
+server = AgentServer()
 
 server.setup_fnc = prewarm
 
@@ -150,19 +272,26 @@ async def my_agent(ctx: JobContext):
     }
 
     # Set up a voice AI pipeline using OpenAI, Cartesia, AssemblyAI, and the LiveKit turn detector
-    session = AgentSession[MySessionInfo](
-        userdata=MySessionInfo(),
+    session = AgentSession[BookingInfo](
+        userdata=BookingInfo(),
         # Speech-to-text (STT) is your agent's ears, turning the user's speech into text that the LLM can understand
         # See all available models at https://docs.livekit.io/agents/models/stt/
-        stt=inference.STT(model="assemblyai/universal-streaming", language="en"),
+        stt=groq.STT(
+      model="whisper-large-v3-turbo",
+      language="en",
+   ),
         # A Large Language Model (LLM) is your agent's brain, processing user input and generating a response
         # See all available models at https://docs.livekit.io/agents/models/llm/
-        llm=inference.LLM(model="openai/gpt-4.1-mini"),
+        llm=groq.LLM(
+            model="qwen/qwen3-32b"
+        ),
         # Text-to-speech (TTS) is your agent's voice, turning the LLM's text into speech that the user can hear
         # See all available models as well as voice selections at https://docs.livekit.io/agents/models/tts/
-        tts=inference.TTS(
-            model="cartesia/sonic-3", voice="9626c31c-bec5-4cca-baa8-f8ba9e84c8bc"
-        ),
+        # dont use any tts
+        tts=cartesia.TTS(
+      model="sonic-3",
+      voice="f786b574-daa5-4673-aa0c-cbe3e8534c02",
+   ),
         # VAD and turn detection are used to determine when the user is speaking and when the agent should respond
         # See more at https://docs.livekit.io/agents/build/turns
         turn_detection=MultilingualModel(),
