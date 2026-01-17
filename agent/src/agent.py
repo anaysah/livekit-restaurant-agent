@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from typing import Annotated, Optional
 from dataclasses import dataclass,field
@@ -35,6 +36,12 @@ class UserData:
     agents: dict[str, Agent] = field(default_factory=dict)
     prev_agent: Optional[Agent] = None
 
+    def __getitem__(self, key):
+        return getattr(self, key)
+    
+    def __setitem__(self, key, value):
+        setattr(self, key, value)
+
     def summarize(self) -> str:
         data = {
             "customer_name": self.customer_name or "unknown",
@@ -46,6 +53,7 @@ class UserData:
             "seatingPreference": self.seatingPreference or "unknown",
         }
         return yaml.dump(data)
+
 
 RunContext_T = RunContext[UserData]
 
@@ -95,6 +103,19 @@ class BaseAgent(Agent):
         next_agent = userdata.agents[name]
         userdata.prev_agent = current_agent
         return next_agent, f"Transferring to {name}."
+    
+    async def _save_details_to_file(self, context: RunContext_T) -> None:
+        """Save details to file in background without blocking."""
+        userdata = context.userdata
+        details_summary = userdata.summarize()
+        filename = "reservation_details.yaml"
+        
+        def write_file():
+            with open(filename, "w") as file:
+                file.write(details_summary)
+        
+        # Run file I/O in thread pool to avoid blocking
+        await asyncio.to_thread(write_file)
 
 class Greeter(BaseAgent):
     def __init__(self) -> None:
@@ -102,7 +123,10 @@ class Greeter(BaseAgent):
             instructions=(
                 f"You are a friendly restaurant receptionist."
                 "Your jobs are to greet the caller and understand if they want to "
-                "make a reservation. Guide them to the right agent using tools."
+                "make a reservation or anything else. Guide them to the right agent using tools."
+                "Your job is not to take details"
+                "Your words: hi there! welcome to our restaurant. how may i assist you today?"
+                "You want to make a reservation or anything else I can help you with?"
             ),
             llm=models["llm"],
             tts=models["tts"]("thalia"),
@@ -139,6 +163,8 @@ class Reservation(BaseAgent):
         if(detail_type not in context.userdata.__annotations__):
             return f"Detail type {detail_type} is not recognized."
         context.userdata[detail_type] = detail_value
+        # Save to file in background without blocking response
+        asyncio.create_task(self._save_details_to_file(context))
         return f"Updated {detail_type} to {detail_value}."
 
 # server = AgentServer()
