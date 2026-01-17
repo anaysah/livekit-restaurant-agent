@@ -66,6 +66,19 @@ VOICE_MODELS = {
     "helena":"aura-2-helena-en",
 }
 
+LLM_MODELS = [
+    "llama-3.3-70b-versatile", #this works best and has tool calling also
+    
+    "llama-3.1-8b-instant",
+    "meta-llama/llama-4-scout-17b-16e-instruct"
+    
+    # groq dont have TPD means no limit in a day
+    # also most limit TPM of 70k
+    # but tool calling is not supported so it is of no use in this agent
+    "groq/compound",
+    "groq/compound-mini"
+]
+
 models = {
     "llm": groq.LLM(model="llama-3.3-70b-versatile"),
     "tts": lambda model: deepgram.TTS(model=VOICE_MODELS[model]),
