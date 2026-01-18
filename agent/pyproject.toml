@@ -1,6 +1,6 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project]
 name = "agent-starter-python"
@@ -9,35 +9,41 @@ description = "Simple voice AI assistant built with LiveKit Agents for Python"
 requires-python = ">=3.9"
 
 dependencies = [
-    "livekit-agents[cartesia,deepgram,groq,silero,turn-detector]~=1.3",
-    "livekit-plugins-noise-cancellation~=0.2",
-    "python-dotenv",
+    "livekit-agents>=1.3.11",
+    "livekit>=1.0.23",
+    "livekit-plugins-deepgram>=0.9.0",
+    "livekit-plugins-groq>=0.7.0",
+    "livekit-plugins-openai>=0.10.0",
+    "livekit-plugins-silero>=0.8.0",
+    "livekit-plugins-turn-detector>=0.2.0",
+    "livekit-plugins-noise-cancellation>=0.2.0",
+    "python-dotenv>=1.0.0",
+    "pydantic>=2.0.0",
+    "pyyaml>=6.0.0",
 ]
 
 [dependency-groups]
 dev = [
-    "pytest",
-    "pytest-asyncio",
-    "ruff",
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "ruff>=0.8.0",
 ]
 
-[tool.setuptools.packages.find]
-where = ["src"]
-
-[tool.setuptools.package-dir]
-"" = "src"
+# Hatchling ko batao kahan files hain
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 
 [tool.ruff]
-line-length = 88
+line-length = 100
 target-version = "py39"
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "N", "B", "A", "C4", "UP", "SIM", "RUF"]
-ignore = ["E501"]  # Line too long (handled by formatter)
+ignore = ["E501", "N805", "B008"]
 
 [tool.ruff.format]
 quote-style = "double"
