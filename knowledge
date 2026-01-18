@@ -4,3 +4,6 @@ deepgram bhi tts hai usmei 200dollars hai free
 jab agent chalana ho toh "uv run src/agent.py dev"
 
 
+temperature kam karne se answers zyada precise aate hain
+temperature badhane se answers zyada creative aate hain
+0.2 thick chal raha hai tool calling ke liye
