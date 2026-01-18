@@ -23,9 +23,27 @@ from pydantic import Field
 import yaml
 from livekit.plugins import openai
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("my_agent")
 
-# logger = logging.getLogger("agent")
+# 1. Basic Config
+logging.basicConfig(
+    level=logging.INFO,
+    filename='my_agent_logs.log',
+    filemode='a',
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+
+# 2. IMPORTANT: OpenAI Library ka logger enable karein
+# Ye 'httpx' se behtar hai kyunki ye JSON body dikhata hai
+openai_logger = logging.getLogger("openai")
+openai_logger.setLevel(logging.DEBUG)
+
+# 3. HTTPCore (Ye network level pe raw bytes dikhayega - Backup option)
+# Agar upar wale se kaam na bane, toh isse uncomment karein.
+# logging.getLogger("httpcore").setLevel(logging.DEBUG)
+
+# 4. LiveKit specific logs
+logging.getLogger("livekit").setLevel(logging.INFO)
 
 load_dotenv(".env.local")
 
