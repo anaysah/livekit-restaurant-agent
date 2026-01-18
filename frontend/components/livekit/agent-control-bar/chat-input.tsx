@@ -7,7 +7,7 @@ const MOTION_PROPS = {
   variants: {
     hidden: {
       height: 0,
-      opacity: 0,
+      opacity: 1,
       marginBottom: 0,
     },
     visible: {

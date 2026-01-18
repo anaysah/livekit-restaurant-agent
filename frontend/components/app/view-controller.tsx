@@ -15,7 +15,7 @@ const VIEW_MOTION_PROPS = {
       opacity: 1,
     },
     hidden: {
-      opacity: 0,
+      opacity: 1,
     },
   },
   initial: 'hidden',

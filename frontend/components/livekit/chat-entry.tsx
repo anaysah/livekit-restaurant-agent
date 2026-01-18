@@ -43,7 +43,7 @@ export const ChatEntry = ({
         )}
       >
         {name && <strong>{name}</strong>}
-        <span className="font-mono text-xs opacity-0 transition-opacity ease-linear group-hover:opacity-100">
+        <span className="font-mono text-xs transition-opacity ease-linear group-hover:opacity-100">
           {hasBeenEdited && '*'}
           {time.toLocaleTimeString(locale, { timeStyle: 'short' })}
         </span>

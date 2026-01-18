@@ -10,7 +10,7 @@ const MotionChatEntry = motion.create(ChatEntry);
 const CONTAINER_MOTION_PROPS = {
   variants: {
     hidden: {
-      opacity: 0,
+      opacity: 1,
       transition: {
         ease: 'easeOut',
         duration: 0.3,
@@ -38,7 +38,7 @@ const CONTAINER_MOTION_PROPS = {
 const MESSAGE_MOTION_PROPS = {
   variants: {
     hidden: {
-      opacity: 0,
+      opacity: 1,
       translateY: 10,
     },
     visible: {

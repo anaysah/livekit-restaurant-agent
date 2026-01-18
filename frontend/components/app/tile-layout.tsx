@@ -111,7 +111,7 @@ export function TileLayout({ chatOpen }: TileLayoutProps) {
                   key="agent"
                   layoutId="agent"
                   initial={{
-                    opacity: 0,
+                    opacity: 1,
                     scale: 0,
                   }}
                   animate={{
@@ -204,7 +204,7 @@ export function TileLayout({ chatOpen }: TileLayoutProps) {
                   layout="position"
                   layoutId="camera"
                   initial={{
-                    opacity: 0,
+                    opacity: 1,
                     scale: 0,
                   }}
                   animate={{
@@ -212,7 +212,7 @@ export function TileLayout({ chatOpen }: TileLayoutProps) {
                     scale: 1,
                   }}
                   exit={{
-                    opacity: 0,
+                    opacity: 1,
                     scale: 0,
                   }}
                   transition={{

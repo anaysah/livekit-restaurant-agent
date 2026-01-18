@@ -23,7 +23,7 @@ const BOTTOM_VIEW_MOTION_PROPS = {
       translateY: '0%',
     },
     hidden: {
-      opacity: 0,
+      opacity: 1,
       translateY: '100%',
     },
   },

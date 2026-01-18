@@ -18,7 +18,7 @@ const VIEW_MOTION_PROPS = {
       },
     },
     hidden: {
-      opacity: 0,
+      opacity: 1,
       transition: {
         ease: 'easeIn',
         duration: 0.5,
