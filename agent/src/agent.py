@@ -23,27 +23,48 @@ from pydantic import Field
 import yaml
 from livekit.plugins import openai
 
-logger = logging.getLogger("my_agent")
+from prompts import COMMON_RULES, GREETER_INSTRUCTIONS, RESERVATION_INSTRUCTIONS
 
-# 1. Basic Config
-logging.basicConfig(
-    level=logging.INFO,
-    filename='my_agent_logs.log',
-    filemode='a',
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+# make logs directory if not exists
+import os
+if not os.path.exists('logs'):
+    os.makedirs('logs')
 
-# 2. IMPORTANT: OpenAI Library ka logger enable karein
-# Ye 'httpx' se behtar hai kyunki ye JSON body dikhata hai
+# --- 1. Formatter banayein (Logs kaise dikhenge) ---
+# Full debug file ke liye detailed format
+debug_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+# VIP file ke liye clean format
+vip_formatter = logging.Formatter('%(asctime)s - %(message)s')
+
+# --- 2. Handlers banayein (Files create karna) ---
+
+# File A: Sab kuch (Kachra + Kaam ki baat)
+debug_handler = logging.FileHandler('logs/full_debug.log')
+debug_handler.setLevel(logging.DEBUG)
+debug_handler.setFormatter(debug_formatter)
+
+# File B: Sirf Important (LLM + Tools + Agent Flow)
+vip_handler = logging.FileHandler('logs/vip_agent.log')
+vip_handler.setLevel(logging.DEBUG) # DEBUG zaroori hai kyunki OpenAI raw data DEBUG level pe hota hai
+vip_handler.setFormatter(vip_formatter)
+
+# --- 3. Loggers Connect karein ---
+
+# A. ROOT LOGGER (Ye sab kuch pakadta hai - LiveKit, HTTP, System)
+root_logger = logging.getLogger()
+root_logger.setLevel(logging.DEBUG)
+root_logger.addHandler(debug_handler) # Sab kuch debug file mein daalo
+
+# B. OPENAI LOGGER (Sirf isko VIP file se jodo)
 openai_logger = logging.getLogger("openai")
 openai_logger.setLevel(logging.DEBUG)
+openai_logger.addHandler(vip_handler) # OpenAI ka raw JSON VIP file mein bhi jayega
 
-# 3. HTTPCore (Ye network level pe raw bytes dikhayega - Backup option)
-# Agar upar wale se kaam na bane, toh isse uncomment karein.
-# logging.getLogger("httpcore").setLevel(logging.DEBUG)
-
-# 4. LiveKit specific logs
-logging.getLogger("livekit").setLevel(logging.INFO)
+# C. CUSTOM AGENT LOGGER (Jo hum code mein use karenge)
+agent_logger = logging.getLogger("agent_logic")
+agent_logger.setLevel(logging.INFO)
+agent_logger.addHandler(vip_handler) # Hamare custom messages VIP file mein jayenge
+agent_logger.addHandler(debug_handler) # Aur safe side debug file mein bhi
 
 load_dotenv(".env.local")
 
@@ -78,7 +99,9 @@ class UserData:
             "special_requests": self.special_requests or "unknown",
             "seating_preference": self.seating_preference or "unknown",
         }
-        return yaml.dump(data)
+        # add space before new lines for better readability
+        formatted_data = {k: v.replace("\n", " \n ") if isinstance(v, str) else v for k, v in data.items()}
+        return yaml.dump(formatted_data, default_flow_style=False, indent=2)
 
 
 RunContext_T = RunContext[UserData]
@@ -124,7 +147,7 @@ models = {
 class BaseAgent(Agent):
     async def on_enter(self) -> None:
         agent_name = self.__class__.__name__
-        logger.info(f"entering task {agent_name}")
+        agent_logger.info(f"🚀 ENTERING AGENT: {agent_name}")
         
         userdata: UserData = self.session.userdata
         chat_ctx = self.chat_ctx.copy()
@@ -138,10 +161,10 @@ class BaseAgent(Agent):
             items_copy = [item for item in truncated_chat_ctx.items if item.id not in existing_ids]
             chat_ctx.items.extend(items_copy)
 
-        chat_ctx.add_message(
-            role="system",
-            content=f"You are {agent_name} agent. Current saved user data is {userdata.summarize()}"
-        )
+        # chat_ctx.add_message(
+        #     role="system",
+        #     content=f"You are {agent_name} agent. Current saved user data is {userdata.summarize()}"
+        # )
         await self.update_chat_ctx(chat_ctx)
         self.session.generate_reply()
 
@@ -165,17 +188,11 @@ class BaseAgent(Agent):
         # Run file I/O in thread pool to avoid blocking
         await asyncio.to_thread(write_file)
 
-class Greeter(BaseAgent):
+class Greeter(BaseAgent):    
     def __init__(self) -> None:
         super().__init__(
             instructions=(
-                f"You are a friendly restaurant receptionist."
-                "Your jobs are to greet the caller and understand if they want to "
-                "make a reservation or anything else. Guide them to the right agent using tools."
-                "Your job is not to take details"
-                "Your words: hi there! welcome to our restaurant. how may i assist you today?"
-                "You want to make a reservation or anything else I can help you with?"
-                "If they want to make a reservation, use the to_reservation tool."
+                f"""{COMMON_RULES} \n {GREETER_INSTRUCTIONS}"""
             ),
             llm=models["llm"],
             tts=models["tts"]("thalia"),
@@ -194,46 +211,7 @@ class Greeter(BaseAgent):
 class Reservation(BaseAgent):
     def __init__(self) -> None:
         super().__init__(
-            instructions=f"""You are a friendly, professional reservation agent at an upscale restaurant. Your role is to collect reservation details from customers and confirm their bookings in a warm, conversational manner.
-
-# Output rules
-You are speaking with the customer via voice, so follow these rules:
-- Keep responses brief and natural: one to two sentences at a time
-- Ask one question at a time to avoid overwhelming the customer
-- Speak numbers and dates naturally (example: say "June twenty-sixth at four PM" not "2026-06-26 16:00")
-- Respond in plain text only - no JSON, lists, or technical formatting
-- Be conversational and personable
-
-# Your goal
-Collect the following reservation details one by one:
-1. Customer name (customer_name)
-2. Customer phone number (customer_phone)
-3. Reservation date (reservation_date)
-4. Reservation time (reservation_time)
-5. Number of guests (no_of_guests)
-6. Seating preference (inside or outside) (seating_preference)
-7. Cuisine preference (Italian, Chinese, Indian, or Mexican) (cuisine_preference)
-8. Any special requests (special_requests)
-
-After collecting all details, confirm the complete reservation with the customer before finalizing.
-
-# Tools
-- Use the update_details tool to save customer information as you gather it
-- Store dates in YYYY-MM-DD format (convert relative terms like "tomorrow", "next Friday", "June 29" automatically)
-- Store times in 24-hour HH:MM format (convert "4 PM" to "16:00", "8:30 AM" to "08:30")
-- Valid seating preferences: inside, outside
-- Valid cuisine preferences: italian, chinese, indian, mexican
-
-# Context
-Today's date and time is {datetime.now().strftime('%B %d, %Y at %I:%M %p')} ({datetime.now().strftime('%Y-%m-%d %H:%M')})
-
-# Conversation flow
-- Greet the customer warmly
-- Ask for unknown details one at a time in a natural order
-- Confirm each detail as you receive it
-- After collecting all information, read back the complete reservation for final confirmation
-- Thank the customer once confirmed
-""",
+            instructions=f"""{COMMON_RULES} \n {RESERVATION_INSTRUCTIONS.format(current_datetime=datetime.now().strftime("%Y-%m-%d %H:%M"))}""",
             tts=models["tts"]("asteria"),
             llm=models["llm"],
         )
@@ -262,9 +240,6 @@ Today's date and time is {datetime.now().strftime('%B %d, %Y at %I:%M %p')} ({da
     ) -> str:
         """Update multiple reservation details at once in the user's data.
         
-        Call this function to update one or more details simultaneously.
-        Only use valid detail types that exist in the reservation system.
-        
         Args:
             details: Dictionary where keys are field names and values are the data to store
             
@@ -288,13 +263,13 @@ Today's date and time is {datetime.now().strftime('%B %d, %Y at %I:%M %p')} ({da
                 setattr(context.userdata, detail_type, detail_value)
                 updated_fields.append(f"{detail_type}='{detail_value}'")
         except Exception as e:
-            logger.error(f"Failed to update details: {e}")
+            # agent_logger.error(f"Failed to update details: {e}")
             raise ToolError("Unable to save details. Please try again.")
         
         # Save to file asynchronously
         save_task = asyncio.create_task(self._save_details_to_file(context))
         save_task.add_done_callback(
-            lambda t: logger.error(f"Save failed: {t.exception()}") 
+            lambda t: agent_logger.error(f"Saved to file failed: {t.exception()}") 
             if t.exception() else None
         )
         
