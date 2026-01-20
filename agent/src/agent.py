@@ -35,6 +35,8 @@ if not os.path.exists('logs'):
 debug_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 # VIP file ke liye clean format
 vip_formatter = logging.Formatter('%(asctime)s - %(message)s')
+# ✅ NEW: Conversation-only formatter
+conversation_formatter = logging.Formatter('%(asctime)s - %(message)s')
 
 # --- 2. Handlers banayein (Files create karna) ---
 
@@ -65,6 +67,20 @@ agent_logger = logging.getLogger("agent_logic")
 agent_logger.setLevel(logging.INFO)
 agent_logger.addHandler(vip_handler) # Hamare custom messages VIP file mein jayenge
 agent_logger.addHandler(debug_handler) # Aur safe side debug file mein bhi
+
+# ✅ NEW: Conversation-only handler
+conversation_handler = logging.FileHandler('logs/conversations.log')
+conversation_handler.setLevel(logging.INFO)
+conversation_handler.setFormatter(conversation_formatter)
+
+# ✅ NEW: Conversation logger
+conversation_logger = logging.getLogger("conversation")
+conversation_logger.setLevel(logging.INFO)
+conversation_logger.addHandler(conversation_handler)  # Sirf apni file
+conversation_logger.propagate = False  # Root logger mein mat jao
+# ❌ “Is logger ke messages ko parent/root logger ko mat bhejna.”
+# ✅ “Sirf isi logger ke handlers ko use karo.”
+# Console pe kuch print nahi hoga
 
 load_dotenv(".env.local")
 
@@ -275,6 +291,39 @@ class Reservation(BaseAgent):
         
         return f"Updated {len(details)} field(s): {', '.join(updated_fields)}. Continue gathering any remaining information."
 
+# this function is no longer used and will be removed later
+# async def on_session_end(ctx: JobContext):
+#     """Session end callback - guaranteed to run"""
+#     try:
+#         # Session report banao
+#         report = ctx.make_session_report()
+#         report_dict = report.to_dict()
+        
+#         # Timestamp ke saath filename
+#         current_date = datetime.now().strftime("%Y%m%d_%H%M%S")
+#         filename = f"session_report_{ctx.room.name}_{current_date}.json"
+        
+#         # File mein save karo
+#         with open(filename, 'w') as f:
+#             json.dump(report_dict, f, indent=2)
+        
+#         # Logger mein bhi dalo
+#         conversation_logger.info(f"=== SESSION ENDED: {ctx.room.name} ===")
+#         conversation_logger.info(json.dumps(report_dict, indent=2))
+        
+#         # IMPORTANT: Force flush all handlers
+#         for handler in conversation_logger.handlers:
+#             handler.flush()
+        
+#         print(f"✅ Session report saved to {filename}")
+        
+#     except Exception as e:
+#         print(f"❌ Error in on_session_end: {e}")
+#         # Ye bhi flush karo
+#         for handler in conversation_logger.handlers:
+#             handler.flush()
+
+
 
 server = AgentServer()
 
@@ -309,7 +358,32 @@ async def my_agent(ctx: JobContext):
         vad=ctx.proc.userdata["vad"],
         preemptive_generation=False,
     )
-
+    
+    async def save_transcript():
+        import json
+        from datetime import datetime
+        
+        # Session history nikalo
+        # history = session.history.to_dict() # ismei sirf conversation hoti hai
+        history = ctx.make_session_report().to_dict() # ismei listning speaking vagera event bhi hote hain
+        
+        # File mein save karo
+        filename = f"logs/transcript_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        with open(filename, 'w') as f:
+            json.dump(history, f, indent=2)
+        
+        print(f"✅ Saved: {filename}")
+    
+    # Callback register karo
+    ctx.add_shutdown_callback(save_transcript)
+    
+    # session.on("conversation_item_added", lambda event: conversation_logger.info(f"{event.item.role}: {event.item.content or ''}"))
+    @session.on("conversation_item_added")
+    def log_conversation(event):
+        item = event.item
+        # log full item for debugging
+        conversation_logger.info(f"{item.role}: {item}")
+    
 
     await session.start(
         agent=userdata.agents["greeter"],
