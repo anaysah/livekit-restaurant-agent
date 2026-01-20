@@ -7,3 +7,9 @@ jab agent chalana ho toh "uv run src/agent.py dev"
 temperature kam karne se answers zyada precise aate hain
 temperature badhane se answers zyada creative aate hain
 0.2 thick chal raha hai tool calling ke liye
+
+llama ke models mei jitna data jayda hota hai utna bekar vo perform karta hai
+qwen ke model bade data pe ache perform karte hain
+
+qwen ke model tool calling bhi bhot acha karte hain
+llama ke model mei tool calling thodi weak hai and dont recommended for use

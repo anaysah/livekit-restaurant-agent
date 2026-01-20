@@ -58,6 +58,12 @@ root_logger.setLevel(logging.DEBUG)
 root_logger.addHandler(debug_handler) # Sab kuch debug file mein daalo
 
 # B. OPENAI LOGGER (Sirf isko VIP file se jodo)
+# Base client logger: Logs only HTTP communication details from _base_client.py module
+# Use this for debugging API requests without other OpenAI logs
+# openai_logger = logging.getLogger("openai._base_client")
+
+# Parent logger: Catches all OpenAI package logs including base_client, response, legacy_response etc.
+# Setting level here affects all child loggers unless they're specifically configured
 openai_logger = logging.getLogger("openai")
 openai_logger.setLevel(logging.DEBUG)
 openai_logger.addHandler(vip_handler) # OpenAI ka raw JSON VIP file mein bhi jayega
@@ -152,8 +158,10 @@ models = {
     #     model="gemma-3-27b",
     # ),
     "llm": openai.LLM.with_cerebras(
-        model="llama-3.3-70b",  
-        temperature=0.2,
+        model="qwen-3-32b",
+        temperature=0.0,
+        parallel_tool_calls=False,
+        tool_choice="auto",
     ),
     "tts": lambda model: deepgram.TTS(model=VOICE_MODELS[model]),
     "stt": deepgram.STT(),  # Using STT instead of STTv2
@@ -177,10 +185,10 @@ class BaseAgent(Agent):
             items_copy = [item for item in truncated_chat_ctx.items if item.id not in existing_ids]
             chat_ctx.items.extend(items_copy)
 
-        # chat_ctx.add_message(
-        #     role="system",
-        #     content=f"You are {agent_name} agent. Current saved user data is {userdata.summarize()}"
-        # )
+        chat_ctx.add_message(
+            role="system",
+            content=f"You are {agent_name} agent. Current saved user data is {userdata.summarize()}"
+        )
         await self.update_chat_ctx(chat_ctx)
         self.session.generate_reply()
 
@@ -249,47 +257,48 @@ class Reservation(BaseAgent):
     async def update_details(
         self,
         context: RunContext,
-        details: Annotated[
-            dict[str, str],
-            Field(description="Dictionary of detail types and their values to update. Example: {'customer_name': 'John', 'customer_phone': '1234567890'}")
-        ],
+        customer_name: Annotated[str | None, Field(description="Customer name")] = None,
+        customer_phone: Annotated[str | None, Field(description="Customer phone number")] = None,
+        reservation_date: Annotated[str | None, Field(description="Date (YYYY-MM-DD)")] = None,
+        reservation_time: Annotated[str | None, Field(description="Time (HH:MM)")] = None,
+        no_of_guests: Annotated[int | None, Field(description="Number of guests")] = None,
+        seating_preference: Annotated[str | None, Field(description="inside or outside")] = None,
+        cuisine_preference: Annotated[str | None, Field(description="italian, chinese, indian, mexican")] = None,
+        special_requests: Annotated[str | None, Field(description="Special requests")] = None,
     ) -> str:
-        """Update multiple reservation details at once in the user's data.
+        """Update reservation details one or more at a time."""
         
-        Args:
-            details: Dictionary where keys are field names and values are the data to store
-            
-        Returns:
-            Confirmation message with all updated fields
-        """
-        # Validate all detail_types exist
-        valid_fields = context.userdata.__annotations__.keys() if hasattr(context.userdata, '__annotations__') else dir(context.userdata)
+        # Collect provided values
+        updates = {}
+        params = {
+            "customer_name": customer_name,
+            "customer_phone": customer_phone,
+            "reservation_date": reservation_date,
+            "reservation_time": reservation_time,
+            "no_of_guests": no_of_guests,
+            "seating_preference": seating_preference,
+            "cuisine_preference": cuisine_preference,
+            "special_requests": special_requests,
+        }
         
-        invalid_fields = [field for field in details.keys() if field not in valid_fields]
-        if invalid_fields:
-            raise ToolError(
-                f"Invalid detail types: {', '.join(invalid_fields)}. "
-                f"Valid options are: {', '.join(valid_fields)}"
-            )
+        for field, value in params.items():
+            if value is not None:
+                setattr(context.userdata, field, value)
+                updates[field] = value
         
-        # Update all fields
-        updated_fields = []
-        try:
-            for detail_type, detail_value in details.items():
-                setattr(context.userdata, detail_type, detail_value)
-                updated_fields.append(f"{detail_type}='{detail_value}'")
-        except Exception as e:
-            # agent_logger.error(f"Failed to update details: {e}")
-            raise ToolError("Unable to save details. Please try again.")
+        if not updates:
+            return "No fields updated"
         
-        # Save to file asynchronously
+        # Async save
         save_task = asyncio.create_task(self._save_details_to_file(context))
         save_task.add_done_callback(
-            lambda t: agent_logger.error(f"Saved to file failed: {t.exception()}") 
+            lambda t: agent_logger.error(f"Save failed: {t.exception()}") 
             if t.exception() else None
         )
         
-        return f"Updated {len(details)} field(s): {', '.join(updated_fields)}. Continue gathering any remaining information."
+        updated_list = [f"{k}='{v}'" for k, v in updates.items()]
+        return f"Updated {len(updates)} field(s): {', '.join(updated_list)}"
+
 
 # this function is no longer used and will be removed later
 # async def on_session_end(ctx: JobContext):
@@ -403,63 +412,3 @@ async def my_agent(ctx: JobContext):
 
 if __name__ == "__main__":
     cli.run_app(server)
-
-# from livekit.agents.worker import WorkerOptions
-
-
-# Prewarm function to load VAD before jobs start
-# def prewarm(proc):
-#     """Runs once when the worker process starts."""
-#     proc.userdata["vad"] = silero.VAD.load()
-
-
-# Main entrypoint function
-# async def entrypoint(ctx: JobContext):
-#     # Logging setup - Add any context you want in all log entries here
-#     ctx.log_context_fields = {
-#         "room": ctx.room.name,
-#     }
-    
-#     # FIRST: Connect to room immediately to avoid timeout
-#     await ctx.connect()
-    
-#     # Access prewarmed VAD from process userdata
-#     vad = ctx.proc.userdata["vad"]
-    
-#     userdata = UserData()
-#     userdata.agents.update({
-#         "greeter": Greeter(),
-#         "reservation": Reservation(),
-#     })
-
-#     # Set up a voice AI pipeline using OpenAI, Cartesia, AssemblyAI, and the LiveKit turn detector
-#     session = AgentSession[UserData](
-#         userdata=userdata,
-#         stt=models["stt"],
-#         llm=models["llm"],
-#         tts=models["tts"],
-#         turn_detection=MultilingualModel(),
-#         vad=vad,
-#         preemptive_generation=True,
-#     )
-
-#     await session.start(
-#         agent=userdata.agents["greeter"],
-#         room=ctx.room,
-#         room_options=room_io.RoomOptions(
-#             audio_input=room_io.AudioInputOptions(
-#                 noise_cancellation=lambda params: noise_cancellation.BVCTelephony()
-#                 if params.participant.kind == rtc.ParticipantKind.PARTICIPANT_KIND_SIP
-#                 else noise_cancellation.BVC(),
-#             ),
-#         ),
-#     )
-
-    
-
-
-# if __name__ == "__main__":
-#     cli.run_app(WorkerOptions(
-#         entrypoint_fnc=entrypoint,
-#         prewarm_fnc=prewarm,
-#     ))
