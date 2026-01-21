@@ -1,8 +1,11 @@
 import asyncio
+from curses import raw
 from datetime import datetime
 import logging
 from typing import Annotated, Optional
 from dataclasses import dataclass,field
+
+from src.JSONExtractHandler import StatefulLLMLogger
 from dotenv import load_dotenv
 from livekit import rtc
 from livekit.agents import (
@@ -30,29 +33,12 @@ import os
 if not os.path.exists('logs'):
     os.makedirs('logs')
 
-# --- 1. Formatter banayein (Logs kaise dikhenge) ---
-# Full debug file ke liye detailed format
+
 debug_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-# VIP file ke liye clean format
-vip_formatter = logging.Formatter('%(asctime)s - %(message)s')
-# ✅ NEW: Conversation-only formatter
-conversation_formatter = logging.Formatter('%(asctime)s - %(message)s')
-
-# --- 2. Handlers banayein (Files create karna) ---
-
-# File A: Sab kuch (Kachra + Kaam ki baat)
 debug_handler = logging.FileHandler('logs/full_debug.log')
 debug_handler.setLevel(logging.DEBUG)
 debug_handler.setFormatter(debug_formatter)
 
-# File B: Sirf Important (LLM + Tools + Agent Flow)
-vip_handler = logging.FileHandler('logs/vip_agent.log')
-vip_handler.setLevel(logging.DEBUG) # DEBUG zaroori hai kyunki OpenAI raw data DEBUG level pe hota hai
-vip_handler.setFormatter(vip_formatter)
-
-# --- 3. Loggers Connect karein ---
-
-# A. ROOT LOGGER (Ye sab kuch pakadta hai - LiveKit, HTTP, System)
 root_logger = logging.getLogger()
 root_logger.setLevel(logging.DEBUG)
 root_logger.addHandler(debug_handler) # Sab kuch debug file mein daalo
@@ -64,9 +50,17 @@ root_logger.addHandler(debug_handler) # Sab kuch debug file mein daalo
 
 # Parent logger: Catches all OpenAI package logs including base_client, response, legacy_response etc.
 # Setting level here affects all child loggers unless they're specifically configured
-openai_logger = logging.getLogger("openai")
+vip_formatter = logging.Formatter('%(message)s')
+vip_handler = logging.FileHandler('logs/vip_agent.log')
+vip_handler.setLevel(logging.DEBUG) # DEBUG zaroori hai kyunki OpenAI raw data DEBUG level pe hota hai
+vip_handler.setFormatter(vip_formatter)
+
+openai_logger = logging.getLogger("openai._base_client")
 openai_logger.setLevel(logging.DEBUG)
+openai_logger.handlers.clear()  # Pehle saare handlers hatao
 openai_logger.addHandler(vip_handler) # OpenAI ka raw JSON VIP file mein bhi jayega
+openai_logger.addHandler(StatefulLLMLogger("logs/live_request.json"))
+openai_logger.propagate = False  # Root logger mein mat bhejna
 
 # C. CUSTOM AGENT LOGGER (Jo hum code mein use karenge)
 agent_logger = logging.getLogger("agent_logic")
@@ -74,16 +68,16 @@ agent_logger.setLevel(logging.INFO)
 agent_logger.addHandler(vip_handler) # Hamare custom messages VIP file mein jayenge
 agent_logger.addHandler(debug_handler) # Aur safe side debug file mein bhi
 
-# ✅ NEW: Conversation-only handler
-conversation_handler = logging.FileHandler('logs/conversations.log')
-conversation_handler.setLevel(logging.INFO)
-conversation_handler.setFormatter(conversation_formatter)
+# # ✅ NEW: Conversation-only handler
+# conversation_handler = logging.FileHandler('logs/conversations.log')
+# conversation_handler.setLevel(logging.INFO)
+# conversation_handler.setFormatter(conversation_formatter)
 
-# ✅ NEW: Conversation logger
-conversation_logger = logging.getLogger("conversation")
-conversation_logger.setLevel(logging.INFO)
-conversation_logger.addHandler(conversation_handler)  # Sirf apni file
-conversation_logger.propagate = False  # Root logger mein mat jao
+# # ✅ NEW: Conversation logger
+# conversation_logger = logging.getLogger("conversation")
+# conversation_logger.setLevel(logging.INFO)
+# conversation_logger.addHandler(conversation_handler)  # Sirf apni file
+# conversation_logger.propagate = False  # Root logger mein mat jao
 # ❌ “Is logger ke messages ko parent/root logger ko mat bhejna.”
 # ✅ “Sirf isi logger ke handlers ko use karo.”
 # Console pe kuch print nahi hoga
@@ -384,14 +378,14 @@ async def my_agent(ctx: JobContext):
         print(f"✅ Saved: {filename}")
     
     # Callback register karo
-    ctx.add_shutdown_callback(save_transcript)
+    # ctx.add_shutdown_callback(save_transcript)
     
     # session.on("conversation_item_added", lambda event: conversation_logger.info(f"{event.item.role}: {event.item.content or ''}"))
-    @session.on("conversation_item_added")
-    def log_conversation(event):
-        item = event.item
-        # log full item for debugging
-        conversation_logger.info(f"{item.role}: {item}")
+    # @session.on("conversation_item_added")
+    # def log_conversation(event):
+    #     item = event.item
+    #     # log full item for debugging
+    #     conversation_logger.info(f"{item.role}: {item}")
     
 
     await session.start(
