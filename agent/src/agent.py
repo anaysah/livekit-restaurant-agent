@@ -33,7 +33,7 @@ import os
 if not os.path.exists('logs'):
     os.makedirs('logs')
 
-
+# A. ROOT LOGGER (Sab kuch yahan jaayega)
 debug_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 debug_handler = logging.FileHandler('logs/full_debug.log')
 debug_handler.setLevel(logging.DEBUG)
@@ -43,30 +43,36 @@ root_logger = logging.getLogger()
 root_logger.setLevel(logging.DEBUG)
 root_logger.addHandler(debug_handler) # Sab kuch debug file mein daalo
 
-# B. OPENAI LOGGER (Sirf isko VIP file se jodo)
+# OPENAI LOGGER (Sirf isko VIP file se jodo)
 # Base client logger: Logs only HTTP communication details from _base_client.py module
 # Use this for debugging API requests without other OpenAI logs
 # openai_logger = logging.getLogger("openai._base_client")
 
 # Parent logger: Catches all OpenAI package logs including base_client, response, legacy_response etc.
 # Setting level here affects all child loggers unless they're specifically configured
-vip_formatter = logging.Formatter('%(message)s')
-vip_handler = logging.FileHandler('logs/vip_agent.log')
-vip_handler.setLevel(logging.DEBUG) # DEBUG zaroori hai kyunki OpenAI raw data DEBUG level pe hota hai
-vip_handler.setFormatter(vip_formatter)
+# vip_formatter = logging.Formatter('%(message)s')
+# vip_handler = logging.FileHandler('logs/vip_agent.log')
+# vip_handler.setLevel(logging.DEBUG) # DEBUG zaroori hai kyunki OpenAI raw data DEBUG level pe hota hai
+# vip_handler.setFormatter(vip_formatter)
 
+#B. ye saare request aur respone ko ek json file mein daal dega
 openai_logger = logging.getLogger("openai._base_client")
 openai_logger.setLevel(logging.DEBUG)
 openai_logger.handlers.clear()  # Pehle saare handlers hatao
-openai_logger.addHandler(vip_handler) # OpenAI ka raw JSON VIP file mein bhi jayega
 openai_logger.addHandler(StatefulLLMLogger("logs/live_request.json"))
 openai_logger.propagate = False  # Root logger mein mat bhejna
 
 # C. CUSTOM AGENT LOGGER (Jo hum code mein use karenge)
-agent_logger = logging.getLogger("agent_logic")
-agent_logger.setLevel(logging.INFO)
-agent_logger.addHandler(vip_handler) # Hamare custom messages VIP file mein jayenge
-agent_logger.addHandler(debug_handler) # Aur safe side debug file mein bhi
+agent_flow_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+agent_flow_handler = logging.FileHandler('logs/agent_flow.log')
+agent_flow_handler.setLevel(logging.INFO)
+agent_flow_handler.setFormatter(agent_flow_formatter)
+
+agent_flow = logging.getLogger("angent_flow")
+agent_flow.setLevel(logging.INFO)
+agent_flow.addHandler(agent_flow_handler)
+agent_flow.propagate = False  # Root logger mein mat jao
+
 
 # # ✅ NEW: Conversation-only handler
 # conversation_handler = logging.FileHandler('logs/conversations.log')
@@ -165,7 +171,8 @@ models = {
 class BaseAgent(Agent):
     async def on_enter(self) -> None:
         agent_name = self.__class__.__name__
-        agent_logger.info(f"🚀 ENTERING AGENT: {agent_name}")
+        agent_flow.info(f"🚀 ENTERING AGENT: {agent_name}")
+
         
         userdata: UserData = self.session.userdata
         chat_ctx = self.chat_ctx.copy()
@@ -286,47 +293,13 @@ class Reservation(BaseAgent):
         # Async save
         save_task = asyncio.create_task(self._save_details_to_file(context))
         save_task.add_done_callback(
-            lambda t: agent_logger.error(f"Save failed: {t.exception()}") 
+            lambda t: agent_flow.error(f"Save failed: {t.exception()}") 
+
             if t.exception() else None
         )
         
         updated_list = [f"{k}='{v}'" for k, v in updates.items()]
         return f"Updated {len(updates)} field(s): {', '.join(updated_list)}"
-
-
-# this function is no longer used and will be removed later
-# async def on_session_end(ctx: JobContext):
-#     """Session end callback - guaranteed to run"""
-#     try:
-#         # Session report banao
-#         report = ctx.make_session_report()
-#         report_dict = report.to_dict()
-        
-#         # Timestamp ke saath filename
-#         current_date = datetime.now().strftime("%Y%m%d_%H%M%S")
-#         filename = f"session_report_{ctx.room.name}_{current_date}.json"
-        
-#         # File mein save karo
-#         with open(filename, 'w') as f:
-#             json.dump(report_dict, f, indent=2)
-        
-#         # Logger mein bhi dalo
-#         conversation_logger.info(f"=== SESSION ENDED: {ctx.room.name} ===")
-#         conversation_logger.info(json.dumps(report_dict, indent=2))
-        
-#         # IMPORTANT: Force flush all handlers
-#         for handler in conversation_logger.handlers:
-#             handler.flush()
-        
-#         print(f"✅ Session report saved to {filename}")
-        
-#     except Exception as e:
-#         print(f"❌ Error in on_session_end: {e}")
-#         # Ye bhi flush karo
-#         for handler in conversation_logger.handlers:
-#             handler.flush()
-
-
 
 server = AgentServer()
 
@@ -362,20 +335,20 @@ async def my_agent(ctx: JobContext):
         preemptive_generation=False,
     )
     
-    async def save_transcript():
-        import json
-        from datetime import datetime
+    # async def save_transcript():
+    #     import json
+    #     from datetime import datetime
         
-        # Session history nikalo
-        # history = session.history.to_dict() # ismei sirf conversation hoti hai
-        history = ctx.make_session_report().to_dict() # ismei listning speaking vagera event bhi hote hain
+    #     # Session history nikalo
+    #     # history = session.history.to_dict() # ismei sirf conversation hoti hai
+    #     history = ctx.make_session_report().to_dict() # ismei listning speaking vagera event bhi hote hain
         
-        # File mein save karo
-        filename = f"logs/transcript_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-        with open(filename, 'w') as f:
-            json.dump(history, f, indent=2)
+    #     # File mein save karo
+    #     filename = f"logs/transcript_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+    #     with open(filename, 'w') as f:
+    #         json.dump(history, f, indent=2)
         
-        print(f"✅ Saved: {filename}")
+    #     print(f"✅ Saved: {filename}")
     
     # Callback register karo
     # ctx.add_shutdown_callback(save_transcript)
