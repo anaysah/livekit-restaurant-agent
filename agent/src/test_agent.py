@@ -10,15 +10,20 @@ from src.dataclass import UserData
 
 load_dotenv(".env.local")
 
-
-
 class CollectInfoTask(AgentTask[UserData]):
-    def __init__(self) -> None:
+    def __init__(self, chat_ctx=None) -> None:
         super().__init__(
-            instructions="Collect the user's name and phone number one by one.",
+            instructions="Your task is to collect info one by one from the user: name and phone number. in task pls collect one by one and after collecting name tell them to give 10 digit phone number with country code. ",
+            chat_ctx=chat_ctx,
         )
         print( "📌 Initializing CollectInfoTask" )
         self.userdata: UserData = UserData()
+        
+    async def on_enter(self) -> None:
+        print("📌 Entered CollectInfoTask")
+        self.session.generate_reply(
+            instructions="Let's start collecting your information. Please provide your full name."
+        )
         
     @function_tool
     async def collect_name(
@@ -50,21 +55,39 @@ class CollectInfoTask(AgentTask[UserData]):
                 instructions="Continue collecting remaining information."
             )
             
-    # def on_exit(self):
-    #     print("✔ Exiting CollectInfoTask")
+    # on exit ache se kaam nahi karta task ke sath
+    # 
+    async def on_exit(self):
+        print("📌 Exiting CollectInfoTask")
         
 
 class Assistant(Agent):
     def __init__(self) -> None:
         super().__init__(
             instructions="""You are a helpful voice AI assistant.
-            Your task is to collect the user's name and phone number using the CollectInfoTask.
-            one by one
+            
+            Ask first if they want to give info then call start_collection function to collect details and begin the process.
+            
             """,
+            tts="deepgram/aura-2:odysseus",
         )
         
     async def on_enter(self) -> None:
-        collect_info_task = CollectInfoTask()
+        chat_ctx = self.chat_ctx.copy()
+        chat_ctx.add_message(
+            role="system",
+            content=self.instructions
+        )
+        await self.update_chat_ctx(chat_ctx)
+        
+            
+    @function_tool()
+    async def start_collection(
+        self,
+        context: agents.RunContext,
+    ) -> str:
+        """Start the information collection process."""
+        collect_info_task = CollectInfoTask(chat_ctx=self.chat_ctx.copy())
         try:
             await collect_info_task
             user_data: UserData = collect_info_task.userdata

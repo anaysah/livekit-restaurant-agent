@@ -13,3 +13,10 @@ qwen ke model bade data pe ache perform karte hain
 
 qwen ke model tool calling bhi bhot acha karte hain
 llama ke model mei tool calling thodi weak hai and dont recommended for use
+
+
+Task ke andar agent khud se nahi bol sakta - aapko explicitly session.say() ya session.generate_reply() call karna padta hai.
+
+
+chat_ctx mei agent ke instructions nahi hote hai
+chat_ctx.copy mei exclude_instructions	Filters out messages where role is system or developer.

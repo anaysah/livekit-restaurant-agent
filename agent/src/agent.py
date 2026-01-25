@@ -1,11 +1,10 @@
 import asyncio
 from curses import raw
 from datetime import datetime
-import logging
 from typing import Annotated, Optional
 from dataclasses import dataclass,field
 
-from src.JSONExtractHandler import StatefulLLMLogger
+from av.codec import context
 from dotenv import load_dotenv
 from livekit import rtc
 from livekit.agents import (
@@ -22,108 +21,19 @@ from livekit.agents import (
 )
 from livekit.plugins import deepgram, groq, noise_cancellation, silero
 from livekit.plugins.turn_detector.multilingual import MultilingualModel
+from openai.types.beta.realtime import session
 from pydantic import Field
+from src.dataclass import UserData
+from src.tasks import CollectReservationInfo
 import yaml
 from livekit.plugins import openai
 
-from prompts import COMMON_RULES, GREETER_INSTRUCTIONS, RESERVATION_INSTRUCTIONS
+from src.variables import COMMON_RULES, GREETER_INSTRUCTIONS, RESERVATION_INSTRUCTIONS
 
-# make logs directory if not exists
-import os
-if not os.path.exists('logs'):
-    os.makedirs('logs')
-
-# A. ROOT LOGGER (Sab kuch yahan jaayega)
-debug_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-debug_handler = logging.FileHandler('logs/full_debug.log')
-debug_handler.setLevel(logging.DEBUG)
-debug_handler.setFormatter(debug_formatter)
-
-root_logger = logging.getLogger()
-root_logger.setLevel(logging.DEBUG)
-root_logger.addHandler(debug_handler) # Sab kuch debug file mein daalo
-
-# OPENAI LOGGER (Sirf isko VIP file se jodo)
-# Base client logger: Logs only HTTP communication details from _base_client.py module
-# Use this for debugging API requests without other OpenAI logs
-# openai_logger = logging.getLogger("openai._base_client")
-
-# Parent logger: Catches all OpenAI package logs including base_client, response, legacy_response etc.
-# Setting level here affects all child loggers unless they're specifically configured
-# vip_formatter = logging.Formatter('%(message)s')
-# vip_handler = logging.FileHandler('logs/vip_agent.log')
-# vip_handler.setLevel(logging.DEBUG) # DEBUG zaroori hai kyunki OpenAI raw data DEBUG level pe hota hai
-# vip_handler.setFormatter(vip_formatter)
-
-#B. ye saare request aur respone ko ek json file mein daal dega
-openai_logger = logging.getLogger("openai._base_client")
-openai_logger.setLevel(logging.DEBUG)
-openai_logger.handlers.clear()  # Pehle saare handlers hatao
-openai_logger.addHandler(StatefulLLMLogger("logs/live_request.json"))
-openai_logger.propagate = False  # Root logger mein mat bhejna
-
-# C. CUSTOM AGENT LOGGER (Jo hum code mein use karenge)
-agent_flow_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-agent_flow_handler = logging.FileHandler('logs/agent_flow.log')
-agent_flow_handler.setLevel(logging.INFO)
-agent_flow_handler.setFormatter(agent_flow_formatter)
-
-agent_flow = logging.getLogger("angent_flow")
-agent_flow.setLevel(logging.INFO)
-agent_flow.addHandler(agent_flow_handler)
-agent_flow.propagate = False  # Root logger mein mat jao
-
-
-# # ✅ NEW: Conversation-only handler
-# conversation_handler = logging.FileHandler('logs/conversations.log')
-# conversation_handler.setLevel(logging.INFO)
-# conversation_handler.setFormatter(conversation_formatter)
-
-# # ✅ NEW: Conversation logger
-# conversation_logger = logging.getLogger("conversation")
-# conversation_logger.setLevel(logging.INFO)
-# conversation_logger.addHandler(conversation_handler)  # Sirf apni file
-# conversation_logger.propagate = False  # Root logger mein mat jao
-# ❌ “Is logger ke messages ko parent/root logger ko mat bhejna.”
-# ✅ “Sirf isi logger ke handlers ko use karo.”
-# Console pe kuch print nahi hoga
+from src.logger_config import agent_flow  # Centralized logging
 
 load_dotenv(".env.local")
 
-@dataclass
-class UserData:
-    customer_name: Optional[str] = None
-    customer_phone: Optional[str] = None
-    no_of_guests: Optional[int] = None
-    reservation_time: Optional[str] = None
-    reservation_date: Optional[str] = None
-    cuisine_preference: Optional[str] = None
-    special_requests: Optional[str] = None
-    seating_preference: Optional[str] = None
-    
-    agents: dict[str, Agent] = field(default_factory=dict)
-    prev_agent: Optional[Agent] = None
-
-    def __getitem__(self, key):
-        return getattr(self, key)
-    
-    def __setitem__(self, key, value):
-        setattr(self, key, value)
-
-    def summarize(self) -> str:
-        data = {
-            "customer_name": self.customer_name or "unknown",
-            "customer_phone": self.customer_phone or "unknown",
-            "no_of_guests": self.no_of_guests or "unknown",
-            "reservation_time": self.reservation_time or "unknown",
-            "reservation_date": self.reservation_date or "unknown",
-            "cuisine_preference": self.cuisine_preference or "unknown",
-            "special_requests": self.special_requests or "unknown",
-            "seating_preference": self.seating_preference or "unknown",
-        }
-        # add space before new lines for better readability
-        formatted_data = {k: v.replace("\n", " \n ") if isinstance(v, str) else v for k, v in data.items()}
-        return yaml.dump(formatted_data, default_flow_style=False, indent=2)
 
 
 RunContext_T = RunContext[UserData]
@@ -135,6 +45,7 @@ VOICE_MODELS = {
     "asteria":"aura-asteria-en",
     "andromeda":"aura-2-andromeda-en",
     "helena":"aura-2-helena-en",
+    "odysseus":"aura-2-odysseus-en"
 }
 
 LLM_MODELS = [
@@ -191,7 +102,7 @@ class BaseAgent(Agent):
             content=f"You are {agent_name} agent. Current saved user data is {userdata.summarize()}"
         )
         await self.update_chat_ctx(chat_ctx)
-        self.session.generate_reply()
+        await self.session.generate_reply()
 
     async def _transfer_to_agent(self, name: str, context: RunContext_T) -> tuple[Agent, str]:
         userdata = context.userdata
@@ -237,10 +148,26 @@ class Reservation(BaseAgent):
     def __init__(self) -> None:
         super().__init__(
             instructions=f"""{COMMON_RULES} \n {RESERVATION_INSTRUCTIONS.format(current_datetime=datetime.now().strftime("%Y-%m-%d %H:%M"))}""",
-            tts=models["tts"]("asteria"),
+            tts=models["tts"]("odysseus"),
             llm=models["llm"],
         )
-
+        
+    async def on_enter(self) -> None:
+        await super().on_enter()
+        
+        collect_info_task = CollectReservationInfo(chat_ctx=self.chat_ctx.copy(), tts=self.tts)
+        try:
+            await collect_info_task
+            user_data: UserData = collect_info_task.userdata
+            
+            print("🤖 Collected User Data:", user_data)
+            
+            await self.session.generate_reply(
+                instructions=f"Thank you! I've collected your information: Name - {user_data['customer_name']}, Phone - {user_data['customer_phone']}."
+            )
+        except Exception as e:
+            await self.session.say("Sorry, there was an error collecting your information.")
+            # agents.logger.error(f"Error in CollectInfoTask: {e}")
         
     @function_tool()
     async def get_todays_date_n_time(
@@ -251,56 +178,7 @@ class Reservation(BaseAgent):
     ) -> str:
         """Get today's date and time for reference."""
         return datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
-
-
-
-    @function_tool()
-    async def update_details(
-        self,
-        context: RunContext,
-        customer_name: Annotated[str | None, Field(description="Customer name")] = None,
-        customer_phone: Annotated[str | None, Field(description="Customer phone number")] = None,
-        reservation_date: Annotated[str | None, Field(description="Date (YYYY-MM-DD)")] = None,
-        reservation_time: Annotated[str | None, Field(description="Time (HH:MM)")] = None,
-        no_of_guests: Annotated[int | None, Field(description="Number of guests")] = None,
-        seating_preference: Annotated[str | None, Field(description="inside or outside")] = None,
-        cuisine_preference: Annotated[str | None, Field(description="italian, chinese, indian, mexican")] = None,
-        special_requests: Annotated[str | None, Field(description="Special requests")] = None,
-    ) -> str:
-        """Update reservation details one or more at a time."""
-        
-        # Collect provided values
-        updates = {}
-        params = {
-            "customer_name": customer_name,
-            "customer_phone": customer_phone,
-            "reservation_date": reservation_date,
-            "reservation_time": reservation_time,
-            "no_of_guests": no_of_guests,
-            "seating_preference": seating_preference,
-            "cuisine_preference": cuisine_preference,
-            "special_requests": special_requests,
-        }
-        
-        for field, value in params.items():
-            if value is not None:
-                setattr(context.userdata, field, value)
-                updates[field] = value
-        
-        if not updates:
-            return "No fields updated"
-        
-        # Async save
-        save_task = asyncio.create_task(self._save_details_to_file(context))
-        save_task.add_done_callback(
-            lambda t: agent_flow.error(f"Save failed: {t.exception()}") 
-
-            if t.exception() else None
-        )
-        
-        updated_list = [f"{k}='{v}'" for k, v in updates.items()]
-        return f"Updated {len(updates)} field(s): {', '.join(updated_list)}"
-
+    
 server = AgentServer()
 
 def prewarm(proc: JobProcess):
@@ -329,7 +207,7 @@ async def my_agent(ctx: JobContext):
         userdata=userdata,
         stt=None,
         llm=models["llm"],
-        tts=models["tts"],
+        tts=models["tts"]("thalia"),
         turn_detection=MultilingualModel(),
         vad=ctx.proc.userdata["vad"],
         preemptive_generation=False,
