@@ -214,7 +214,8 @@ class CollectReservationInfo(AgentTask[UserData]):
         """Collect and validate user's name."""
         print(f"📌 Collecting name: {name}")
         self.userdata["customer_name"] = name
-        return self._check_data_collection_complete()
+        # return self._check_data_collection_complete("Name collected successfully.")
+        return "Name collected successfully. Continue collecting remaining information."
         
     @function_tool
     async def collect_phone(
@@ -232,7 +233,8 @@ class CollectReservationInfo(AgentTask[UserData]):
             return "Error: Invalid phone number. It must be exactly 10 digits. Please ask the user to repeat."
         
         self.userdata["customer_phone"] = phone
-        return self._check_data_collection_complete("Phone number collected successfully.")
+        # return self._check_data_collection_complete("Phone number collected successfully.")
+        return "Phone number collected successfully. Continue collecting remaining information."
     
     @function_tool
     async def collect_guests(
@@ -247,7 +249,8 @@ class CollectReservationInfo(AgentTask[UserData]):
             return f"Error: Invalid number of guests. Please provide a number between 1 and {MAX_RESERVATION_GUESTS}."
         
         self.userdata["no_of_guests"] = no_of_guests
-        return self._check_data_collection_complete("Number of guests collected successfully.")
+        # return self._check_data_collection_complete("Number of guests collected successfully.")
+        return "Number of guests collected successfully. Continue collecting remaining information."
     
     @function_tool
     async def collect_datetime(
@@ -279,9 +282,11 @@ class CollectReservationInfo(AgentTask[UserData]):
         
         self.userdata["reservation_date"] = reservation_date
         self.userdata["reservation_time"] = reservation_time
-        return self._check_data_collection_complete("Reservation date and time collected successfully.")
+        # return self._check_data_collection_complete("Reservation date and time collected successfully.")
+        return "Reservation date and time collected successfully. Continue collecting remaining information."
         
-    def _check_data_collection_complete(self, message="") -> str:
+    @function_tool
+    async def check_data_collection_complete(self) -> str:
         """Check if all required data has been collected."""
         required_fields = [
             "customer_name",
@@ -293,16 +298,18 @@ class CollectReservationInfo(AgentTask[UserData]):
             # "special_requests",
         ]
         
-        if all(getattr(self.userdata, field) is not None for field in required_fields):
-            print("📌 All required data collected.")
-            self.complete(self.userdata)
-        else:
-            # self.session.generate_reply(
-            #     instructions="Continue collecting remaining information."
-            # )
-            return f"{message}. Continue collecting remaining information."
+        not_collected_fields = [field for field in required_fields if getattr(self.userdata, field) is None]
+        if not_collected_fields:
+            return f"Remaining information to collect: {', '.join(not_collected_fields)}."
+        
+        return "All required data collected. You can now complete the task."
             
-    
+    @function_tool
+    async def complete_task(self) -> None:
+        """Call at the end to mark task as complete. necessary to call this"""
+        print("📌 Completing CollectInfoTask")
+        self.complete(self.userdata)
+        # return "All required data collected. Task completed successfully."
             
     # on exit ache se kaam nahi karta task ke sath
     # 
