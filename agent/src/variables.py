@@ -68,8 +68,8 @@ COLLECTION_TASK_INSTRUCTIONS: str = (
 "3. Reservation date (reservation_date)\n"
 "4. Reservation time (reservation_time)\n"
 "5. Number of guests (no_of_guests)\n"
-# "7. Cuisine preference (Italian, Chinese, Indian, or Mexican) (cuisine_preference)\n"
-# "8. Any special requests (special_requests)\n"
+"7. Cuisine preference (cuisine_preference)\n"
+"8. Any special requests (special_requests)\n"
 
 "# Guidelines:\n"
 "- You have to do internally thing like change 'tomorrow' to actual date.\n"
@@ -78,7 +78,10 @@ COLLECTION_TASK_INSTRUCTIONS: str = (
 "- Dont make any assumptions.\n"
 "- while asking for date and time tell them the restaurant operating hours\n"
 
-"Critical: Run complete_task in the end after collecting all details.\n"
+"End phase: \n"
+"- run the check_data_collection_complete tool to see if all data is collected.\n"
+"- If all data is collected, then run the complete_task tool.\n"
+"- Otherwise, continue collecting missing information.\n"
 
 # "Data storage guidelines:\n"
 # "- Store dates in YYYY-MM-DD format (convert relative terms like "tomorrow", "next Friday", "June 29" automatically)\n"
@@ -91,5 +94,11 @@ VALID_RESTAURANTS_TIME_RANGE: dict[str, str] = {
     "closing_time": "22:00",
 }
 
-
 MAX_RESERVATION_GUESTS: int = 20
+
+AVAILABLE_CUISINES: list[str] = [
+    "italian",
+    "chinese",
+    "indian",
+    "mexican",
+]
