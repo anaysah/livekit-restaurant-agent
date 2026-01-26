@@ -19,6 +19,8 @@ from livekit.agents import (
     RunContext,
     ToolError,
 )
+from livekit.agents.voice import MetricsCollectedEvent
+from livekit.agents import metrics
 from livekit.plugins import deepgram, groq, noise_cancellation, silero
 from livekit.plugins.turn_detector.multilingual import MultilingualModel
 from openai.types.beta.realtime import session
@@ -123,6 +125,36 @@ class BaseAgent(Agent):
         
         # Run file I/O in thread pool to avoid blocking
         await asyncio.to_thread(write_file)
+        
+    def _token_usage(self) -> dict:
+        """Get current token usage summary from the session."""
+        userdata: UserData = self.session.userdata
+        
+        if not hasattr(userdata, 'usage_collector') or userdata.usage_collector is None:
+            agent_flow.warning("⚠️ Usage collector not initialized")
+            return {
+                "llm_prompt_tokens": 0,
+                "llm_completion_tokens": 0,
+                "total_tokens": 0,
+                "tts_characters": 0,
+                "stt_duration": 0.0
+            }
+        
+        summary = userdata.usage_collector.get_summary()
+        
+        return {
+            "llm_prompt_tokens": summary.llm_prompt_tokens,
+            "llm_completion_tokens": summary.llm_completion_tokens,
+            "total_tokens": summary.llm_prompt_tokens + summary.llm_completion_tokens,
+            "tts_characters": summary.tts_characters_count,
+            "stt_duration": summary.stt_audio_duration
+        }
+    
+    async def on_exit(self) -> None:
+        """Called when leaving this agent"""
+        agent_name = self.__class__.__name__
+        
+        print(f"{agent_name} - 💠 Token Usage Summary: {self._token_usage()}")
 
 class Greeter(BaseAgent):    
     def __init__(self) -> None:
@@ -161,6 +193,8 @@ class Reservation(BaseAgent):
             user_data: UserData = collect_info_task.userdata
             
             print("🤖 Collected User Data:", user_data)
+            
+            print("💠 Current Token Usage:", self._token_usage())
             
             await self.session.generate_reply(
                 instructions=f"Thank you! I've collected your information: Name - {user_data['customer_name']}, Phone - {user_data['customer_phone']}."
@@ -201,6 +235,7 @@ async def my_agent(ctx: JobContext):
         "greeter": Greeter(),
         "reservation": Reservation(),
     })
+    userdata.usage_collector = metrics.UsageCollector()
 
     # Set up a voice AI pipeline using OpenAI, Cartesia, AssemblyAI, and the LiveKit turn detector
     session = AgentSession[UserData](
@@ -212,6 +247,10 @@ async def my_agent(ctx: JobContext):
         vad=ctx.proc.userdata["vad"],
         preemptive_generation=False,
     )
+    
+    @session.on("metrics_collected")
+    def _on_metrics_collected(ev: MetricsCollectedEvent):
+        userdata.usage_collector.collect(ev.metrics)
     
     # async def save_transcript():
     #     import json

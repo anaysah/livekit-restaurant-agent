@@ -1,6 +1,6 @@
 from dataclasses import dataclass,field
 from typing import Annotated, Optional
-from livekit.agents import Agent
+from livekit.agents import Agent, metrics
 import yaml
 
 @dataclass
@@ -14,6 +14,7 @@ class UserData:
     special_requests: Optional[str] = None
     seating_preference: Optional[str] = None
     
+    usage_collector: Optional[metrics.UsageCollector] = None
     agents: dict[str, Agent] = field(default_factory=dict)
     prev_agent: Optional[Agent] = None
 
