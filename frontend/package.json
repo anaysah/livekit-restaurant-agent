@@ -13,10 +13,12 @@
     "@livekit/protocol": "^1.44.0",
     "livekit-client": "^2.17.0",
     "livekit-server-sdk": "^2.15.0",
+    "lucide-react": "^0.563.0",
     "next": "16.1.6",
     "next-themes": "^0.4.6",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "react-icons": "^5.5.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

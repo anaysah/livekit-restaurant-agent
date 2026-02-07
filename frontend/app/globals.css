@@ -8,10 +8,14 @@
 /* Base theme colors */
 @theme {
   --color-background: #ffffff;
+  --color-background-light: #fafafa;
   --color-foreground: #000000;
+  --color-text-muted: #666666;
   --color-primary: #4285f4;
   --color-secondary: #34a853;
   --color-card: #f5f5f5;
+  --color-border: #e0e0e0;
+  --color-border-light: #f0f0f0;
 }
 
 
@@ -19,30 +23,42 @@
 @layer base {
   [data-theme="dark"] {
     --color-background: #1a1a1a;
+    --color-background-light: #2a2a2a;
     --color-foreground: #ffffff;
+    --color-text-muted: #a0a0a0;
     --color-primary: #8ab4f8;
     --color-secondary: #81c995;
     --color-card: #2a2a2a;
+    --color-border: #3a3a3a;
+    --color-border-light: #2f2f2f;
   }
 
   [data-theme="neon"] {
     --color-background: #0a0a0a;
+    --color-background-light: #1a001a;
     --color-foreground: #00ff00;
+    --color-text-muted: #00cc00;
     --color-primary: #ff00ff;
     --color-secondary: #00ffff;
     --color-card: #1a001a;
+    --color-border: #ff00ff;
+    --color-border-light: #cc00cc;
   }
 
   [data-theme="pink"] {
     --color-background: #fff0f5;
+    --color-background-light: #fff5fa;
     --color-foreground: #8b008b;
+    --color-text-muted: #b366b3;
     --color-primary: #ff69b4;
     --color-secondary: #ffc0cb;
     --color-card: #ffe4f0;
+    --color-border: #ffb3d9;
+    --color-border-light: #ffd9ec;
   }
 }
 
 /* Optional: Smooth transitions */
 * {
-  transition: background-color 2s ease, color 0.3s ease, border-color 0.3s ease;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
