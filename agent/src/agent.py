@@ -1,5 +1,4 @@
 import asyncio
-from curses import raw
 from datetime import datetime
 from typing import Annotated, Optional
 from dataclasses import dataclass,field
