@@ -29,17 +29,18 @@ export default function AgentChatUI() {
   }, [messages]);
 
   return (
-    <div className="h-full flex flex-col bg-[var(--color-card)]">
+    <div className="h-full flex flex-col bg-card">
       {/* Header */}
-      <div className="p-4 border-b border-[var(--color-border)] bg-[var(--color-background-light)]">
+      <div className="p-4 border-b border-border bg-background-light">
         <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-[var(--color-primary)]">
+        <h2 className="text-lg font-semibold text-primary">
           AI Agent Chat
         </h2>
         <button 
           onClick={() => isConnected ? end() : start()} 
-          className="mt-2 transition-colors"
+          className="mt-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           title={isConnected ? "Disconnect" : "Connect"}
+          disabled={isConnected && !agentJoined}
         >
           {isConnected ? (
             <PlugZap size={20} className="text-green-500" />
@@ -48,15 +49,15 @@ export default function AgentChatUI() {
           )}
         </button>
         </div>
-        <p className="text-xs text-[var(--color-text-muted)] mt-1">
-          {isConnected ? "Online" : "Offline"}
+        <p className="text-xs text-text-muted mt-1">
+          {isConnected ? (agentJoined ? "Online" : "Connecting...") : "Offline"}
         </p>
       </div>
 
       {/* Messages Container */}
       <div ref={scrollAreaRef} className="flex-1 overflow-y-auto p-1 space-y-2 bg-background">
         {messages.length === 0 ? (
-          <div className="flex items-center justify-center h-full text-[var(--color-text-muted)] text-sm">
+          <div className="flex items-center justify-center h-full text-text-muted text-sm">
             {!isConnected 
               ? "Connect to start chatting" 
               : agentJoined 
@@ -74,8 +75,8 @@ export default function AgentChatUI() {
                 <div
                   className={`max-w-[80%] rounded-sm p-2 ${
                     isUser
-                      ? "bg-[var(--color-primary)] text-white"
-                      : "bg-[var(--color-background-light)] border border-[var(--color-border)]"
+                      ? "bg-primary text-white"
+                      : "bg-background-light border border-border"
                   }`}
                 >
                   <p className="text-sm">{msg.message}</p>
