@@ -1,5 +1,6 @@
 import asyncio
 from datetime import datetime
+import os
 from typing import Annotated, Optional
 from dataclasses import dataclass,field
 
@@ -64,6 +65,13 @@ LLM_MODELS = [
     
 ]
 
+# IS_STT_ENABLED and IS_TTS_ENABLED FROM .env
+IS_TTS_ENABLED = os.getenv("IS_TTS_ENABLED", "true").lower() in ["true", "1", "yes"]
+IS_STT_ENABLED = os.getenv("IS_STT_ENABLED", "true").lower() in ["true", "1", "yes"]
+
+print(f"🔊 TTS Enabled: {IS_TTS_ENABLED}")
+print(f"🎤 STT Enabled: {IS_STT_ENABLED}")
+
 models = {
     # "llm": groq.LLM(model="llama-3.3-70b-versatile"),
     # "llm": google.LLM(
@@ -75,8 +83,8 @@ models = {
         parallel_tool_calls=False,
         tool_choice="auto",
     ),
-    "tts": lambda model: deepgram.TTS(model=VOICE_MODELS[model]),
-    "stt": deepgram.STT(),  # Using STT instead of STTv2
+    "tts": lambda model: deepgram.TTS(model=VOICE_MODELS[model]) if IS_TTS_ENABLED else None,
+    "stt": deepgram.STT() if IS_STT_ENABLED else None,  # Using STT instead of STTv2
     "vad": silero.VAD.load(),
 }
     
@@ -239,7 +247,7 @@ async def my_agent(ctx: JobContext):
     # Set up a voice AI pipeline using OpenAI, Cartesia, AssemblyAI, and the LiveKit turn detector
     session = AgentSession[UserData](
         userdata=userdata,
-        stt=None,
+        stt=models["stt"],
         llm=models["llm"],
         tts=models["tts"]("thalia"),
         turn_detection=MultilingualModel(),
