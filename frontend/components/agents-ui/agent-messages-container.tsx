@@ -1,17 +1,39 @@
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
+
+/**
+ * Represents a received message in the chat
+ */
+export interface ReceivedMessage {
+  id?: string;
+  timestamp: number;
+  from?: {
+    identity?: string;
+    isLocal: boolean;
+  };
+  message: string;
+}
 
 type AgentMessagesContainerProps = {
-  scrollAreaRef: React.RefObject<HTMLDivElement | null>
-  messages: Array<{
-    from?: { isLocal: boolean };
-    message: string;
-    timestamp?: number;
-  }>;
+  messages: ReceivedMessage[];
   isConnected: boolean;
   agentJoined: boolean;
 }
 
-export const AgentMessagesContainer = ({ scrollAreaRef, messages, isConnected, agentJoined }: AgentMessagesContainerProps) => {
+export const AgentMessagesContainer = ({ messages, isConnected, agentJoined }: AgentMessagesContainerProps) => {
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    if (scrollAreaRef.current && messages.length > 0) {
+      // Use setTimeout to ensure DOM has updated
+      setTimeout(() => {
+        if (scrollAreaRef.current) {
+          scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
+        }
+      }, 0);
+    }
+  }, [messages]);
+
   return (
       <div ref={scrollAreaRef} className="flex-1 overflow-y-auto p-1 space-y-2 bg-background">
         {messages.length === 0 ? (
@@ -23,11 +45,14 @@ export const AgentMessagesContainer = ({ scrollAreaRef, messages, isConnected, a
                 : "Agent is joining..."}
           </div>
         ) : (
-          messages.map((msg, index) => {
+          messages.map((msg) => {
             const isUser = msg.from?.isLocal === true;
+            // Use unique key: id if available, otherwise timestamp, fallback to timestamp + message hash
+            const messageKey = msg.id || `${msg.timestamp}-${msg.message.slice(0, 10)}`;
+            
             return (
               <div
-                key={index}
+                key={messageKey}
                 className={`flex ${isUser ? "justify-end" : "justify-start"}`}
               >
                 <div
