@@ -2,9 +2,9 @@
 
 import { useSessionContext, useSessionMessages, useVoiceAssistant } from "@livekit/components-react";
 import { useParticipants } from "@livekit/components-react";
-import AgentChatInput from "./AgentChatInput";
-import AgentUIHeader from "./agents-ui/agent-chat-header";
-import { AgentMessagesContainer } from "./agents-ui/agent-messages-container";
+import AgentUIHeader from "@/components/agents-ui/agent-chat-header";
+import { AgentMessagesContainer } from "@/components/agents-ui/agent-messages-container";
+import AgentControlBar from "@/components/agents-ui/agent-control-bar";
 
 export default function AgentChatUI() {
   const session = useSessionContext();
@@ -20,12 +20,12 @@ export default function AgentChatUI() {
 
   return (
     <div className="h-full flex flex-col bg-card">
-      <AgentUIHeader isConnected={isConnected} agentJoined={agentJoined} state={state} start={start} end={end} />
+      <AgentUIHeader isConnected={isConnected} agentJoined={agentJoined} state={state} participants={participants} start={start} end={end} />
 
       <AgentMessagesContainer messages={messages} isConnected={isConnected} agentJoined={agentJoined} />
 
       {/* Input Section */}
-      <AgentChatInput isConnected={isConnected} agentJoined={agentJoined} />
+      <AgentControlBar isConnected={isConnected} agentJoined={agentJoined} />
     </div>
   );
 }

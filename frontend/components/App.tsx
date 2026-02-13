@@ -1,6 +1,7 @@
 import React from 'react'
 import AgentChatUI from './AgentChatUI'
 import ThemeSwitcher from './ThemeSwitcher'
+import { WebsiteContainer } from './WebsiteContainer'
 
 const App = () => {
   return (
@@ -10,50 +11,11 @@ const App = () => {
         <AgentChatUI />
       </div>
 
-      {/* Right Side - Main Content (3/4 width) */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Navbar */}
-        {/* <Navbar /> */}
-        <div className="bg-background-light border-b border-border p-4">
-          <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-primary">Restaurant Booking</h1>
-            <ThemeSwitcher />
-          </div>
-        </div>
-
-        {/* Main Content Area - Scrollable */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="max-w-7xl mx-auto p-6 space-y-6">
-            {/* Sample Card to demonstrate theme variables */}
-            <div className="bg-card border border-border rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-2 text-primary">Booking Form</h2>
-              <p className="text-text-muted text-base">Form will appear here</p>
-            </div>
-
-            <div className="bg-card border border-border-light rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-2 text-secondary">Seating Preference</h2>
-              <p className="text-text-muted text-base">Seating options will appear here</p>
-            </div>
-
-            <div className="bg-card border border-border rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-2">Restaurant Menu</h2>
-              <p className="text-text-muted text-sm">Menu items will appear here</p>
-            </div>
-            
-            {/* Booking Form Section */}
-            {/* <BookingForm /> */}
-
-            {/* Seating Preference Section */}
-            {/* <SeatingPreference /> */}
-
-            {/* Restaurant Menu Section */}
-            {/* <MenuSection /> */}
-          </div>
-        </div>
+      {/* Right Side - Placeholder for future content (3/4 width) */}
+      <div className="flex-1 p-4">
+        <WebsiteContainer />
       </div>
-
-      {/* Booking Confirmation Modal - Conditionally shown */}
-      {/* {showConfirmation && <BookingConfirmation />} */}
+    
     </div>
   )
 }

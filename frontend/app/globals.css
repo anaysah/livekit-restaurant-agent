@@ -22,16 +22,44 @@
 /* Override colors per theme using data-theme attribute */
 @layer base {
   [data-theme="dark"] {
-    --color-background: #1a1a1a;
-    --color-background-light: #2a2a2a;
-    --color-foreground: #ffffff;
-    --color-text-muted: #a0a0a0;
-    --color-primary: #8ab4f8;
-    --color-secondary: #81c995;
-    --color-card: #2a2a2a;
-    --color-border: #3a3a3a;
-    --color-border-light: #2f2f2f;
+    --color-background: #0C1120;
+    --color-background-light: #1a2332;
+    --color-foreground: #F1F5F9;
+    --color-text-main: #F1F5F9;
+    --color-text-secondary: #94A3B8;
+    --color-text-muted: #94A3B8;
+    --color-primary: #3A82FF;
+    --color-secondary: #60A5FA;
+    --color-card: #1a2332;
+    --color-border: #293548;
+    --color-border-light: #1f2937;
+}
+
+  [data-theme="dark-warm"] {
+    --color-background: #1C1C1C;
+    --color-background-light: #2A2422;
+    --color-foreground: #F5E8D8;
+    --color-text-muted: #B8A99A;
+    --color-primary: #FF6F61;
+    --color-secondary: #DAA520;
+    --color-card: #2A2422;
+    --color-border: #3D3530;
+    --color-border-light: #2F2926;
   }
+
+  [data-theme="dark-minimal"] {
+    --color-background: #000000;
+    --color-background-light: #121212;
+    --color-foreground: #FFFFFF;
+    --color-text-muted: #A1A1AA;
+    --color-primary: #FFFFFF;
+    --color-secondary: #E5E5E5;
+    --color-card: #121212;
+    --color-border: #2A2A2A;
+    --color-border-light: #1A1A1A;
+  }
+  
+
 
   [data-theme="neon"] {
     --color-background: #0a0a0a;

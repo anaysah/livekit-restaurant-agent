@@ -9,13 +9,13 @@ type AgentUIHeaderProps = {
   isConnected: boolean;
   agentJoined: boolean;
   state: string;
+  participants: ReturnType<typeof useParticipants>;
   start: () => void;
   end: () => void;
 }
 
-const AgentUIHeader = ({ isConnected, agentJoined, state, start, end }: AgentUIHeaderProps) => {
+const AgentUIHeader = ({ isConnected, agentJoined, state, participants, start, end }: AgentUIHeaderProps) => {
   const [isAgentMuted, setIsAgentMuted] = useState(false);
-  const participants = useParticipants();
 
   const handleAgentAudioToggle = useCallback(() => {
     const agentParticipant = participants.find((p) => p.isAgent);
@@ -42,14 +42,14 @@ const AgentUIHeader = ({ isConnected, agentJoined, state, start, end }: AgentUIH
   return (
 
     <div className="p-4 border-b border-border bg-background-light">
-      <div className="flex items-center justify-between items-stretch">
-        <div>
+      <div className="flex items-center justify-between items-end">
+        <div className='flex items-end'>
           <h2 className="text-lg font-semibold text-primary">
             AI Agent Chat
           </h2>
           <button
             onClick={handleAgentAudioToggle}
-            className="ml-2 p-1 hover:opacity-70 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+            className="ml-2 p-1 hover:opacity-70 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed rounded-sm"
             disabled={!isConnected || !agentJoined}
             title={isAgentMuted ? "Unmute Agent" : "Mute Agent"}
           >

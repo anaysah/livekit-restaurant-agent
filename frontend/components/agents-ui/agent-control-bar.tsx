@@ -5,12 +5,12 @@ import { Mic, MicOff, Send, Loader2 } from "lucide-react";
 import { useChat, useTrackToggle, usePersistentUserChoices } from "@livekit/components-react";
 import { Track } from "livekit-client";
 
-interface AgentChatInputProps {
+interface AgentControlBarProps {
   isConnected: boolean;
   agentJoined: boolean;
 }
 
-export default function AgentChatInput({ isConnected, agentJoined }: AgentChatInputProps) {
+export default function AgentControlBar({ isConnected, agentJoined }: AgentControlBarProps) {
   const [message, setMessage] = useState("");
   const { send } = useChat();
   
