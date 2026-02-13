@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { Mic, MicOff, Send } from "lucide-react";
-import { useChat } from "@livekit/components-react";
+import { useState, useCallback } from "react";
+import { Mic, MicOff, Send, Loader2 } from "lucide-react";
+import { useChat, useTrackToggle, usePersistentUserChoices } from "@livekit/components-react";
+import { Track } from "livekit-client";
 
 interface AgentChatInputProps {
   isConnected: boolean;
@@ -10,9 +11,28 @@ interface AgentChatInputProps {
 }
 
 export default function AgentChatInput({ isConnected, agentJoined }: AgentChatInputProps) {
-  const [isMicOn, setIsMicOn] = useState(false);
   const [message, setMessage] = useState("");
   const { send } = useChat();
+  
+  
+  
+  // Mic toggle with error handling
+  const microphoneToggle = useTrackToggle({
+    source: Track.Source.Microphone,
+    onDeviceError: (error) => {
+      console.error("Microphone error:", error);
+      alert(`Cannot access microphone: ${error.message}`);
+    },
+  });
+
+  // Enhanced toggle with persistence
+  const handleMicToggle = useCallback(async () => {
+    try {
+      await microphoneToggle.toggle();
+    } catch (error) {
+      console.error("Failed to toggle microphone:", error);
+    }
+  }, [microphoneToggle]);
 
   const isDisabled = !isConnected || !agentJoined;
 
@@ -32,15 +52,22 @@ export default function AgentChatInput({ isConnected, agentJoined }: AgentChatIn
       <div className="flex items-center gap-1">
         {/* Mic Toggle Button */}
         <button
-          onClick={() => setIsMicOn(!isMicOn)}
-          disabled={isDisabled}
-          className={` transition-all ${
-            isMicOn
-              ? "bg-primary text-white"
+          onClick={handleMicToggle}
+          disabled={isDisabled || microphoneToggle.pending}
+          className={`p-2 rounded-sm transition-all ${
+            microphoneToggle.enabled
+              ? "text-white"
               : "bg-background-light text-foreground"
           } disabled:opacity-50 disabled:cursor-not-allowed`}
+          title={microphoneToggle.enabled ? "Mute microphone" : "Unmute microphone"}
         >
-          {isMicOn ? <Mic size={20} /> : <MicOff size={20} />}
+          {microphoneToggle.pending ? (
+            <Loader2 size={20} className="animate-spin" />
+          ) : microphoneToggle.enabled ? (
+            <Mic size={20} />
+          ) : (
+            <MicOff size={20} />
+          )}
         </button>
 
         {/* Text Input */}
