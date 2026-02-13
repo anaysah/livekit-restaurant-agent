@@ -1,9 +1,10 @@
-import React, { useState, useCallback } from 'react'
+import React from 'react'
 import { Plug, PlugZap } from "lucide-react";
 import { PiPlugsBold, PiPlugsConnectedFill } from 'react-icons/pi';
 import { FaVolumeUp } from 'react-icons/fa';
 import { FaVolumeXmark } from 'react-icons/fa6';
 import { useParticipants } from '@livekit/components-react';
+import { useAgentAudioToggle } from '@/hooks/useAgentAudioToggle';
 
 type AgentUIHeaderProps = {
   isConnected: boolean;
@@ -15,27 +16,7 @@ type AgentUIHeaderProps = {
 }
 
 const AgentUIHeader = ({ isConnected, agentJoined, state, participants, start, end }: AgentUIHeaderProps) => {
-  const [isAgentMuted, setIsAgentMuted] = useState(false);
-
-  const handleAgentAudioToggle = useCallback(() => {
-    const agentParticipant = participants.find((p) => p.isAgent);
-
-    if (agentParticipant) {
-      agentParticipant.audioTrackPublications.forEach((publication) => {
-        if (publication.audioTrack) {
-          const audioElements = publication.audioTrack.attachedElements;
-
-          audioElements.forEach((element) => {
-            if (element instanceof HTMLAudioElement) {
-              element.volume = isAgentMuted ? 1 : 0;
-            }
-          });
-        }
-      });
-
-      setIsAgentMuted(!isAgentMuted);
-    }
-  }, [participants, isAgentMuted]);
+  const { isAgentMuted, toggleAgentAudio } = useAgentAudioToggle();
 
 
 
@@ -48,7 +29,7 @@ const AgentUIHeader = ({ isConnected, agentJoined, state, participants, start, e
             AI Agent Chat
           </h2>
           <button
-            onClick={handleAgentAudioToggle}
+            onClick={toggleAgentAudio}
             className="ml-2 p-1 hover:opacity-70 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed rounded-sm"
             disabled={!isConnected || !agentJoined}
             title={isAgentMuted ? "Unmute Agent" : "Mute Agent"}
