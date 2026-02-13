@@ -25,7 +25,7 @@
     --color-background: #0C1120;
     --color-background-light: #1a2332;
     --color-foreground: #F1F5F9;
-    --color-text-main: #F1F5F9;
+    --color-text-main: #ceccd6;
     --color-text-secondary: #94A3B8;
     --color-text-muted: #94A3B8;
     --color-primary: #3A82FF;
@@ -33,7 +33,7 @@
     --color-card: #1a2332;
     --color-border: #293548;
     --color-border-light: #1f2937;
-}
+  }
 
   [data-theme="dark-warm"] {
     --color-background: #1C1C1C;
