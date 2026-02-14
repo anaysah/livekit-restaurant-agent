@@ -1,3 +1,5 @@
+// order/page.tsx
+
 import React from 'react'
 import Header from '@/components/website/header-simple'
 import HeroSection from '@/components/website/hero-section-simple'

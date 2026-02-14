@@ -1,5 +1,7 @@
 "use client"
 
+// booking/page.tsx
+
 import React, { useState } from 'react'
 import Header from '@/components/website/header-simple'
 

@@ -1,3 +1,5 @@
+// @chat/page.tsx
+
 import React from 'react'
 import ChatWithSession from '@/components/ChatWithSession'
 

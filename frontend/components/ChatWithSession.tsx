@@ -1,5 +1,7 @@
 "use client"
 
+// components/ChatWithSession.tsx
+
 import { useMemo } from 'react'
 import { TokenSource } from 'livekit-client'
 import { useSession } from '@livekit/components-react'

@@ -1,3 +1,5 @@
+// components/agents-ui/agent-session-provider.tsx
+
 import {
   SessionProvider,
   type UseSessionReturn,

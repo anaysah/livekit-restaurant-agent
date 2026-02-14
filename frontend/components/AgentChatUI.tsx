@@ -1,5 +1,7 @@
 "use client";
 
+// components/AgentChatUI.tsx
+
 import { useSessionContext, useSessionMessages, useVoiceAssistant } from "@livekit/components-react";
 import { useParticipants } from "@livekit/components-react";
 import AgentUIHeader from "@/components/agents-ui/agent-chat-header";
