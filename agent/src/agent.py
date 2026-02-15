@@ -352,8 +352,8 @@ async def my_agent(ctx: JobContext):
     agent_flow.info(f"📊 Room participants: {list(ctx.room.remote_participants.keys())}")
     
     try:
-        await send_to_ui(ctx, "agent:command", {
-            "command": "test",
+        await send_to_ui(ctx, "agent:ui_action", {
+            "action": "test",
             "data": {"message": "Data channel is working!"}
         })
         agent_flow.info("✅ Test message sent successfully")

@@ -5,72 +5,98 @@
 import { useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAgentBridge } from "./useAgentBridge";
-import { MessageTopic, UICommandMessage, NavigationMessage } from "@/types/agent-bridge";
-import actionRegistry from "@/lib/actions/action-registry";
+import { useAppStore } from "@/lib/store/app-store";
+import { 
+  MessageTopic, 
+  UIActionMessage, 
+  NavigationMessage, 
+  FormPrefillMessage 
+} from "@/types/agent-bridge";
 
 /**
- * Hook to handle agent commands
+ * Hook to handle all agent actions in one place
  * Use this at the root level or in layout to enable agent control over UI
  */
 export function useAgentCommands() {
-  const { onMessage } = useAgentBridge();
+  const { registerHandler } = useAgentBridge();
   const router = useRouter();
+  const { setContext, clearFormState, setFormState } = useAppStore();
 
   /**
-   * Handle UI commands from agent
+   * Handle UI actions from agent (DOM operations)
    */
-  const handleUICommand = useCallback(
-    (message: UICommandMessage) => {
-      const { command, target, data } = message.payload;
+  const handleUIAction = useCallback(
+    (message: UIActionMessage) => {
+      try {
+        const { action, target, data } = message.payload;
 
-      switch (command) {
-        case "navigate":
-          if (data?.route) {
-            router.push(data.route);
-          }
-          break;
-
-        case "scroll":
-          if (target) {
-            const element = document.querySelector(target);
-            element?.scrollIntoView({ behavior: "smooth" });
-          }
-          break;
-
-        case "focus":
-          if (target) {
-            const element = document.querySelector(target) as HTMLElement;
-            element?.focus();
-          }
-          break;
-
-        case "submit":
-          if (target) {
-            const form = document.querySelector(target) as HTMLFormElement;
-            form?.requestSubmit();
-          }
-          break;
-
-        case "show":
-        case "hide":
-          if (target) {
-            const element = document.querySelector(target) as HTMLElement;
-            if (element) {
-              element.style.display = command === "show" ? "" : "none";
+        switch (action) {
+          case "scroll":
+            if (target) {
+              const element = document.querySelector(target);
+              if (element) {
+                element.scrollIntoView({ behavior: "smooth" });
+                console.log(`[AgentCommands] ✓ Scrolled to: ${target}`);
+              } else {
+                console.warn(`[AgentCommands] Element not found: ${target}`);
+              }
             }
-          }
-          break;
+            break;
 
-        default:
-          // Try to execute from action registry
-          if (actionRegistry.has(command)) {
-            actionRegistry.execute(command, data);
-          } else {
-            console.warn(`[AgentCommands] Unknown command: ${command}`);
-          }
+          case "focus":
+            if (target) {
+              const element = document.querySelector(target) as HTMLElement;
+              if (element) {
+                element.focus();
+                console.log(`[AgentCommands] ✓ Focused: ${target}`);
+              } else {
+                console.warn(`[AgentCommands] Element not found: ${target}`);
+              }
+            }
+            break;
+
+          case "submit":
+            if (target) {
+              const form = document.querySelector(target) as HTMLFormElement;
+              if (form) {
+                form.requestSubmit();
+                console.log(`[AgentCommands] ✓ Submitted form: ${target}`);
+              } else {
+                console.warn(`[AgentCommands] Form not found: ${target}`);
+              }
+            }
+            break;
+
+          case "show":
+          case "hide":
+            if (target) {
+              const element = document.querySelector(target) as HTMLElement;
+              if (element) {
+                element.style.display = action === "show" ? "" : "none";
+                console.log(`[AgentCommands] ✓ ${action}: ${target}`);
+              } else {
+                console.warn(`[AgentCommands] Element not found: ${target}`);
+              }
+            }
+            break;
+
+          case "clear-form":
+            if (data?.formId) {
+              clearFormState(data.formId);
+              console.log(`[AgentCommands] ✓ Cleared form: ${data.formId}`);
+            } else {
+              console.warn("[AgentCommands] No formId provided for clear-form action");
+            }
+            break;
+
+          default:
+            console.warn(`[AgentCommands] Unknown action: ${action}`);
+        }
+      } catch (error) {
+        console.error("[AgentCommands] Error handling UI action:", error);
       }
     },
-    [router]
+    [clearFormState]
   );
 
   /**
@@ -78,28 +104,55 @@ export function useAgentCommands() {
    */
   const handleNavigation = useCallback(
     (message: NavigationMessage) => {
-      console.log("[AgentCommands] 🧭 Navigation message received:", message);
-      const { route, to } = message.payload;
-      console.log("[AgentCommands] 🧭 Route:", route, "Context:", to);
-      
-      if (route) {
-        console.log("[AgentCommands] 🚀 Navigating to:", route);
-        router.push(route);
-      } else {
-        console.warn("[AgentCommands] ⚠️ No route in navigation message");
+      try {
+        const { route, to } = message.payload;
+        
+        // Update context in store
+        if (to) {
+          setContext(to, message.payload.metadata);
+          console.log(`[AgentCommands] ✓ Context updated to: ${to}`);
+        }
+        
+        // Navigate to route
+        if (route) {
+          router.push(route);
+          console.log(`[AgentCommands] ✓ Navigated to: ${route}`);
+        } else {
+          console.warn("[AgentCommands] No route in navigation message");
+        }
+      } catch (error) {
+        console.error("[AgentCommands] Error handling navigation:", error);
       }
     },
-    [router]
+    [router, setContext]
+  );
+
+  /**
+   * Handle form prefill commands from agent
+   */
+  const handleFormPrefill = useCallback(
+    (message: FormPrefillMessage) => {
+      try {
+        const { formId, values, merge } = message.payload;
+        setFormState(formId, values, merge);
+        console.log(`[AgentCommands] ✓ Prefilled form: ${formId}`, values);
+      } catch (error) {
+        console.error("[AgentCommands] Error handling form prefill:", error);
+      }
+    },
+    [setFormState]
   );
 
   // Register handlers
   useEffect(() => {
-    const unsubUICommand = onMessage(MessageTopic.UI_COMMAND, handleUICommand);
-    const unsubNavigation = onMessage(MessageTopic.NAVIGATION, handleNavigation);
+    const unsubUIAction = registerHandler(MessageTopic.UI_ACTION, handleUIAction);
+    const unsubNavigation = registerHandler(MessageTopic.NAVIGATION, handleNavigation);
+    const unsubFormPrefill = registerHandler(MessageTopic.FORM_PREFILL, handleFormPrefill);
 
     return () => {
-      unsubUICommand();
+      unsubUIAction();
       unsubNavigation();
+      unsubFormPrefill();
     };
-  }, [onMessage, handleUICommand, handleNavigation]);
+  }, [registerHandler, handleUIAction, handleNavigation, handleFormPrefill]);
 }

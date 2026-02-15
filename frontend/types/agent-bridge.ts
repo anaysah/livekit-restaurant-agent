@@ -21,7 +21,7 @@ export enum MessageTopic {
   PAGE_EVENT = "ui:event",
 
   // Agent → UI topics
-  UI_COMMAND = "agent:command",
+  UI_ACTION = "agent:ui_action",
   FORM_PREFILL = "agent:form",
   NAVIGATION = "agent:navigation",
   TASK_TRIGGER = "agent:task",
@@ -95,13 +95,13 @@ export type ToAgentMessage =
 // Agent → UI Messages
 // ============================================================================
 
-export type UICommandType = "navigate" | "show" | "hide" | "scroll" | "focus" | "submit" | string;
+export type UIActionType = "navigate" | "show" | "hide" | "scroll" | "focus" | "submit" | string;
 
-export interface UICommandMessage extends BaseMessage {
-  topic: MessageTopic.UI_COMMAND;
+export interface UIActionMessage extends BaseMessage {
+  topic: MessageTopic.UI_ACTION;
   direction: MessageDirection.TO_UI;
   payload: {
-    command: UICommandType;
+    action: UIActionType;
     target?: string;
     data?: Record<string, any>;
   };
@@ -138,7 +138,7 @@ export interface TaskTriggerMessage extends BaseMessage {
 }
 
 export type ToUIMessage =
-  | UICommandMessage
+  | UIActionMessage
   | FormPrefillMessage
   | NavigationMessage
   | TaskTriggerMessage;
@@ -158,27 +158,10 @@ export type MessageHandler<T extends AgentBridgeMessage = AgentBridgeMessage> = 
 ) => void | Promise<void>;
 
 export interface MessageHandlerRegistry {
-  [MessageTopic.UI_COMMAND]: MessageHandler<UICommandMessage>[];
+  [MessageTopic.UI_ACTION]: MessageHandler<UIActionMessage>[];
   [MessageTopic.FORM_PREFILL]: MessageHandler<FormPrefillMessage>[];
   [MessageTopic.NAVIGATION]: MessageHandler<NavigationMessage>[];
   [MessageTopic.TASK_TRIGGER]: MessageHandler<TaskTriggerMessage>[];
-}
-
-// ============================================================================
-// Action Registry Types
-// ============================================================================
-
-export interface ActionDefinition {
-  id: string;
-  name: string;
-  description?: string;
-  context?: AppContext[]; // Which contexts this action is valid in
-  params?: Record<string, any>;
-  handler: (params?: any) => void | Promise<void>;
-}
-
-export interface ActionRegistry {
-  [actionId: string]: ActionDefinition;
 }
 
 // ============================================================================

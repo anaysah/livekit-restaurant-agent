@@ -11,13 +11,7 @@ import {
   ToUIMessage,
   MessageTopic,
   MessageDirection,
-  MessageHandlerRegistry,
-  UICommandMessage,
-  FormPrefillMessage,
-  NavigationMessage,
-  TaskTriggerMessage,
 } from "@/types/agent-bridge";
-import { useAppStore } from "@/lib/store/app-store";
 
 /**
  * Main hook for bidirectional communication with the agent
@@ -26,8 +20,6 @@ import { useAppStore } from "@/lib/store/app-store";
 export function useAgentBridge() {
   const room = useRoomContext();
   const handlersRef = useRef<Record<string, Array<(message: any) => void | Promise<void>>>>({});
-
-  const { setFormState, updateAgentAwareness, setContext } = useAppStore();
 
   /**
    * Generate unique message ID
@@ -70,7 +62,7 @@ export function useAgentBridge() {
   /**
    * Register a handler for messages from agent
    */
-  const onMessage = useCallback(
+  const registerHandler = useCallback(
     <T extends ToUIMessage>(
       topic: MessageTopic,
       handler: (message: T) => void | Promise<void>
@@ -143,36 +135,8 @@ export function useAgentBridge() {
               console.error("[AgentBridge] Handler error:", error);
             }
           });
-        }
-
-        // Built-in handlers for common operations
-        switch (toUIMessage.topic) {
-          case MessageTopic.FORM_PREFILL: {
-            const msg = toUIMessage as FormPrefillMessage;
-            setFormState(msg.payload.formId, msg.payload.values, msg.payload.merge);
-            console.log(`[AgentBridge] Auto-prefilled form: ${msg.payload.formId}`);
-            break;
-          }
-
-          case MessageTopic.NAVIGATION: {
-            const msg = toUIMessage as NavigationMessage;
-            setContext(msg.payload.to, msg.payload.metadata);
-            console.log(`[AgentBridge] Auto-navigated to: ${msg.payload.to}`);
-            break;
-          }
-
-          case MessageTopic.UI_COMMAND: {
-            const msg = toUIMessage as UICommandMessage;
-            console.log(`[AgentBridge] UI Command: ${msg.payload.command}`, msg.payload);
-            // Handlers can be registered for specific commands
-            break;
-          }
-
-          case MessageTopic.TASK_TRIGGER: {
-            const msg = toUIMessage as TaskTriggerMessage;
-            console.log(`[AgentBridge] Task triggered: ${msg.payload.taskId}`, msg.payload);
-            break;
-          }
+        } else {
+          console.warn(`[AgentBridge] No handlers registered for topic: ${toUIMessage.topic}`);
         }
       } catch (error) {
         console.error("[AgentBridge] Error processing message:", error);
@@ -184,11 +148,11 @@ export function useAgentBridge() {
     return () => {
       room.off("dataReceived", handleDataReceived);
     };
-  }, [room, setFormState, setContext]);
+  }, [room]);
 
   return {
     sendToAgent,
-    onMessage,
+    registerHandler,
     isConnected: !!room,
   };
 }

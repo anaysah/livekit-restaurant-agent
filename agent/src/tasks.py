@@ -1,4 +1,4 @@
-from livekit.agents import AgentTask, function_tool
+from livekit.agents import AgentTask, function_tool, get_job_context
 from typing import Annotated
 from dataclasses import dataclass
 from src.dataclass import UserData
@@ -7,6 +7,9 @@ from datetime import datetime as dt
 from pydantic import Field
 from src.logger_config import agent_flow  # Centralized logging
 import re
+import json
+import time
+import random
 
         
 class CollectReservationInfo(AgentTask[UserData]):
@@ -39,7 +42,31 @@ class CollectReservationInfo(AgentTask[UserData]):
         """Collect and validate user's name."""
         agent_flow.info(f"📌 Collecting name: {name}")
         self.userdata["customer_name"] = name
-        # return self._check_data_collection_complete("Name collected successfully.")
+        
+        # Send form prefill to frontend
+        message = {
+            "id": f"msg_{int(time.time() * 1000)}_{random.randint(1000, 9999)}",
+            "timestamp": int(time.time() * 1000),
+            "topic": "agent:form",
+            "direction": "to_ui",
+            "payload": {
+                "formId": "booking-form",
+                "values": {
+                    "name": name
+                },
+                "merge": True
+            }
+        }
+        
+        data = json.dumps(message).encode("utf-8")
+        job_ctx = get_job_context()
+        await job_ctx.room.local_participant.publish_data(
+            payload=data,
+            topic="agent-bridge",
+            destination_identities=[]
+        )
+        agent_flow.info(f"✅ Sent name to form: {name}")
+        
         return "Name collected successfully. Continue collecting remaining information."
         
     @function_tool
