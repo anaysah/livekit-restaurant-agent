@@ -53,7 +53,7 @@ agent_flow_handler.setFormatter(agent_flow_formatter)
 agent_flow = logging.getLogger("agent_flow")
 agent_flow.setLevel(logging.INFO)
 agent_flow.addHandler(agent_flow_handler)
-agent_flow.propagate = False  # Root logger mein mat jao
+# agent_flow.propagate = False  # Root logger mein mat jao
 
 
 # D. OPTIONAL: Conversation logger (agar chahiye toh uncomment karo)

@@ -17,6 +17,7 @@ class UserData:
     usage_collector: Optional[metrics.UsageCollector] = None
     agents: dict[str, Agent] = field(default_factory=dict)
     prev_agent: Optional[Agent] = None
+    job_ctx: Optional[any] = None  # Store JobContext for sending messages
 
     def __getitem__(self, key):
         return getattr(self, key)

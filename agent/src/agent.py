@@ -33,12 +33,38 @@ from livekit.plugins import openai
 from src.variables import COMMON_RULES, GREETER_INSTRUCTIONS, RESERVATION_INSTRUCTIONS
 
 from src.logger_config import agent_flow  # Centralized logging
+import json
+import time
+import random
 
 load_dotenv(".env.local")
 
 
 
 RunContext_T = RunContext[UserData]
+
+# Helper function to send messages to UI
+async def send_to_ui(ctx: JobContext, topic: str, payload: dict):
+    """Send a message to the frontend via data channel"""
+    message = {
+        "id": f"msg_{int(time.time() * 1000)}_{random.randint(1000, 9999)}",
+        "timestamp": int(time.time() * 1000),
+        "topic": topic,
+        "direction": "to_ui",
+        "payload": payload
+    }
+    
+    try:
+        # Encode and send via data channel
+        data = json.dumps(message).encode("utf-8")
+        await ctx.room.local_participant.publish_data(
+            payload=data,
+            topic="agent-bridge",
+            destination_identities=[]  # Empty list for broadcast
+        )
+        agent_flow.info(f"📤 Sent to UI: {topic} - {payload}")
+    except Exception as e:
+        agent_flow.error(f"❌ Failed to send message to UI {topic} {payload} and error: {e}")
 
 # Models configuration
 
@@ -69,8 +95,8 @@ LLM_MODELS = [
 IS_TTS_ENABLED = os.getenv("IS_TTS_ENABLED", "true").lower() in ["true", "1", "yes"]
 IS_STT_ENABLED = os.getenv("IS_STT_ENABLED", "true").lower() in ["true", "1", "yes"]
 
-print(f"🔊 TTS Enabled: {IS_TTS_ENABLED}")
-print(f"🎤 STT Enabled: {IS_STT_ENABLED}")
+agent_flow.info(f"🔊 TTS Enabled: {IS_TTS_ENABLED}")
+agent_flow.info(f"🎤 STT Enabled: {IS_STT_ENABLED}")
 
 models = {
     # "llm": groq.LLM(model="llama-3.3-70b-versatile"),
@@ -161,7 +187,7 @@ class BaseAgent(Agent):
         """Called when leaving this agent"""
         agent_name = self.__class__.__name__
         
-        print(f"{agent_name} - 💠 Token Usage Summary: {self._token_usage()}")
+        agent_flow.info(f"{agent_name} - 💠 Token Usage Summary: {self._token_usage()}")
 
 class Greeter(BaseAgent):    
     def __init__(self) -> None:
@@ -181,6 +207,22 @@ class Greeter(BaseAgent):
         request: Annotated[str, Field(description="User request confirmation")] = "reservation",
     ) -> tuple[Agent, str]:
         """Called when user wants to make a reservation."""
+        # Send navigation message to frontend
+        userdata = context.userdata
+        if userdata.job_ctx:
+            await send_to_ui(
+                userdata.job_ctx,
+                "agent:navigation",
+                {
+                    "to": "booking",
+                    "route": "/booking",
+                    "metadata": {
+                        "reason": "user_requested_reservation",
+                        "timestamp": int(time.time() * 1000)
+                    }
+                }
+            )
+            agent_flow.info("🔄 Navigating user to booking page")
         return await self._transfer_to_agent("reservation", context)
 
 class Reservation(BaseAgent):
@@ -199,9 +241,9 @@ class Reservation(BaseAgent):
             await collect_info_task
             user_data: UserData = collect_info_task.userdata
             
-            print("🤖 Collected User Data:", user_data)
+            agent_flow.info(f"🤖 Collected User Data: {user_data}")
             
-            print("💠 Current Token Usage:", self._token_usage())
+            agent_flow.info(f"💠 Current Token Usage: {self._token_usage()}")
             
             await self.session.generate_reply(
                 instructions=f"Thank you! I've collected your information: Name - {user_data['customer_name']}, Phone - {user_data['customer_phone']}."
@@ -238,6 +280,7 @@ async def my_agent(ctx: JobContext):
     }
     
     userdata = UserData()
+    userdata.job_ctx = ctx  # Store context for sending messages
     userdata.agents.update({
         "greeter": Greeter(),
         "reservation": Reservation(),
@@ -299,6 +342,23 @@ async def my_agent(ctx: JobContext):
 
     # Join the room and connect to the user
     await ctx.connect()
+    
+    # Wait for participants to join before testing
+    agent_flow.info("⏳ Waiting for participants to join...")
+    await asyncio.sleep(2)  # Give time for frontend to connect
+    
+    # Test data channel connection
+    agent_flow.info("🧪 Testing data channel connection...")
+    agent_flow.info(f"📊 Room participants: {list(ctx.room.remote_participants.keys())}")
+    
+    try:
+        await send_to_ui(ctx, "agent:command", {
+            "command": "test",
+            "data": {"message": "Data channel is working!"}
+        })
+        agent_flow.info("✅ Test message sent successfully")
+    except Exception as e:
+        agent_flow.error(f"❌ Test message failed: {e}")
 
 
 if __name__ == "__main__":

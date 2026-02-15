@@ -7,6 +7,7 @@ import { useParticipants } from "@livekit/components-react";
 import AgentUIHeader from "@/components/agents-ui/agent-chat-header";
 import { AgentMessagesContainer } from "@/components/agents-ui/agent-messages-container";
 import AgentControlBar from "@/components/agents-ui/agent-control-bar";
+import { DebugDataChannel } from "@/components/DebugDataChannel";
 
 export default function AgentChatUI() {
   const session = useSessionContext();
@@ -22,6 +23,9 @@ export default function AgentChatUI() {
 
   return (
     <div className="h-full flex flex-col bg-card">
+      {/* Debug Component - Remove after testing */}
+      <DebugDataChannel />
+      
       <AgentUIHeader isConnected={isConnected} agentJoined={agentJoined} state={state} participants={participants} start={start} end={end} />
 
       <AgentMessagesContainer messages={messages} isConnected={isConnected} agentJoined={agentJoined} />
