@@ -20,3 +20,26 @@ Task ke andar agent khud se nahi bol sakta - aapko explicitly session.say() ya s
 
 chat_ctx mei agent ke instructions nahi hote hai
 chat_ctx.copy mei exclude_instructions	Filters out messages where role is system or developer.
+
+
+qwen model cerebras mei deprecated ho chuka hai, aur usmei models bhi kam hai abhi shayd vo vpas layenge unke docs mei likha hua hai
+
+(OpenRouter example)
+llm = openai.LLM(
+    model="z-ai/glm-4.5-air:free",
+    base_url="https://openrouter.ai/api/v1",
+    api_key=os.getenv("OPENROUTER_API_KEY"),
+    temperature=0.0,
+    parallel_tool_calls=False,
+)
+with openrouter plugin
+llm = openai.LLM.with_openrouter(
+    model="z-ai/glm-4.5-air:free",
+    temperature=0.0,
+)
+
+modal.com free glm 5 api until april
+llm = openai.LLM(
+    model="zai-org/GLM-5-FP8",
+    base_url="https://api.us-west-2.modal.direct/v1",
+

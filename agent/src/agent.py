@@ -21,7 +21,7 @@ from livekit.agents import (
 )
 from livekit.agents.voice import MetricsCollectedEvent
 from livekit.agents import metrics
-from livekit.plugins import deepgram, groq, noise_cancellation, silero
+from livekit.plugins import deepgram, groq, noise_cancellation, silero, mistralai
 from livekit.plugins.turn_detector.multilingual import MultilingualModel
 from openai.types.beta.realtime import session
 from pydantic import Field
@@ -37,6 +37,19 @@ import json
 import time
 import random
 
+from livekit.agents.metrics import LLMMetrics
+import http.client as http_client
+import logging
+
+# HTTP level debug
+# http_client.HTTPConnection.debuglevel = 1
+
+# Logging config
+# logging.basicConfig(level=logging.DEBUG)
+logging.getLogger("httpx").setLevel(logging.DEBUG)
+# logging.getLogger("httpcore").setLevel(logging.DEBUG)
+# http_client.HTTPConnection.debuglevel = 1
+
 load_dotenv(".env.local")
 
 
@@ -44,13 +57,12 @@ load_dotenv(".env.local")
 RunContext_T = RunContext[UserData]
 
 # Helper function to send messages to UI
-async def send_to_ui(ctx: JobContext, topic: str, payload: dict):
+async def send_to_ui(ctx: JobContext, type: str, payload: dict):
     """Send a message to the frontend via data channel"""
     message = {
         "id": f"msg_{int(time.time() * 1000)}_{random.randint(1000, 9999)}",
         "timestamp": int(time.time() * 1000),
-        "topic": topic,
-        "direction": "to_ui",
+        "type": type,
         "payload": payload
     }
     
@@ -59,12 +71,12 @@ async def send_to_ui(ctx: JobContext, topic: str, payload: dict):
         data = json.dumps(message).encode("utf-8")
         await ctx.room.local_participant.publish_data(
             payload=data,
-            topic="agent-bridge",
+            topic="agent-to-ui",
             destination_identities=[]  # Empty list for broadcast
         )
-        agent_flow.info(f"📤 Sent to UI: {topic} - {payload}")
+        agent_flow.info(f"📤 Sent to UI: {type} - {payload}")
     except Exception as e:
-        agent_flow.error(f"❌ Failed to send message to UI {topic} {payload} and error: {e}")
+        agent_flow.error(f"❌ Failed to send message to UI {type} {payload} and error: {e}")
 
 # Models configuration
 
@@ -103,11 +115,23 @@ models = {
     # "llm": google.LLM(
     #     model="gemma-3-27b",
     # ),
-    "llm": openai.LLM.with_cerebras(
-        model="qwen-3-32b",
-        temperature=0.0,
-        parallel_tool_calls=False,
-        tool_choice="auto",
+    # cerebras is no logger giving qwen3 (Deprecated)
+    # "llm": openai.LLM.with_cerebras(
+    #     model="qwen-3-32b",
+    #     temperature=0.0,
+    #     parallel_tool_calls=False,
+    #     tool_choice="auto",
+    # ),
+    # "llm": openai.LLM(
+    #     model="mistral-large-latest",
+    #     base_url="https://api.mistral.ai/v1",
+    #     api_key=os.getenv("MISTRAL_API_KEY"),
+    #     tool_choice="auto",
+    #     parallel_tool_calls=False,
+    #     temperature=0.0,
+    # ),
+    "llm":mistralai.LLM(
+        model="mistral-large-latest"
     ),
     "tts": lambda model: deepgram.TTS(model=VOICE_MODELS[model]) if IS_TTS_ENABLED else None,
     "stt": deepgram.STT() if IS_STT_ENABLED else None,  # Using STT instead of STTv2
@@ -195,7 +219,7 @@ class Greeter(BaseAgent):
             instructions=(
                 f"""{COMMON_RULES} \n {GREETER_INSTRUCTIONS}"""
             ),
-            llm=models["llm"],
+            # llm=models["llm"],
             tts=models["tts"]("thalia"),
         )
 
@@ -212,14 +236,9 @@ class Greeter(BaseAgent):
         if userdata.job_ctx:
             await send_to_ui(
                 userdata.job_ctx,
-                "agent:navigation",
+                "NAVIGATE_PAGE",
                 {
-                    "to": "booking",
-                    "route": "/booking",
-                    "metadata": {
-                        "reason": "user_requested_reservation",
-                        "timestamp": int(time.time() * 1000)
-                    }
+                    "page": "booking",
                 }
             )
             agent_flow.info("🔄 Navigating user to booking page")
@@ -230,7 +249,7 @@ class Reservation(BaseAgent):
         super().__init__(
             instructions=f"""{COMMON_RULES} \n {RESERVATION_INSTRUCTIONS.format(current_datetime=datetime.now().strftime("%Y-%m-%d %H:%M"))}""",
             tts=models["tts"]("odysseus"),
-            llm=models["llm"],
+            # llm=models["llm"],
         )
         
     async def on_enter(self) -> None:
@@ -352,8 +371,8 @@ async def my_agent(ctx: JobContext):
     agent_flow.info(f"📊 Room participants: {list(ctx.room.remote_participants.keys())}")
     
     try:
-        await send_to_ui(ctx, "agent:ui_action", {
-            "action": "test",
+        await send_to_ui(ctx, "test", {
+            "type": "test",
             "data": {"message": "Data channel is working!"}
         })
         agent_flow.info("✅ Test message sent successfully")

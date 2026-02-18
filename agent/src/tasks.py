@@ -35,11 +35,11 @@ class CollectReservationInfo(AgentTask[UserData]):
         # )
         
     @function_tool
-    async def collect_name(
+    async def save_customer_name(
         self,
         name: Annotated[str, Field(description="User's full name")],
     ) -> str:
-        """Collect and validate user's name."""
+        """Save and validate user's name in Database."""
         agent_flow.info(f"📌 Collecting name: {name}")
         self.userdata["customer_name"] = name
         
@@ -47,14 +47,12 @@ class CollectReservationInfo(AgentTask[UserData]):
         message = {
             "id": f"msg_{int(time.time() * 1000)}_{random.randint(1000, 9999)}",
             "timestamp": int(time.time() * 1000),
-            "topic": "agent:form",
-            "direction": "to_ui",
+            "type": "FORM_PREFILL",
             "payload": {
                 "formId": "booking-form",
                 "values": {
                     "name": name
-                },
-                "merge": True
+                }
             }
         }
         
@@ -62,7 +60,7 @@ class CollectReservationInfo(AgentTask[UserData]):
         job_ctx = get_job_context()
         await job_ctx.room.local_participant.publish_data(
             payload=data,
-            topic="agent-bridge",
+            topic="agent-to-ui",
             destination_identities=[]
         )
         agent_flow.info(f"✅ Sent name to form: {name}")
@@ -70,11 +68,11 @@ class CollectReservationInfo(AgentTask[UserData]):
         return "Name collected successfully. Continue collecting remaining information."
         
     @function_tool
-    async def collect_phone(
+    async def save_customer_phone(
         self,
         phone: Annotated[str, Field(description="User's phone number")],
     ) -> str:
-        """Collect and validate user's phone number."""
+        """Save and validate user's phone number in Database."""
         agent_flow.info(f"📌 Collecting phone: {phone}")
         
         clean_phone = re.sub(r'\D', '', phone)  # Remove non-digit characters
@@ -89,11 +87,11 @@ class CollectReservationInfo(AgentTask[UserData]):
         return "Phone number collected successfully. Continue collecting remaining information."
     
     @function_tool
-    async def collect_guests(
+    async def save_guests(
         self,
         no_of_guests: Annotated[int, Field(description="Number of guests")],
     ) -> str:
-        """Collect and validate number of guests."""
+        """Save and validate number of guests in Database."""
         agent_flow.info(f"📌 Collecting number of guests: {no_of_guests}")
         
         if no_of_guests <= 0 or no_of_guests > MAX_RESERVATION_GUESTS:
@@ -105,12 +103,12 @@ class CollectReservationInfo(AgentTask[UserData]):
         return "Number of guests collected successfully. Continue collecting remaining information."
     
     @function_tool
-    async def collect_datetime(
+    async def save_reservation_datetime(
         self,
         reservation_date: Annotated[str, Field(description="Reservation date (YYYY-MM-DD)")],
         reservation_time: Annotated[str, Field(description="Reservation time (HH:MM)")],
     ) -> str:
-        """Collect and validate reservation date and time."""
+        """Save and validate reservation date and time in Database."""
         agent_flow.info(f"📌 Collecting reservation date: {reservation_date}, time: {reservation_time}")
         
         # Validate date format
@@ -138,11 +136,11 @@ class CollectReservationInfo(AgentTask[UserData]):
         return "Reservation date and time collected successfully. Continue collecting remaining information."
     
     @function_tool
-    async def collect_cuisine_preference(
+    async def save_cuisine_preference(
         self,
         cuisine_preference: Annotated[str, Field(description="Cuisine preference")],
     ) -> str:
-        """Collect user's cuisine preference."""
+        """Save user's cuisine preference in Database."""
         agent_flow.info(f"📌 Collecting cuisine preference: {cuisine_preference}")
         
         # Validate cuisine preference
@@ -155,11 +153,11 @@ class CollectReservationInfo(AgentTask[UserData]):
         return "Cuisine preference collected successfully. Continue collecting remaining information."
     
     @function_tool
-    async def collect_special_requests(
+    async def save_special_requests(
         self,
         special_requests: Annotated[str, Field(description="Any special requests")],
     ) -> str:
-        """Collect user's special requests."""
+        """Save user's special requests in Database."""
         agent_flow.info(f"📌 Collecting special requests: {special_requests}")
         
         self.userdata["special_requests"] = special_requests
@@ -167,8 +165,11 @@ class CollectReservationInfo(AgentTask[UserData]):
         return "Special requests collected successfully. Continue collecting remaining information."
         
     @function_tool
-    async def check_data_collection_complete(self) -> str:
-        """Check if all required data has been collected."""
+    async def check_data_collection_complete(
+        self,
+        dummy_attr: Annotated[str, Field(description="Dummy attribute to trigger completion check")]=None,
+    ) -> str:
+        """Check if all required data saved in Database"""
         required_fields = [
             "customer_name",
             "customer_phone",
@@ -181,15 +182,18 @@ class CollectReservationInfo(AgentTask[UserData]):
         
         not_collected_fields = [field for field in required_fields if getattr(self.userdata, field) is None]
         if not_collected_fields:
-            return f"Remaining information to collect: {', '.join(not_collected_fields)}."
+            return f"Remaining information to save: {', '.join(not_collected_fields)}."
         
         # self.session.generate_reply(
         #     instructions="All required information has been collected. You can now complete the task."
         # )
-        return "Tell them all data completed. if they dont want to change anything then complete the task."
+        return "Tell them all data completed. if they dont want to change anything then run complete_task function to complete the task."
             
     @function_tool
-    async def complete_task(self) -> None:
+    async def complete_task(
+        self,
+        dummy_attr: Annotated[str, Field(description="Dummy attribute to trigger task completion")]=None,
+    ) -> None:
         """Call at the end to mark task as complete. necessary to call this"""
         agent_flow.info("📌 Completing CollectInfoTask")
         self.complete(self.userdata)
