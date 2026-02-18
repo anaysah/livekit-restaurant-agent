@@ -2,6 +2,7 @@
 
 "use client";
 
+import { AGENT_UI_TOPIC_NAME } from "@/lib/constants";
 import { useRoomContext } from "@livekit/components-react";
 import { useEffect, useState } from "react";
 
@@ -22,7 +23,7 @@ export function DebugDataChannel() {
     const handleDataReceived = (payload: Uint8Array, participant: any, kind: any, topic?: string) => {
       console.log("🟢 [DEBUG] Data received - Topic:", topic, "From:", participant?.identity);
       
-      if (topic === "agent-bridge") {
+      if (topic === AGENT_UI_TOPIC_NAME) {
         const decoder = new TextDecoder();
         const messageStr = decoder.decode(payload);
         console.log("🟢 [DEBUG] Agent-bridge message:", messageStr);

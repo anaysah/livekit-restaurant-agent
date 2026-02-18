@@ -1,121 +1,67 @@
 // lib/store/app-store.ts
-
 import { create } from "zustand";
-import { devtools } from "zustand/middleware";
-import type { AppContext, AppState } from "@/types/agent-bridge";
+import { devtools } from "zustand/middleware"; // 1. Import devtools
+import type { AppState, PAGE } from "@/types/agent-bridge";
+import { PAGES } from "@/lib/constants";
+import { AGENT_ACTIONS } from "@/lib/constants";
 
-interface AppStore extends AppState {
-  // Actions
-  setContext: (context: AppContext, metadata?: Record<string, any>) => void;
-  updateFormState: (formId: string, field: string, value: any) => void;
-  setFormState: (formId: string, values: Record<string, any>, merge?: boolean) => void;
-  getFormState: (formId: string) => Record<string, any>;
-  clearFormState: (formId: string) => void;
-  updateAgentAwareness: (context: AppContext) => void;
-  reset: () => void;
+
+// 1. Define Signal Types (Event replacements)
+export interface AgentSignal {
+  type: string ; 
+  payload: any;
+  timestamp: number; 
 }
 
-const initialState: AppState = {
-  currentContext: "home",
-  previousContext: null,
-  formStates: {},
-  navigationHistory: ["home"],
-  agentAwareness: {
-    lastSyncedContext: null,
-    lastSyncedAt: null,
-  },
-};
+interface AppStore extends AppState {
+  currentPage: PAGE;
+  forms: Record<string, Record<string, any>>;
+  meta: Record<string, any>;
+  signal: AgentSignal | null; // New: The "Event" carrier
 
+  setPage: (page: PAGE) => void;
+  updateForm: (formId: string, data: Record<string, any>) => void;
+  applyAgentUpdate: (update: Partial<AppState>) => void;
+  getStateSnapshot: () => AppState;
+  dispatchSignal: (type: AgentSignal["type"], payload: any) => void;
+}
+
+// 2. Wrap create function with devtools
 export const useAppStore = create<AppStore>()(
   devtools(
     (set, get) => ({
-      ...initialState,
+      // Initial State
+      currentPage: "",
+      forms: {},
+      meta: {},
+      signal: null, 
 
-      /**
-       * Change the current context (e.g., from home to booking)
-       */
-      setContext: (context: AppContext, metadata?: Record<string, any>) => {
-        const currentContext = get().currentContext;
-        set((state) => ({
-          previousContext: currentContext,
-          currentContext: context,
-          navigationHistory: [...state.navigationHistory, context],
-        }));
-      },
+      // UI Actions
+      setPage: (page) => set({ currentPage: page }, false, "setPage"), // Optional: Action name
+      
+      updateForm: (formId, data) => set((state) => ({
+        forms: {
+          ...state.forms,
+          [formId]: { ...state.forms[formId], ...data }
+        }
+      }), false, "updateForm"), // Optional: Action name
 
-      /**
-       * Update a single field in a form
-       */
-      updateFormState: (formId: string, field: string, value: any) => {
-        set((state) => ({
-          formStates: {
-            ...state.formStates,
-            [formId]: {
-              ...(state.formStates[formId] || {}),
-              [field]: value,
-            },
-          },
-        }));
-      },
+      // Agent Action (Bulk update)
+      applyAgentUpdate: (update) => set((state) => ({
+        ...state,
+        ...update,
+        forms: { ...state.forms, ...update.forms } 
+      }), false, "applyAgentUpdate"),
 
-      /**
-       * Set entire form state (used by agent for prefilling)
-       */
-      setFormState: (formId: string, values: Record<string, any>, merge = true) => {
-        set((state) => ({
-          formStates: {
-            ...state.formStates,
-            [formId]: merge
-              ? { ...(state.formStates[formId] || {}), ...values }
-              : values,
-          },
-        }));
-      },
+      dispatchSignal: (type, payload) => set({ 
+        signal: { type, payload, timestamp: Date.now() } 
+      }, false, "dispatchSignal"),
 
-      /**
-       * Get form state by ID
-       */
-      getFormState: (formId: string) => {
-        return get().formStates[formId] || {};
-      },
-
-      /**
-       * Clear a form's state
-       */
-      clearFormState: (formId: string) => {
-        set((state) => {
-          const { [formId]: _, ...rest } = state.formStates;
-          return { formStates: rest };
-        });
-      },
-
-      /**
-       * Update what the agent knows about the current state
-       */
-      updateAgentAwareness: (context: AppContext) => {
-        set({
-          agentAwareness: {
-            lastSyncedContext: context,
-            lastSyncedAt: Date.now(),
-          },
-        });
-      },
-
-      /**
-       * Reset the entire store to initial state
-       */
-      reset: () => set(initialState),
+      getStateSnapshot: () => get(),
     }),
-    { name: "AppStore" }
+    { name: "AppStore" } // 3. Isse Redux DevTools mein yeh naam dikhega
   )
 );
 
-/**
- * Selectors for optimized component re-renders
- */
-export const selectCurrentContext = (state: AppStore) => state.currentContext;
-export const selectPreviousContext = (state: AppStore) => state.previousContext;
-export const selectFormState = (formId: string) => (state: AppStore) =>
-  state.formStates[formId] || {};
-export const selectNavigationHistory = (state: AppStore) => state.navigationHistory;
-export const selectAgentAwareness = (state: AppStore) => state.agentAwareness;
+// Selectors
+export const selectFormData = (formId: string) => (state: AppStore) => state.forms[formId] || {};

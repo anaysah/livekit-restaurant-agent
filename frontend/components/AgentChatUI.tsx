@@ -8,6 +8,8 @@ import AgentUIHeader from "@/components/agents-ui/agent-chat-header";
 import { AgentMessagesContainer } from "@/components/agents-ui/agent-messages-container";
 import AgentControlBar from "@/components/agents-ui/agent-control-bar";
 import { DebugDataChannel } from "@/components/DebugDataChannel";
+import { setLogLevel } from "@livekit/components-core";
+import { useEffect } from "react";
 
 export default function AgentChatUI() {
   const session = useSessionContext();
@@ -20,6 +22,13 @@ export default function AgentChatUI() {
   // Check if agent has joined
   const agentParticipant = participants.find((p) => p.isAgent);
   const agentJoined = !!agentParticipant;
+
+  useEffect(() => {
+    setLogLevel('silent');
+    return () => {
+      setLogLevel('info');
+    }
+  }, []);
 
   return (
     <div className="h-full flex flex-col bg-card">

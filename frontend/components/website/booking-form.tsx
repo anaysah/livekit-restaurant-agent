@@ -2,44 +2,23 @@
 
 "use client";
 
-import { useEffect } from "react";
-import { useFormSync } from "@/hooks/useFormSync";
 import { useAppStore } from "@/lib/store/app-store";
-
-const FORM_ID = "booking-form";
+import { useRegisterElement } from "@/hooks/useRegisterElement";
+import { FORMS } from "@/lib/constants";
 
 export default function BookingForm() {
-  const { formState, updateField, sendAction } = useFormSync(FORM_ID);
-  const setContext = useAppStore((state) => state.setContext);
+  // 1. Register Container for Scrolling
+  const containerRef = useRegisterElement(FORMS.BOOKING.id);
 
-  // Set context when component mounts
-  useEffect(() => {
-    setContext("booking");
-    
-    // Cleanup: you could reset context or not depending on your needs
-    return () => {
-      // Optional: setContext("home");
-    };
-  }, [setContext]);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Send action to agent
-    sendAction("submit-booking", {
-      formData: formState,
-      timestamp: Date.now(),
-    });
-
-    console.log("Booking submitted:", formState);
-    alert("Booking request sent! Check console for details.");
-  };
+  // 2. Connect to Store
+  const formData = useAppStore((s) => s.forms[FORMS.BOOKING.id] || {});
+  const updateForm = useAppStore((s) => s.updateForm);
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
+    <div ref={containerRef} className="max-w-2xl mx-auto p-6">
       <h2 className="text-2xl font-bold mb-6">Make a Reservation</h2>
       
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form className="space-y-4">
         {/* Name */}
         <div>
           <label htmlFor="name" className="block text-sm font-medium mb-1">
@@ -48,8 +27,8 @@ export default function BookingForm() {
           <input
             id="name"
             type="text"
-            value={formState.name || ""}
-            onChange={(e) => updateField("name", e.target.value)}
+            value={formData.name || ""}
+            onChange={(e) => updateForm(FORMS.BOOKING.id, { name: e.target.value })}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="Your name"
           />
@@ -63,8 +42,8 @@ export default function BookingForm() {
           <input
             id="email"
             type="email"
-            value={formState.email || ""}
-            onChange={(e) => updateField("email", e.target.value)}
+            value={formData.email || ""}
+            onChange={(e) => updateForm(FORMS.BOOKING.id, { email: e.target.value })}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="your@email.com"
           />
@@ -78,8 +57,8 @@ export default function BookingForm() {
           <input
             id="phone"
             type="tel"
-            value={formState.phone || ""}
-            onChange={(e) => updateField("phone", e.target.value)}
+            value={formData.phone || ""}
+            onChange={(e) => updateForm(FORMS.BOOKING.id, { phone: e.target.value })}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="123-456-7890"
           />
@@ -93,8 +72,8 @@ export default function BookingForm() {
           <input
             id="date"
             type="date"
-            value={formState.date || ""}
-            onChange={(e) => updateField("date", e.target.value)}
+            value={formData.date || ""}
+            onChange={(e) => updateForm(FORMS.BOOKING.id, { date: e.target.value })}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
@@ -107,8 +86,8 @@ export default function BookingForm() {
           <input
             id="time"
             type="time"
-            value={formState.time || ""}
-            onChange={(e) => updateField("time", e.target.value)}
+            value={formData.time || ""}
+            onChange={(e) => updateForm(FORMS.BOOKING.id, { time: e.target.value })}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
@@ -120,8 +99,8 @@ export default function BookingForm() {
           </label>
           <select
             id="guests"
-            value={formState.guests || "2"}
-            onChange={(e) => updateField("guests", e.target.value)}
+            value={formData.guests || "2"}
+            onChange={(e) => updateForm(FORMS.BOOKING.id, { guests: e.target.value })}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="1">1 Guest</option>
@@ -140,8 +119,8 @@ export default function BookingForm() {
           </label>
           <textarea
             id="requests"
-            value={formState.requests || ""}
-            onChange={(e) => updateField("requests", e.target.value)}
+            value={formData.requests || ""}
+            onChange={(e) => updateForm(FORMS.BOOKING.id, { requests: e.target.value })}
             rows={3}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="Any dietary restrictions or special requests?"
@@ -161,7 +140,7 @@ export default function BookingForm() {
       <div className="mt-6 p-4 bg-gray-100 rounded-md">
         <p className="text-sm font-semibold mb-2">Form State (Debug):</p>
         <pre className="text-xs overflow-auto">
-          {JSON.stringify(formState, null, 2)}
+          {JSON.stringify(formData, null, 2)}
         </pre>
       </div>
     </div>

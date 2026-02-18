@@ -1,180 +1,26 @@
 // types/agent-bridge.ts
+import { AGENT_ACTIONS, AGENT_UI_ACTIONS } from "@/lib/constants";
+import { AppContext } from "next/dist/pages/_app";
 
-/**
- * Message types for bidirectional communication between UI and Agent
- */
+export type PAGE = "home" | "booking" | "ordering" | "profile" | string;
 
-// ============================================================================
-// Base Message Types
-// ============================================================================
-
-export enum MessageDirection {
-  TO_AGENT = "to_agent",
-  TO_UI = "to_ui",
-}
-
-export enum MessageTopic {
-  // UI → Agent topics
-  CONTEXT_CHANGE = "ui:context",
-  FORM_UPDATE = "ui:form",
-  USER_ACTION = "ui:action",
-  PAGE_EVENT = "ui:event",
-
-  // Agent → UI topics
-  UI_ACTION = "agent:ui_action",
-  FORM_PREFILL = "agent:form",
-  NAVIGATION = "agent:navigation",
-  TASK_TRIGGER = "agent:task",
-}
-
-export interface BaseMessage {
-  id: string;
-  timestamp: number;
-  topic: MessageTopic;
-  direction: MessageDirection;
-}
-
-// ============================================================================
-// UI → Agent Messages
-// ============================================================================
-
-/**
- * Context types in the application
- */
-export type AppContext = "home" | "booking" | "ordering" | "profile" | "support" | string;
-
-export interface ContextChangeMessage extends BaseMessage {
-  topic: MessageTopic.CONTEXT_CHANGE;
-  direction: MessageDirection.TO_AGENT;
-  payload: {
-    from: AppContext | null;
-    to: AppContext;
-    metadata?: Record<string, any>;
-  };
-}
-
-export interface FormUpdateMessage extends BaseMessage {
-  topic: MessageTopic.FORM_UPDATE;
-  direction: MessageDirection.TO_AGENT;
-  payload: {
-    context: AppContext;
-    formId: string;
-    field: string;
-    value: any;
-    allValues: Record<string, any>;
-  };
-}
-
-export interface UserActionMessage extends BaseMessage {
-  topic: MessageTopic.USER_ACTION;
-  direction: MessageDirection.TO_AGENT;
-  payload: {
-    context: AppContext;
-    action: string;
-    data?: Record<string, any>;
-  };
-}
-
-export interface PageEventMessage extends BaseMessage {
-  topic: MessageTopic.PAGE_EVENT;
-  direction: MessageDirection.TO_AGENT;
-  payload: {
-    context: AppContext;
-    event: string;
-    data?: Record<string, any>;
-  };
-}
-
-export type ToAgentMessage =
-  | ContextChangeMessage
-  | FormUpdateMessage
-  | UserActionMessage
-  | PageEventMessage;
-
-// ============================================================================
-// Agent → UI Messages
-// ============================================================================
-
-export type UIActionType = "navigate" | "show" | "hide" | "scroll" | "focus" | "submit" | string;
-
-export interface UIActionMessage extends BaseMessage {
-  topic: MessageTopic.UI_ACTION;
-  direction: MessageDirection.TO_UI;
-  payload: {
-    action: UIActionType;
-    target?: string;
-    data?: Record<string, any>;
-  };
-}
-
-export interface FormPrefillMessage extends BaseMessage {
-  topic: MessageTopic.FORM_PREFILL;
-  direction: MessageDirection.TO_UI;
-  payload: {
-    context: AppContext;
-    formId: string;
-    values: Record<string, any>;
-    merge?: boolean; // If true, merge with existing values
-  };
-}
-
-export interface NavigationMessage extends BaseMessage {
-  topic: MessageTopic.NAVIGATION;
-  direction: MessageDirection.TO_UI;
-  payload: {
-    to: AppContext;
-    route?: string;
-    metadata?: Record<string, any>;
-  };
-}
-
-export interface TaskTriggerMessage extends BaseMessage {
-  topic: MessageTopic.TASK_TRIGGER;
-  direction: MessageDirection.TO_UI;
-  payload: {
-    taskId: string;
-    params?: Record<string, any>;
-  };
-}
-
-export type ToUIMessage =
-  | UIActionMessage
-  | FormPrefillMessage
-  | NavigationMessage
-  | TaskTriggerMessage;
-
-// ============================================================================
-// Union types
-// ============================================================================
-
-export type AgentBridgeMessage = ToAgentMessage | ToUIMessage;
-
-// ============================================================================
-// Handler Types
-// ============================================================================
-
-export type MessageHandler<T extends AgentBridgeMessage = AgentBridgeMessage> = (
-  message: T
-) => void | Promise<void>;
-
-export interface MessageHandlerRegistry {
-  [MessageTopic.UI_ACTION]: MessageHandler<UIActionMessage>[];
-  [MessageTopic.FORM_PREFILL]: MessageHandler<FormPrefillMessage>[];
-  [MessageTopic.NAVIGATION]: MessageHandler<NavigationMessage>[];
-  [MessageTopic.TASK_TRIGGER]: MessageHandler<TaskTriggerMessage>[];
-}
-
-// ============================================================================
-// State Types
-// ============================================================================
-
+// The shape of our global app state
 export interface AppState {
-  currentContext: AppContext;
-  previousContext: AppContext | null;
-  formStates: Record<string, Record<string, any>>;
-  navigationHistory: AppContext[];
-  agentAwareness: {
-    lastSyncedContext: AppContext | null;
-    lastSyncedAt: number | null;
-  };
+  currentPage: PAGE;
+  forms: Record<string, Record<string, any>>;
+  meta: Record<string, any>;
+}
+
+// Messages sent FROM Agent TO UI
+export type AgentToUIMessage = 
+  | {type: typeof AGENT_ACTIONS.NAVIGATE_PAGE; payload: { page: PAGE }} // Action: Change page
+  | { type: typeof AGENT_ACTIONS.STATE_UPDATE; payload: Partial<AppState> } // Silent data update
+  | { type: typeof AGENT_ACTIONS.FORM_PREFILL; payload: { formId: string; values: Record<string, any> } } // Action: Fill form
+  | { type: typeof AGENT_ACTIONS.UI_ACTIONS; payload: { action: keyof typeof AGENT_UI_ACTIONS; target: string } } // Action: UI interaction (scroll, highlight, focus)
+  
+
+// Messages sent FROM UI TO Agent
+export interface UIToAgentMessage {
+  type: "STATE_SYNC";
+  payload: AppState;
 }
