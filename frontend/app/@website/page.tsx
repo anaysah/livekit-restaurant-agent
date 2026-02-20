@@ -11,14 +11,13 @@ import Footer from '@/components/website/footer-simple'
 
 export default function WebsiteHome() {
   return (
-    <div className="flex-1 h-screen overflow-y-auto scroll-smooth">
-      <Header />
+    <>
       <HeroSection />
       <AboutSection />
       <ServicesSection />
       <TeamSection />
       <FAQsSection />
       <Footer />
-    </div>
+    </>
   )
 }

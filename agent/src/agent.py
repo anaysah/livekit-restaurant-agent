@@ -1,11 +1,18 @@
 import asyncio
-from datetime import datetime
+import http.client as http_client
+import json
+import logging
 import os
+import random
+import time
+from dataclasses import dataclass, field
+from datetime import datetime
 from typing import Annotated, Optional
-from dataclasses import dataclass,field
 
-from av.codec import context
+import yaml
 from dotenv import load_dotenv
+from pydantic import Field
+
 from livekit import rtc
 from livekit.agents import (
     Agent,
@@ -13,33 +20,24 @@ from livekit.agents import (
     AgentSession,
     JobContext,
     JobProcess,
-    cli,
-    function_tool,
-    room_io,
     RunContext,
     ToolError,
+    cli,
+    function_tool,
+    metrics,
+    room_io,
 )
-from livekit.agents.voice import MetricsCollectedEvent
-from livekit.agents import metrics
-from livekit.plugins import deepgram, groq, noise_cancellation, silero, mistralai
-from livekit.plugins.turn_detector.multilingual import MultilingualModel
-from openai.types.beta.realtime import session
-from pydantic import Field
-from src.dataclass import UserData
-from src.tasks import CollectReservationInfo
-import yaml
-from livekit.plugins import openai
-
-from src.variables import COMMON_RULES, GREETER_INSTRUCTIONS, RESERVATION_INSTRUCTIONS
-
-from src.logger_config import agent_flow  # Centralized logging
-import json
-import time
-import random
-
 from livekit.agents.metrics import LLMMetrics
-import http.client as http_client
-import logging
+from livekit.agents.voice import MetricsCollectedEvent
+from livekit.plugins import deepgram, groq, mistralai, noise_cancellation, openai, silero
+from livekit.plugins.turn_detector.multilingual import MultilingualModel
+
+from src.dataclass import UserData
+from src.logger_config import agent_flow
+from src.tasks import CollectReservationInfo
+from src.variables import COMMON_RULES, GREETER_INSTRUCTIONS, RESERVATION_INSTRUCTIONS
+from src.fn import summarize_agent_handoff
+
 
 # HTTP level debug
 # http_client.HTTPConnection.debuglevel = 1
@@ -112,23 +110,12 @@ agent_flow.info(f"🎤 STT Enabled: {IS_STT_ENABLED}")
 
 models = {
     # "llm": groq.LLM(model="llama-3.3-70b-versatile"),
-    # "llm": google.LLM(
-    #     model="gemma-3-27b",
-    # ),
     # cerebras is no logger giving qwen3 (Deprecated)
     # "llm": openai.LLM.with_cerebras(
     #     model="qwen-3-32b",
     #     temperature=0.0,
     #     parallel_tool_calls=False,
     #     tool_choice="auto",
-    # ),
-    # "llm": openai.LLM(
-    #     model="mistral-large-latest",
-    #     base_url="https://api.mistral.ai/v1",
-    #     api_key=os.getenv("MISTRAL_API_KEY"),
-    #     tool_choice="auto",
-    #     parallel_tool_calls=False,
-    #     temperature=0.0,
     # ),
     "llm":mistralai.LLM(
         model="mistral-large-latest"
@@ -149,16 +136,17 @@ class BaseAgent(Agent):
 
         # Add previous agent's context
         if isinstance(userdata.prev_agent, Agent):
-            truncated_chat_ctx = userdata.prev_agent.chat_ctx.copy(
-                exclude_instructions=True, exclude_function_call=False
-            ).truncate(max_items=6)
-            existing_ids = {item.id for item in chat_ctx.items}
-            items_copy = [item for item in truncated_chat_ctx.items if item.id not in existing_ids]
-            chat_ctx.items.extend(items_copy)
+            summarized_ctx = await summarize_agent_handoff(
+                previous_agent_chat_ctx=userdata.prev_agent.chat_ctx,
+                current_agent_chat_ctx=chat_ctx,
+                llm_v=self.session.llm,  
+            )
+            chat_ctx = summarized_ctx
+
 
         chat_ctx.add_message(
             role="system",
-            content=f"You are {agent_name} agent. Current saved user data is {userdata.summarize()}"
+            content=f"You are {agent_name} agent. Current saved user data in Database is {userdata.summarize()}"
         )
         await self.update_chat_ctx(chat_ctx)
         await self.session.generate_reply()
@@ -196,7 +184,7 @@ class BaseAgent(Agent):
                 "tts_characters": 0,
                 "stt_duration": 0.0
             }
-        
+            
         summary = userdata.usage_collector.get_summary()
         
         return {
