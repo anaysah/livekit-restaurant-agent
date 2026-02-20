@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from 'react'
-import Header from '@/components/website/header-simple'
+import Header from '@/components/website/header'
 import { Plus, Minus, ShoppingCart } from 'lucide-react'
 
 interface MenuItem {
@@ -70,8 +70,8 @@ export default function OrderPage() {
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0)
 
   return (
-    <div className="flex-1 h-screen overflow-y-auto bg-background pb-24">
-      <Header />
+    <div className="">
+      
       
       {totalItems > 0 && (
         <div className="bg-card border-b border-border sticky top-0 z-10">
