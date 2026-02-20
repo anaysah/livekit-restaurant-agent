@@ -9,7 +9,6 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Annotated, Optional
 
-import yaml
 from dotenv import load_dotenv
 from pydantic import Field
 
@@ -36,7 +35,7 @@ from src.dataclass import UserData
 from src.logger_config import agent_flow
 from src.tasks import CollectReservationInfo
 from src.variables import COMMON_RULES, GREETER_INSTRUCTIONS, RESERVATION_INSTRUCTIONS
-from src.fn import summarize_agent_handoff
+from src.fn import summarize_agent_handoff, send_to_ui
 
 
 # HTTP level debug
@@ -54,28 +53,6 @@ load_dotenv(".env.local")
 
 RunContext_T = RunContext[UserData]
 
-# Helper function to send messages to UI
-async def send_to_ui(ctx: JobContext, type: str, payload: dict):
-    """Send a message to the frontend via data channel"""
-    message = {
-        "id": f"msg_{int(time.time() * 1000)}_{random.randint(1000, 9999)}",
-        "timestamp": int(time.time() * 1000),
-        "type": type,
-        "payload": payload
-    }
-    
-    try:
-        # Encode and send via data channel
-        data = json.dumps(message).encode("utf-8")
-        await ctx.room.local_participant.publish_data(
-            payload=data,
-            topic="agent-to-ui",
-            destination_identities=[]  # Empty list for broadcast
-        )
-        agent_flow.info(f"📤 Sent to UI: {type} - {payload}")
-    except Exception as e:
-        agent_flow.error(f"❌ Failed to send message to UI {type} {payload} and error: {e}")
-
 # Models configuration
 
 VOICE_MODELS = {
@@ -91,15 +68,63 @@ LLM_MODELS = [
     
     "llama-3.1-8b-instant", #itna acha kaam nahi karta as compare to 3.3 70b
     "meta-llama/llama-4-scout-17b-16e-instruct",
-    
-    # groq dont have TPD means no limit in a day
-    # also most limit TPM of 70k
-    # but tool calling is not supported so it is of no use in this agent
+
     "groq/compound",
-    "groq/compound-mini"
-    
-    
+    "groq/compound-mini" 
 ]
+
+TEMPERATURE = os.getenv("LLM_TEMPERATURE", "0.0")
+PARALLEL_TOOL_CALLS = os.getenv("LLM_PARALLEL_TOOL_CALLS", "false").lower() in ["true", "1", "yes"]
+TOOL_CHOICE = os.getenv("LLM_TOOL_CHOICE", "auto")
+
+LLM_MODELS = {
+    "groq":{
+        "compound":"groq/compound",
+        "compound-mini":"groq/compound-mini",
+        "llama-70b-versatile":"llama-3.3-70b-versatile",
+        "llama-8b-instant":"llama-3.1-8b-instant",
+        "provider": lambda model: groq.LLM(
+            model=model,
+            temperature=float(TEMPERATURE),
+            parallel_tool_calls=PARALLEL_TOOL_CALLS,
+            tool_choice=TOOL_CHOICE
+        )
+    },
+    "mistral":{
+        "mistral-large-latest":"mistral-large-latest",
+        "provider": lambda model: mistralai.LLM(
+            model=model,
+            temperature=float(TEMPERATURE),
+        )
+    },
+    "cerebras":{
+        "qwen-3-32b":"qwen-3-32b",
+        "gpt-oss-120b":"gpt-oss-120b",
+        "glm4":"zai-glm-4.7",
+        "provider": lambda model: openai.LLM.with_cerebras(
+            model=model,
+            temperature=float(TEMPERATURE),
+            parallel_tool_calls=PARALLEL_TOOL_CALLS,
+            tool_choice=TOOL_CHOICE,
+            api_key=os.getenv("CEREBRAS_API_KEY")
+         )
+    },
+    "modal.com":{
+        "glm5":"zai-org/GLM-5-FP8",
+        "provider": lambda model: openai.LLM(
+            model=model,
+            temperature=float(TEMPERATURE),
+            base_url="https://api.us-west-2.modal.direct/v1",
+        )
+    }
+}
+
+def get_provider(llm_models, provider_name, model_name: str):
+    if provider_name in llm_models:
+        model_info = llm_models[provider_name]
+        if model_name in model_info:
+            return model_info["provider"](model_info[model_name])
+    raise ValueError(f"Invalid provider or model: {provider_name}, {model_name}")
 
 # IS_STT_ENABLED and IS_TTS_ENABLED FROM .env
 IS_TTS_ENABLED = os.getenv("IS_TTS_ENABLED", "true").lower() in ["true", "1", "yes"]
@@ -109,17 +134,7 @@ agent_flow.info(f"🔊 TTS Enabled: {IS_TTS_ENABLED}")
 agent_flow.info(f"🎤 STT Enabled: {IS_STT_ENABLED}")
 
 models = {
-    # "llm": groq.LLM(model="llama-3.3-70b-versatile"),
-    # cerebras is no logger giving qwen3 (Deprecated)
-    # "llm": openai.LLM.with_cerebras(
-    #     model="qwen-3-32b",
-    #     temperature=0.0,
-    #     parallel_tool_calls=False,
-    #     tool_choice="auto",
-    # ),
-    "llm":mistralai.LLM(
-        model="mistral-large-latest"
-    ),
+    "llm": get_provider(LLM_MODELS,"mistral","mistral-large-latest"),
     "tts": lambda model: deepgram.TTS(model=VOICE_MODELS[model]) if IS_TTS_ENABLED else None,
     "stt": deepgram.STT() if IS_STT_ENABLED else None,  # Using STT instead of STTv2
     "vad": silero.VAD.load(),
