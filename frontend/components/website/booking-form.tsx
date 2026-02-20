@@ -2,17 +2,16 @@
 
 "use client";
 
-import { useAppStore } from "@/lib/store/app-store";
+import { useAppStore, selectFormData } from "@/lib/store/app-store";
 import { useRegisterElement } from "@/hooks/useRegisterElement";
 import { FORMS } from "@/lib/constants";
-import { useShallow } from "zustand/react/shallow";
 
 export default function BookingForm() {
   // 1. Register Container for Scrolling
   const containerRef = useRegisterElement(FORMS.BOOKING.id);
 
   // 2. Connect to Store
-  const formData = useAppStore(useShallow((s) => s.forms[FORMS.BOOKING.id] || {}));
+  const formData = useAppStore(selectFormData(FORMS.BOOKING.id));
   const updateForm = useAppStore((s) => s.updateForm);
 
   return (

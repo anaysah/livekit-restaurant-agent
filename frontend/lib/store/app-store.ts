@@ -64,4 +64,5 @@ export const useAppStore = create<AppStore>()(
 );
 
 // Selectors
-export const selectFormData = (formId: string) => (state: AppStore) => state.forms[formId] || {};
+const EMPTY_FORM_DATA: Record<string, any> = {};
+export const selectFormData = (formId: string) => (state: AppStore) => state.forms[formId] ?? EMPTY_FORM_DATA;

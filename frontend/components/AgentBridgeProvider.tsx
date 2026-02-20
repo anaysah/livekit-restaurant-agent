@@ -6,7 +6,7 @@ import { useAgentVisuals } from "@/hooks/useAgentVisuals";
 
 export function AgentBridgeProvider({ children }: { children: React.ReactNode }) {
   useAgentBridge();
-  // useNavigationSync();
+  useNavigationSync();
   useAgentVisuals();
 
   return <>{children}</>;
