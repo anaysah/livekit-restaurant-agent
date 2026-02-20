@@ -20,7 +20,8 @@ export type AgentToUIMessage =
   
 
 // Messages sent FROM UI TO Agent
-export interface UIToAgentMessage {
-  type: "STATE_SYNC";
-  payload: AppState;
-}
+export type UIToAgentMessage =
+  | { type: "FORM_UPDATE";    payload: { formId: string; values: Record<string, any> } }
+  | { type: "FORM_SUBMITTED"; payload: { formId: string; values: Record<string, any> } }
+  | { type: "PAGE_CHANGED";   payload: { page: string; path: string } }
+  | { type: "STATE_SYNC";     payload: AppState };

@@ -2,9 +2,10 @@
 
 "use client";
 
+import { useCallback } from "react";
 import { useAppStore, selectFormData } from "@/lib/store/app-store";
 import { useRegisterElement } from "@/hooks/useRegisterElement";
-import { FORMS } from "@/lib/constants";
+import { FORMS, UI_TO_AGENT_EVENTS } from "@/lib/constants";
 
 export default function BookingForm() {
   // 1. Register Container for Scrolling
@@ -13,6 +14,25 @@ export default function BookingForm() {
   // 2. Connect to Store
   const formData = useAppStore(selectFormData(FORMS.BOOKING.id));
   const updateForm = useAppStore((s) => s.updateForm);
+  const dispatchOutboundSignal = useAppStore((s) => s.dispatchOutboundSignal);
+
+  // 3. Outbound Handlers
+  // onBlur: User left a field -> send current form snapshot to agent
+  const handleBlur = useCallback(() => {
+    dispatchOutboundSignal(UI_TO_AGENT_EVENTS.FORM_UPDATE, {
+      formId: FORMS.BOOKING.id,
+      values: formData,
+    });
+  }, [dispatchOutboundSignal, formData]);
+
+  // onSubmit: User confirmed booking -> send full form to agent
+  const handleSubmit = useCallback((e: React.FormEvent) => {
+    e.preventDefault();
+    dispatchOutboundSignal(UI_TO_AGENT_EVENTS.FORM_SUBMITTED, {
+      formId: FORMS.BOOKING.id,
+      values: formData,
+    });
+  }, [dispatchOutboundSignal, formData]);
 
   return (
     <div ref={containerRef} className="container mx-auto px-4 py-20">
@@ -27,7 +47,7 @@ export default function BookingForm() {
         </div>
 
         <div className="bg-card border border-border rounded-lg p-8">
-          <form className="space-y-6">
+          <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="grid md:grid-cols-2 gap-6">
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-foreground mb-2">
@@ -39,6 +59,7 @@ export default function BookingForm() {
                   required
                   value={formData.name || ""}
                   onChange={(e) => updateForm(FORMS.BOOKING.id, { name: e.target.value })}
+                  onBlur={handleBlur}
                   className="w-full px-4 py-2 bg-background border border-border rounded-sm focus:outline-none focus:border-primary text-foreground"
                   placeholder="John Doe"
                 />
@@ -54,6 +75,7 @@ export default function BookingForm() {
                   required
                   value={formData.email || ""}
                   onChange={(e) => updateForm(FORMS.BOOKING.id, { email: e.target.value })}
+                  onBlur={handleBlur}
                   className="w-full px-4 py-2 bg-background border border-border rounded-sm focus:outline-none focus:border-primary text-foreground"
                   placeholder="john@example.com"
                 />
@@ -69,6 +91,7 @@ export default function BookingForm() {
                   required
                   value={formData.phone || ""}
                   onChange={(e) => updateForm(FORMS.BOOKING.id, { phone: e.target.value })}
+                  onBlur={handleBlur}
                   className="w-full px-4 py-2 bg-background border border-border rounded-sm focus:outline-none focus:border-primary text-foreground"
                   placeholder="+1 234 567 890"
                 />
@@ -83,6 +106,7 @@ export default function BookingForm() {
                   required
                   value={formData.guests || "2"}
                   onChange={(e) => updateForm(FORMS.BOOKING.id, { guests: e.target.value })}
+                  onBlur={handleBlur}
                   className="w-full px-4 py-2 bg-background border border-border rounded-sm focus:outline-none focus:border-primary text-foreground"
                 >
                   {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
@@ -101,6 +125,7 @@ export default function BookingForm() {
                   required
                   value={formData.date || ""}
                   onChange={(e) => updateForm(FORMS.BOOKING.id, { date: e.target.value })}
+                  onBlur={handleBlur}
                   className="w-full px-4 py-2 bg-background border border-border rounded-sm focus:outline-none focus:border-primary text-foreground"
                 />
               </div>
@@ -115,6 +140,7 @@ export default function BookingForm() {
                   required
                   value={formData.time || ""}
                   onChange={(e) => updateForm(FORMS.BOOKING.id, { time: e.target.value })}
+                  onBlur={handleBlur}
                   className="w-full px-4 py-2 bg-background border border-border rounded-sm focus:outline-none focus:border-primary text-foreground"
                 />
               </div>
@@ -129,6 +155,7 @@ export default function BookingForm() {
                 rows={4}
                 value={formData.message || ""}
                 onChange={(e) => updateForm(FORMS.BOOKING.id, { message: e.target.value })}
+                onBlur={handleBlur}
                 className="w-full px-4 py-2 bg-background border border-border rounded-sm focus:outline-none focus:border-primary text-foreground resize-none"
                 placeholder="Any special requirements or requests..."
               />

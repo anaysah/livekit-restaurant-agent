@@ -12,7 +12,7 @@ export const PAGES = {
   },
   ORDERING: {
     id: "order",
-    path: "/order-food",
+    path: "/order",
   },
   PROFILE: {
     id: "profile",
@@ -63,3 +63,12 @@ export const AGENT_UI_ACTIONS = {
 }
 
 export const AGENT_UI_TOPIC_NAME = "agent-to-ui"; // Data channel topic for agent -> UI communication
+
+// UI -> Agent outbound event types
+export const UI_TO_AGENT_EVENTS = {
+  FORM_UPDATE:    "FORM_UPDATE",    // User left a field (onBlur)
+  FORM_SUBMITTED: "FORM_SUBMITTED", // User submitted the form
+  PAGE_CHANGED:   "PAGE_CHANGED",   // Navigation happened
+} as const;
+
+export type UIToAgentEventType = typeof UI_TO_AGENT_EVENTS[keyof typeof UI_TO_AGENT_EVENTS];

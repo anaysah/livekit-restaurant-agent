@@ -248,6 +248,8 @@ class Greeter(BaseAgent):
         return await self._transfer_to_agent("reservation", context)
 
 class Reservation(BaseAgent):
+    
+    
     def __init__(self) -> None:
         super().__init__(
             instructions=f"""{COMMON_RULES} \n {RESERVATION_INSTRUCTIONS.format(current_datetime=datetime.now().strftime("%Y-%m-%d %H:%M"))}""",
@@ -323,6 +325,11 @@ async def my_agent(ctx: JobContext):
     @session.on("metrics_collected")
     def _on_metrics_collected(ev: MetricsCollectedEvent):
         userdata.usage_collector.collect(ev.metrics)
+        
+    
+    @ctx.room.on("data_received")
+    def _on_data_received(packet: rtc.DataPacket):
+        agent_flow.info(f"📥 Data received from {packet.participant.identity} on topic '{packet.topic}': {packet.data.decode()}")
     
     # async def save_transcript():
     #     import json

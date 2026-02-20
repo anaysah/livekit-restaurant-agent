@@ -8,22 +8,31 @@ import { AGENT_ACTIONS } from "@/lib/constants";
 
 // 1. Define Signal Types (Event replacements)
 export interface AgentSignal {
-  type: string ; 
+  type: string;
   payload: any;
-  timestamp: number; 
+  timestamp: number;
+}
+
+// Outbound Signal: UI -> Agent
+export interface OutboundSignal {
+  type: string;
+  payload: any;
+  timestamp: number;
 }
 
 interface AppStore extends AppState {
   currentPage: PAGE;
   forms: Record<string, Record<string, any>>;
   meta: Record<string, any>;
-  signal: AgentSignal | null; // New: The "Event" carrier
+  signal: AgentSignal | null;           // Inbound: Agent -> UI
+  outboundSignal: OutboundSignal | null; // Outbound: UI -> Agent
 
   setPage: (page: PAGE) => void;
   updateForm: (formId: string, data: Record<string, any>) => void;
   applyAgentUpdate: (update: Partial<AppState>) => void;
   getStateSnapshot: () => AppState;
   dispatchSignal: (type: AgentSignal["type"], payload: any) => void;
+  dispatchOutboundSignal: (type: string, payload: any) => void;
 }
 
 // 2. Wrap create function with devtools
@@ -34,7 +43,8 @@ export const useAppStore = create<AppStore>()(
       currentPage: "",
       forms: {},
       meta: {},
-      signal: null, 
+      signal: null,
+      outboundSignal: null, 
 
       // UI Actions
       setPage: (page) => set({ currentPage: page }, false, "setPage"), // Optional: Action name
@@ -56,6 +66,10 @@ export const useAppStore = create<AppStore>()(
       dispatchSignal: (type, payload) => set({ 
         signal: { type, payload, timestamp: Date.now() } 
       }, false, "dispatchSignal"),
+
+      dispatchOutboundSignal: (type, payload) => set({
+        outboundSignal: { type, payload, timestamp: Date.now() }
+      }, false, "dispatchOutboundSignal"),
 
       getStateSnapshot: () => get(),
     }),
