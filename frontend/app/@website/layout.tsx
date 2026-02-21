@@ -3,12 +3,10 @@ import Header from '@/components/website/header'
 
 export default function layout({children}:{children:React.ReactNode}) {
   return (
-    // <div className="">
-    <div className="flex-1 h-screen overflow-y-auto bg-background pb-24">
-        <Header />
+    <div className="flex-1 h-screen overflow-y-auto" style={{ background: "var(--color-background)" }}>
+      <Header />
       {children}
-
     </div>
-    
   )
 }
+

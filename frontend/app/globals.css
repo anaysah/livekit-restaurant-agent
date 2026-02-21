@@ -5,88 +5,228 @@
 @variant neon (&:where([data-theme="neon"], [data-theme="neon"] *));
 @variant pink (&:where([data-theme="pink"], [data-theme="pink"] *));
 
-/* Base theme colors */
+/* ════════════════════════════════════════
+   TERRA BASE THEME — Light (warm earthy)
+   ════════════════════════════════════════ */
 @theme {
-  --color-background: #ffffff;
-  --color-background-light: #fafafa;
-  --color-foreground: #000000;
-  --color-text-muted: #666666;
-  --color-primary: #4285f4;
-  --color-secondary: #34a853;
-  --color-card: #f5f5f5;
-  --color-border: #e0e0e0;
-  --color-border-light: #f0f0f0;
+  /* Backgrounds */
+  --color-background:          #FAF7F2;
+  --color-background-light:    #FFFFFF;
+  --color-background-subtle:   #F3EDE3;
+
+  /* Text */
+  --color-foreground:          #1C1510;
+  --color-text-main:           #2D2318;
+  --color-text-secondary:      #6B5445;
+  --color-text-muted:          #A8937E;
+
+  /* Brand */
+  --color-primary:             #C4613A;
+  --color-primary-hover:       #A84F2D;
+  --color-primary-fg:          #FFFFFF;
+
+  /* Accent (olive green) */
+  --color-accent:              #6B7C45;
+  --color-accent-hover:        #556234;
+  --color-accent-fg:           #FFFFFF;
+
+  /* Semantic */
+  --color-success:             #5C7A45;
+  --color-warning:             #9B7A3A;
+  --color-secondary:           #6B7C45;
+
+  /* Card & borders */
+  --color-card:                #FFFFFF;
+  --color-card-hover:          #FDF9F4;
+  --color-border:              #E2D5C3;
+  --color-border-light:        #EFE8DC;
+
+  /* Shadows */
+  --shadow-sm:  0 1px 3px  rgba(44,28,16,0.08);
+  --shadow-md:  0 4px 16px rgba(44,28,16,0.10);
+  --shadow-lg:  0 16px 48px rgba(44,28,16,0.14);
+
+  /* Nav blur bg */
+  --nav-blur-bg: rgba(250,247,242,0.85);
+
+  /* Fonts */
+  --font-serif: var(--font-playfair, 'Playfair Display', Georgia, serif);
+  --font-sans:  var(--font-dm-sans, 'DM Sans', ui-sans-serif, sans-serif);
+  --font-family-serif: var(--font-playfair, 'Playfair Display', Georgia, serif);
+  --font-family-sans:  var(--font-dm-sans, 'DM Sans', ui-sans-serif, sans-serif);
 }
 
-
-/* Override colors per theme using data-theme attribute */
+/* ════════════════════════════════════════
+   THEME OVERRIDES
+   ════════════════════════════════════════ */
 @layer base {
+  /* ── Dark (warm earthy dark) ── */
   [data-theme="dark"] {
-    --color-background: #0C1120;
-    --color-background-light: #1a2332;
-    --color-foreground: #F1F5F9;
-    --color-text-main: #ceccd6;
-    --color-text-secondary: #94A3B8;
-    --color-text-muted: #94A3B8;
-    --color-primary: #3A82FF;
-    --color-secondary: #60A5FA;
-    --color-card: #1a2332;
-    --color-border: #293548;
-    --color-border-light: #1f2937;
+    --color-background:        #141009;
+    --color-background-light:  #1E1710;
+    --color-background-subtle: #251D14;
+    --color-foreground:        #F2EDE4;
+    --color-text-main:         #DDD4C4;
+    --color-text-secondary:    #9C8B77;
+    --color-text-muted:        #5E5044;
+    --color-primary:           #E07A52;
+    --color-primary-hover:     #C9653C;
+    --color-primary-fg:        #141009;
+    --color-accent:            #8A9E5C;
+    --color-accent-hover:      #748649;
+    --color-accent-fg:         #141009;
+    --color-success:           #7AAD56;
+    --color-warning:           #C49A52;
+    --color-secondary:         #8A9E5C;
+    --color-card:              #1E1710;
+    --color-card-hover:        #251D14;
+    --color-border:            #3A2E22;
+    --color-border-light:      #2C2218;
+    --shadow-sm:  0 1px 3px  rgba(0,0,0,0.3);
+    --shadow-md:  0 4px 16px rgba(0,0,0,0.4);
+    --shadow-lg:  0 16px 48px rgba(0,0,0,0.6);
+    --nav-blur-bg: rgba(20,16,9,0.88);
   }
 
+  /* ── Dark Warm ── */
   [data-theme="dark-warm"] {
-    --color-background: #1C1C1C;
-    --color-background-light: #2A2422;
-    --color-foreground: #F5E8D8;
-    --color-text-muted: #B8A99A;
-    --color-primary: #FF6F61;
-    --color-secondary: #DAA520;
-    --color-card: #2A2422;
-    --color-border: #3D3530;
-    --color-border-light: #2F2926;
+    --color-background:        #1C1C1C;
+    --color-background-light:  #2A2422;
+    --color-background-subtle: #221E1C;
+    --color-foreground:        #F5E8D8;
+    --color-text-main:         #F5E8D8;
+    --color-text-secondary:    #C8A99A;
+    --color-text-muted:        #B8A99A;
+    --color-primary:           #FF6F61;
+    --color-primary-fg:        #FFFFFF;
+    --color-accent:            #DAA520;
+    --color-accent-fg:         #FFFFFF;
+    --color-secondary:         #DAA520;
+    --color-card:              #2A2422;
+    --color-card-hover:        #2F2926;
+    --color-border:            #3D3530;
+    --color-border-light:      #2F2926;
+    --shadow-sm:  0 1px 3px rgba(0,0,0,0.3);
+    --shadow-md:  0 4px 16px rgba(0,0,0,0.4);
+    --shadow-lg:  0 16px 48px rgba(0,0,0,0.5);
+    --nav-blur-bg: rgba(28,28,28,0.88);
   }
 
+  /* ── Dark Minimal ── */
   [data-theme="dark-minimal"] {
-    --color-background: #000000;
-    --color-background-light: #121212;
-    --color-foreground: #FFFFFF;
-    --color-text-muted: #A1A1AA;
-    --color-primary: #FFFFFF;
-    --color-secondary: #E5E5E5;
-    --color-card: #121212;
-    --color-border: #2A2A2A;
-    --color-border-light: #1A1A1A;
+    --color-background:        #000000;
+    --color-background-light:  #121212;
+    --color-background-subtle: #0A0A0A;
+    --color-foreground:        #FFFFFF;
+    --color-text-main:         #FFFFFF;
+    --color-text-secondary:    #CCCCCC;
+    --color-text-muted:        #A1A1AA;
+    --color-primary:           #FFFFFF;
+    --color-primary-fg:        #000000;
+    --color-accent:            #E5E5E5;
+    --color-accent-fg:         #000000;
+    --color-secondary:         #E5E5E5;
+    --color-card:              #121212;
+    --color-card-hover:        #1A1A1A;
+    --color-border:            #2A2A2A;
+    --color-border-light:      #1A1A1A;
+    --shadow-sm:  0 1px 3px rgba(0,0,0,0.5);
+    --shadow-md:  0 4px 16px rgba(0,0,0,0.6);
+    --shadow-lg:  0 16px 48px rgba(0,0,0,0.8);
+    --nav-blur-bg: rgba(0,0,0,0.9);
   }
-  
 
-
+  /* ── Neon ── */
   [data-theme="neon"] {
-    --color-background: #0a0a0a;
-    --color-background-light: #1a001a;
-    --color-foreground: #00ff00;
-    --color-text-muted: #00cc00;
-    --color-primary: #ff00ff;
-    --color-secondary: #00ffff;
-    --color-card: #1a001a;
-    --color-border: #ff00ff;
-    --color-border-light: #cc00cc;
+    --color-background:        #0a0a0a;
+    --color-background-light:  #1a001a;
+    --color-background-subtle: #0f000f;
+    --color-foreground:        #00ff00;
+    --color-text-main:         #00ff00;
+    --color-text-secondary:    #00cc00;
+    --color-text-muted:        #00cc00;
+    --color-primary:           #ff00ff;
+    --color-primary-fg:        #000000;
+    --color-accent:            #00ffff;
+    --color-accent-fg:         #000000;
+    --color-secondary:         #00ffff;
+    --color-card:              #1a001a;
+    --color-card-hover:        #200020;
+    --color-border:            #ff00ff;
+    --color-border-light:      #cc00cc;
+    --shadow-sm:  0 1px 3px rgba(255,0,255,0.3);
+    --shadow-md:  0 4px 16px rgba(255,0,255,0.4);
+    --shadow-lg:  0 16px 48px rgba(255,0,255,0.5);
+    --nav-blur-bg: rgba(10,0,10,0.9);
   }
 
+  /* ── Pink ── */
   [data-theme="pink"] {
-    --color-background: #fff0f5;
-    --color-background-light: #fff5fa;
-    --color-foreground: #8b008b;
-    --color-text-muted: #b366b3;
-    --color-primary: #ff69b4;
-    --color-secondary: #ffc0cb;
-    --color-card: #ffe4f0;
-    --color-border: #ffb3d9;
-    --color-border-light: #ffd9ec;
+    --color-background:        #fff0f5;
+    --color-background-light:  #fff5fa;
+    --color-background-subtle: #fff0f5;
+    --color-foreground:        #8b008b;
+    --color-text-main:         #8b008b;
+    --color-text-secondary:    #b366b3;
+    --color-text-muted:        #b366b3;
+    --color-primary:           #ff69b4;
+    --color-primary-fg:        #ffffff;
+    --color-accent:            #ffc0cb;
+    --color-accent-fg:         #8b008b;
+    --color-secondary:         #ffc0cb;
+    --color-card:              #ffe4f0;
+    --color-card-hover:        #ffd9ec;
+    --color-border:            #ffb3d9;
+    --color-border-light:      #ffd9ec;
+    --shadow-sm:  0 1px 3px rgba(255,105,180,0.15);
+    --shadow-md:  0 4px 16px rgba(255,105,180,0.2);
+    --shadow-lg:  0 16px 48px rgba(255,105,180,0.3);
+    --nav-blur-bg: rgba(255,240,245,0.9);
   }
 }
 
-/* Optional: Smooth transitions */
-* {
-  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+/* ═════════════════════════════
+   TERRA GLOBAL STYLES
+   ═════════════════════════════ */
+
+/* Smooth theme transitions */
+*, *::before, *::after {
+  transition: background-color 0.3s ease, color 0.2s ease, border-color 0.3s ease;
 }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--color-background); }
+::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
+
+/* Selection */
+::selection { background: var(--color-primary); color: var(--color-primary-fg); }
+
+/* Hero plate float animation */
+@keyframes terra-float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-14px); }
+}
+@keyframes terra-badge1 {
+  0%, 100% { transform: translateY(0px) rotate(-1deg); }
+  50%       { transform: translateY(-8px) rotate(1deg); }
+}
+@keyframes terra-badge2 {
+  0%, 100% { transform: translateY(0px) rotate(1deg); }
+  50%       { transform: translateY(-10px) rotate(-1deg); }
+}
+@keyframes terra-marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+@keyframes terraFadeUp {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.terra-float    { animation: terra-float  5s ease-in-out infinite; }
+.terra-badge1   { animation: terra-badge1 4s ease-in-out infinite; }
+.terra-badge2   { animation: terra-badge2 5s ease-in-out infinite; }
+.terra-badge3   { animation: terra-badge1 6s ease-in-out infinite 1s; }
+.terra-marquee  { animation: terra-marquee 25s linear infinite; }
+.terra-fade-up  { animation: terraFadeUp 0.7s ease both; }

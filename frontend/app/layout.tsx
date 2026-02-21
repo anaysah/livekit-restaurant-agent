@@ -2,7 +2,7 @@
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
-import { Inter } from "next/font/google";
+import { Playfair_Display, DM_Sans } from "next/font/google";
 
 export const metadata: Metadata = {
   title: "Restaurant AI Assistant",
@@ -10,7 +10,18 @@ export const metadata: Metadata = {
 };
 
 
-const inter = Inter({ subsets: ["latin"] });
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
+  style: ["normal", "italic"],
+  variable: "--font-playfair",
+});
+
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600"],
+  variable: "--font-dm-sans",
+});
 
 
 
@@ -26,7 +37,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
 
-      <body className="bg-background text-foreground" style={inter.style}>
+      <body className={`bg-background text-foreground ${dmSans.variable} ${playfair.variable}`} style={{ fontFamily: "var(--font-dm-sans, 'DM Sans', ui-sans-serif, sans-serif)" }}>
         <ThemeProvider 
           attribute="data-theme"
           defaultTheme="dark"
