@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
 import { Playfair_Display, DM_Sans } from "next/font/google";
+import AgentChatWithSession from "@/components/AgentChatWithSession";
+
 
 export const metadata: Metadata = {
   title: "Restaurant AI Assistant",
@@ -31,8 +33,6 @@ export default function RootLayout({
   website,
 }: {
   children: React.ReactNode;
-  chat: React.ReactNode;
-  website: React.ReactNode;
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
@@ -46,10 +46,10 @@ export default function RootLayout({
         >
           <div className="flex h-screen bg-background text-foreground">
             {/* Left Side - Chat UI (Parallel Slot) */}
-            {chat}
+            <AgentChatWithSession/>
             
             {/* Right Side - Website Content (Parallel Slot) */}
-            {website}
+            {children}
           </div>
         </ThemeProvider>
       </body>

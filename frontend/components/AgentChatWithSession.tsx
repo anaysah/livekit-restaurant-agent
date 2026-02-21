@@ -1,5 +1,5 @@
 "use client"
-// @chat/page.tsx
+// components/AgentChatWithSession.tsx
 
 import React, { useMemo, useState } from 'react'
 import { TokenSource } from 'livekit-client'
@@ -8,10 +8,6 @@ import { APP_CONFIG_DEFAULTS } from '@/app-config'
 import { AgentSessionProvider } from '@/components/agents-ui/agent-session-provider'
 import { AgentBridgeProvider } from '@/components/AgentBridgeProvider'
 import AgentChatUI from '@/components/AgentChatUI'
-
-export default function ChatSlot() {
-  return <ChatWithSession />
-}
 
 
 function ResizableContainer({ children }: { children: React.ReactNode }) {
@@ -117,7 +113,7 @@ function ResizableContainer({ children }: { children: React.ReactNode }) {
   )
 }
 
-function ChatWithSession() {
+export default function AgentChatWithSession() {
   const tokenSource = useMemo(() => {
     return TokenSource.endpoint('/api/connection-details')
   }, [])

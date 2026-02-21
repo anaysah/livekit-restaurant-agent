@@ -15,10 +15,11 @@ export default function Header() {
   }
 
   const navLinks = [
-    { href: "#menu",    label: "Menu" },
-    { href: "#about",   label: "About" },
-    { href: "#reviews", label: "Reviews" },
-    { href: "#contact", label: "Contact" },
+    { href: "/#home",    label: "Home" },
+    { href: "/#menu",    label: "Menu" },
+    { href: "/#about",   label: "About" },
+    { href: "/#reviews", label: "Reviews" },
+    { href: "/#contact", label: "Contact" },
   ]
 
   return (
