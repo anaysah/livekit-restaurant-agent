@@ -33,7 +33,7 @@ export default function AgentChatUI() {
   return (
     <div className="h-full flex flex-col bg-card">
       {/* Debug Component - Remove after testing */}
-      <DebugDataChannel />
+      {/* <DebugDataChannel /> */}
       
       <AgentUIHeader isConnected={isConnected} agentJoined={agentJoined} state={state} participants={participants} start={start} end={end} />
 

@@ -12,10 +12,10 @@ interface AgentControlBarProps {
 
 export default function AgentControlBar({ isConnected, agentJoined }: AgentControlBarProps) {
   const [message, setMessage] = useState("");
-  const { send, isSending } = useChat(); // Use isSending from useChat
-  const isSendingRef = useRef(false); // Additional safeguard
-  
-  const microphoneToggle = useTrackToggle({
+  const { send, isSending } = useChat();
+  const isSendingRef = useRef(false);
+
+  const micToggle = useTrackToggle({
     source: Track.Source.Microphone,
     onDeviceError: (error) => {
       console.error("Microphone error:", error);
@@ -24,86 +24,104 @@ export default function AgentControlBar({ isConnected, agentJoined }: AgentContr
   });
 
   const handleMicToggle = useCallback(async () => {
-    try {
-      await microphoneToggle.toggle();
-    } catch (error) {
-      console.error("Failed to toggle microphone:", error);
-    }
-  }, [microphoneToggle]);
+    try { await micToggle.toggle() }
+    catch (e) { console.error("Mic toggle failed:", e) }
+  }, [micToggle]);
 
   const isDisabled = !isConnected || !agentJoined;
 
-  const handleSendMessage = useCallback(async () => {
-    if (!message.trim() || isSending || isSendingRef.current) {
-      return;
-    }
-
-    // Request track karne ke liye
-    const timestamp = new Date().toISOString();
-    const requestId = crypto.randomUUID();
-    
-    console.log('🚀 REQUEST SENT:', {
-      timestamp,
-      requestId,
-      message: message.trim(),
-      isSending,
-      isSendingRef: isSendingRef.current
-    });
-
+  const handleSend = useCallback(async () => {
+    if (!message.trim() || isSending || isSendingRef.current) return;
     isSendingRef.current = true;
-    
     try {
       await send(message.trim());
-      console.log('✅ REQUEST SUCCESS:', requestId);
       setMessage("");
-    } catch (error) {
-      console.error('❌ REQUEST FAILED:', requestId, error);
+    } catch (e) {
+      console.error("Send failed:", e);
     } finally {
-      console.log('🏁 REQUEST COMPLETE:', requestId);
       isSendingRef.current = false;
     }
   }, [message, send, isSending]);
 
+  const micActive = micToggle.enabled;
 
   return (
-    <div className="p-1 px-2 border-t border-border bg-background-light">
-      <div className="flex items-center gap-1">
+    <div className="flex-shrink-0 px-3 py-3 border-t border-border bg-card">
+
+      {/* Input row */}
+      <div className="flex items-center gap-2">
+
+        {/* Mic button */}
         <button
           onClick={handleMicToggle}
-          disabled={isDisabled || microphoneToggle.pending}
-          className={`p-2 rounded-sm transition-all ${
-            microphoneToggle.enabled
-              ? "text-white"
-              : "bg-background-light text-foreground"
-          } disabled:opacity-50 disabled:cursor-not-allowed`}
-          title={microphoneToggle.enabled ? "Mute microphone" : "Unmute microphone"}
+          disabled={isDisabled || micToggle.pending}
+          title={micActive ? 'Mute microphone' : 'Unmute microphone'}
+          className={`
+            w-9 h-9 rounded-xl flex-shrink-0 flex items-center justify-center border
+            transition-all duration-200
+            disabled:opacity-40 disabled:cursor-not-allowed
+            ${micActive
+              ? 'bg-primary border-primary text-primary-fg shadow-sm'
+              : 'bg-background-subtle border-border text-text-secondary hover:border-primary hover:text-primary'
+            }
+          `}
         >
-          {microphoneToggle.pending ? (
-            <Loader2 size={20} className="animate-spin" />
-          ) : microphoneToggle.enabled ? (
-            <Mic size={20} />
-          ) : (
-            <MicOff size={20} />
-          )}
+          {micToggle.pending
+            ? <Loader2 size={15} className="animate-spin" />
+            : micActive
+            ? <Mic    size={15} />
+            : <MicOff size={15} />
+          }
         </button>
 
-        <input
-          type="text"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          onKeyPress={(e) => e.key === "Enter" && !isSending && handleSendMessage()}
-          placeholder={isDisabled ? "Waiting for agent..." : "Type your message..."}
-          disabled={isDisabled || isSending}
-          className="flex-1 px-2 py-1 rounded-sm border border-border bg-background text-foreground text-sm placeholder:text-text-muted focus:outline-none focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed"
-        />
+        {/* Text input */}
+        <div className="flex-1 relative">
+          <input
+            type="text"
+            value={message}
+            onChange={e => setMessage(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && !e.shiftKey && !isSending && handleSend()}
+            placeholder={isDisabled ? 'Waiting for agent...' : 'Ask me anything...'}
+            disabled={isDisabled || isSending}
+            className="
+              w-full px-3 py-2 pr-2
+              rounded-xl border border-border
+              bg-background text-foreground text-sm
+              placeholder:text-text-muted
+              focus:outline-none focus:border-primary
+              disabled:opacity-50 disabled:cursor-not-allowed
+              transition-colors duration-150
+            "
+          />
+        </div>
 
+        {/* Send button */}
         <button
-          onClick={handleSendMessage}
+          onClick={handleSend}
           disabled={!message.trim() || isDisabled || isSending}
-          className="text-primary disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-70 transition-opacity">
-          {isSending ? <Loader2 size={20} className="animate-spin" /> : <Send size={20} />}
+          title="Send message"
+          className="
+            w-9 h-9 rounded-xl flex-shrink-0 flex items-center justify-center
+            bg-primary text-primary-fg border border-primary
+            hover:bg-primary-hover hover:border-primary-hover
+            disabled:opacity-40 disabled:cursor-not-allowed
+            transition-all duration-200 shadow-sm
+          "
+        >
+          {isSending
+            ? <Loader2 size={15} className="animate-spin" />
+            : <Send    size={15} />
+          }
         </button>
       </div>
+
+      {/* Hint text */}
+      <p className="text-[10px] text-text-muted text-center mt-2 leading-none">
+        {isDisabled
+          ? 'Connect to start your session'
+          : 'Enter to send · Mic for voice'
+        }
+      </p>
     </div>
   );
 }
