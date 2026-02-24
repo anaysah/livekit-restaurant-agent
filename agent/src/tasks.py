@@ -1,7 +1,7 @@
 from livekit.agents import AgentTask, function_tool, get_job_context
 from typing import Annotated
 from dataclasses import dataclass
-from src.dataclass import UserData
+from src.dataclass import UserData, BOOKING_FORM_ID, ORDER_FORM_ID
 from src.variables import AVAILABLE_CUISINES, COLLECTION_TASK_INSTRUCTIONS, COMMON_RULES, MAX_RESERVATION_GUESTS, VALID_RESTAURANTS_TIME_RANGE
 from datetime import datetime as dt
 from pydantic import Field
@@ -180,7 +180,10 @@ class CollectReservationInfo(AgentTask[UserData]):
             "special_requests",
         ]
         
-        not_collected_fields = [field for field in required_fields if getattr(self.userdata, field) is None]
+        not_collected_fields = [
+            field for field in required_fields
+            if not self.userdata.get_field(BOOKING_FORM_ID, field)
+        ]
         if not_collected_fields:
             return f"Remaining information to save: {', '.join(not_collected_fields)}."
         

@@ -72,3 +72,10 @@ async def send_to_ui(ctx: JobContext, type: str, payload: dict):
         agent_flow.info(f"📤 Sent to UI: {type} - {payload}")
     except Exception as e:
         agent_flow.error(f"❌ Failed to send message to UI {type} {payload} and error: {e}")
+        
+def get_provider(llm_models, provider_name, model_name: str):
+    if provider_name in llm_models:
+        model_info = llm_models[provider_name]
+        if model_name in model_info:
+            return model_info["provider"](model_info[model_name])
+    raise ValueError(f"Invalid provider or model: {provider_name}, {model_name}")
