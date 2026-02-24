@@ -29,8 +29,6 @@ const dmSans = DM_Sans({
 
 export default function RootLayout({
   children,
-  chat,
-  website,
 }: {
   children: React.ReactNode;
 }) {

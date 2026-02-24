@@ -2,12 +2,14 @@
 
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { useAppStore, selectFormData } from "@/lib/store/app-store";
 import { useRegisterElement } from "@/hooks/useRegisterElement";
 import { FORMS, UI_TO_AGENT_EVENTS } from "@/lib/constants";
 
-export default function BookingForm() {
+type SelectedTable = { id: number; seats: number } | null
+
+export default function BookingForm({ selectedTable }: { selectedTable?: SelectedTable }) {
   // 1. Register Container for Scrolling
   const containerRef = useRegisterElement(FORMS.BOOKING.id);
 
@@ -15,6 +17,14 @@ export default function BookingForm() {
   const formData = useAppStore(selectFormData(FORMS.BOOKING.id));
   const updateForm = useAppStore((s) => s.updateForm);
   const dispatchOutboundSignal = useAppStore((s) => s.dispatchOutboundSignal);
+
+  // Sync selectedTable prop → form store whenever it changes
+  useEffect(() => {
+    updateForm(FORMS.BOOKING.id, {
+      tableId: selectedTable?.id ?? null,
+      tableSeats: selectedTable?.seats ?? null,
+    });
+  }, [selectedTable, updateForm]);
 
   // 3. Outbound Handlers
   // onBlur: User left a field -> send current form snapshot to agent
@@ -35,19 +45,43 @@ export default function BookingForm() {
   }, [dispatchOutboundSignal, formData]);
 
   return (
-    <div ref={containerRef} className="container mx-auto px-4 py-20">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-12">
+    <div ref={containerRef} className="">
+      <div className="">
+        {/* <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
             Book A Table
           </h1>
           <p className="text-lg text-text-muted">
             Reserve your table for an unforgettable dining experience
           </p>
-        </div>
+        </div> */}
 
         <div className="bg-card border border-border rounded-lg p-8">
           <form className="space-y-6" onSubmit={handleSubmit}>
+            {/* Selected Table field */}
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Selected Table
+              </label>
+              <div
+                className="w-full px-4 py-2 border rounded-sm flex items-center gap-3 min-h-[42px]"
+                style={selectedTable
+                  ? { background: "color-mix(in srgb, var(--color-primary) 8%, var(--color-background))", borderColor: "color-mix(in srgb, var(--color-primary) 40%, transparent)" }
+                  : { background: "var(--color-background)", borderColor: "var(--color-border)" }
+                }
+              >
+                {selectedTable ? (
+                  <span className="text-sm font-medium" style={{ color: "var(--color-primary)" }}>
+                    🪑 Table {selectedTable.id} &mdash; {selectedTable.seats} seats
+                  </span>
+                ) : (
+                  <span className="text-sm" style={{ color: "var(--color-text-muted)" }}>
+                    Select a table from the floor plan →
+                  </span>
+                )}
+              </div>
+            </div>
+
             <div className="grid md:grid-cols-2 gap-6">
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-foreground mb-2">

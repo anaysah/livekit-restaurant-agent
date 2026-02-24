@@ -2,13 +2,19 @@
 "use client"
 
 import Link from "next/link"
-import { useState } from "react"
+import { useState, useEffect } from "react" // Added useEffect
 import { useTheme } from "next-themes"
 import { Menu, X } from "lucide-react"
 
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [mounted, setMounted] = useState(false) // 1. Track mount state
   const { theme, setTheme } = useTheme()
+
+  // 2. Set mounted to true only after the component hydrates
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const toggleTheme = () => {
     setTheme(theme === "dark" ? "light" : "dark")
@@ -82,7 +88,9 @@ export default function Header() {
             el.style.color = "var(--color-text-secondary)"
           }}
         >
-          {theme === "dark" ? "☀️" : "🌙"}
+          {/* 3. Only render the icon if mounted. 
+              This prevents the server guessing the wrong theme and causing a crash. */}
+          {mounted ? (theme === "dark" ? "☀️" : "🌙") : null}
         </button>
 
         {/* Order Food */}
