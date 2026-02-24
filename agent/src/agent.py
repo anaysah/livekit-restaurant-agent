@@ -176,7 +176,8 @@ async def my_agent(ctx: JobContext):
     
     @ctx.room.on("data_received")
     def _on_data_received(packet: rtc.DataPacket):
-        agent_flow.info(f"📥 Data received from {packet.participant.identity} on topic '{packet.topic}': {packet.data.decode()}")
+        # agent_flow.info(f"📥 Data received from {packet.participant.identity} on topic '{packet.topic}': {packet.data.decode()}")
+        pass
     
     # async def save_transcript():
     #     import json

@@ -16,16 +16,18 @@ from livekit.agents import RunContext
 @dataclass
 class BookingFormData:
     """Maps 1-to-1 with frontend booking-form fields."""
-    name:    Optional[str] = None   # Full name
-    email:   Optional[str] = None
-    phone:   Optional[str] = None
-    guests:  Optional[int] = None
-    date:    Optional[str] = None   # YYYY-MM-DD
-    time:    Optional[str] = None   # HH:MM
-    message: Optional[str] = None   # Special requests
+    customer_name:      Optional[str] = None
+    customer_phone:     Optional[str] = None
+    no_of_guests:       Optional[int] = None
+    reservation_date:   Optional[str] = None   # YYYY-MM-DD
+    reservation_time:   Optional[str] = None   # HH:MM
+    special_requests:   Optional[str] = None
+    table_id:           Optional[int] = None
+    table_seats:        Optional[int] = None
 
     def update(self, data: dict[str, Any]) -> None:
-        """Merge a partial dict (e.g. from FORM_UPDATE) into this dataclass."""
+        """Merge a partial dict into this dataclass.
+        Frontend keys now match field names directly."""
         for key, value in data.items():
             if hasattr(self, key):
                 setattr(self, key, value)

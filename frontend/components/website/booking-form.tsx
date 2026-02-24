@@ -21,8 +21,8 @@ export default function BookingForm({ selectedTable }: { selectedTable?: Selecte
   // Sync selectedTable prop → form store whenever it changes
   useEffect(() => {
     updateForm(FORMS.BOOKING.id, {
-      tableId: selectedTable?.id ?? null,
-      tableSeats: selectedTable?.seats ?? null,
+      table_id: selectedTable?.id ?? null,
+      table_seats: selectedTable?.seats ?? null,
     });
   }, [selectedTable, updateForm]);
 
@@ -83,7 +83,7 @@ export default function BookingForm({ selectedTable }: { selectedTable?: Selecte
             </div>
 
             <div className="grid md:grid-cols-2 gap-6">
-              <div>
+              <div className="md:col-span-2">
                 <label htmlFor="name" className="block text-sm font-medium text-foreground mb-2">
                   Full Name *
                 </label>
@@ -91,27 +91,11 @@ export default function BookingForm({ selectedTable }: { selectedTable?: Selecte
                   type="text"
                   id="name"
                   required
-                  value={formData.name || ""}
-                  onChange={(e) => updateForm(FORMS.BOOKING.id, { name: e.target.value })}
+                  value={formData.customer_name || ""}
+                  onChange={(e) => updateForm(FORMS.BOOKING.id, { customer_name: e.target.value })}
                   onBlur={handleBlur}
                   className="w-full px-4 py-2 bg-background border border-border rounded-sm focus:outline-none focus:border-primary text-foreground"
                   placeholder="John Doe"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
-                  Email *
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  required
-                  value={formData.email || ""}
-                  onChange={(e) => updateForm(FORMS.BOOKING.id, { email: e.target.value })}
-                  onBlur={handleBlur}
-                  className="w-full px-4 py-2 bg-background border border-border rounded-sm focus:outline-none focus:border-primary text-foreground"
-                  placeholder="john@example.com"
                 />
               </div>
 
@@ -123,8 +107,8 @@ export default function BookingForm({ selectedTable }: { selectedTable?: Selecte
                   type="tel"
                   id="phone"
                   required
-                  value={formData.phone || ""}
-                  onChange={(e) => updateForm(FORMS.BOOKING.id, { phone: e.target.value })}
+                  value={formData.customer_phone || ""}
+                  onChange={(e) => updateForm(FORMS.BOOKING.id, { customer_phone: e.target.value })}
                   onBlur={handleBlur}
                   className="w-full px-4 py-2 bg-background border border-border rounded-sm focus:outline-none focus:border-primary text-foreground"
                   placeholder="+1 234 567 890"
@@ -138,8 +122,8 @@ export default function BookingForm({ selectedTable }: { selectedTable?: Selecte
                 <select
                   id="guests"
                   required
-                  value={formData.guests || "2"}
-                  onChange={(e) => updateForm(FORMS.BOOKING.id, { guests: e.target.value })}
+                  value={formData.no_of_guests || "2"}
+                  onChange={(e) => updateForm(FORMS.BOOKING.id, { no_of_guests: e.target.value })}
                   onBlur={handleBlur}
                   className="w-full px-4 py-2 bg-background border border-border rounded-sm focus:outline-none focus:border-primary text-foreground"
                 >
@@ -157,8 +141,8 @@ export default function BookingForm({ selectedTable }: { selectedTable?: Selecte
                   type="date"
                   id="date"
                   required
-                  value={formData.date || ""}
-                  onChange={(e) => updateForm(FORMS.BOOKING.id, { date: e.target.value })}
+                  value={formData.reservation_date || ""}
+                  onChange={(e) => updateForm(FORMS.BOOKING.id, { reservation_date: e.target.value })}
                   onBlur={handleBlur}
                   className="w-full px-4 py-2 bg-background border border-border rounded-sm focus:outline-none focus:border-primary text-foreground"
                 />
@@ -172,8 +156,8 @@ export default function BookingForm({ selectedTable }: { selectedTable?: Selecte
                   type="time"
                   id="time"
                   required
-                  value={formData.time || ""}
-                  onChange={(e) => updateForm(FORMS.BOOKING.id, { time: e.target.value })}
+                  value={formData.reservation_time || ""}
+                  onChange={(e) => updateForm(FORMS.BOOKING.id, { reservation_time: e.target.value })}
                   onBlur={handleBlur}
                   className="w-full px-4 py-2 bg-background border border-border rounded-sm focus:outline-none focus:border-primary text-foreground"
                 />
@@ -187,8 +171,8 @@ export default function BookingForm({ selectedTable }: { selectedTable?: Selecte
               <textarea
                 id="message"
                 rows={4}
-                value={formData.message || ""}
-                onChange={(e) => updateForm(FORMS.BOOKING.id, { message: e.target.value })}
+                value={formData.special_requests || ""}
+                onChange={(e) => updateForm(FORMS.BOOKING.id, { special_requests: e.target.value })}
                 onBlur={handleBlur}
                 className="w-full px-4 py-2 bg-background border border-border rounded-sm focus:outline-none focus:border-primary text-foreground resize-none"
                 placeholder="Any special requirements or requests..."
