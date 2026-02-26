@@ -52,7 +52,7 @@ export default function Header() {
       <ul className="hidden md:flex items-center gap-9 list-none">
         {navLinks.map((link) => (
           <li key={link.href}>
-            <a
+            <Link
               href={link.href}
               className="text-[13px] font-medium tracking-[0.5px] no-underline transition-colors duration-200"
               style={{ color: "var(--color-text-secondary)" }}
@@ -60,7 +60,7 @@ export default function Header() {
               onMouseLeave={(e) => (e.currentTarget.style.color = "var(--color-text-secondary)")}
             >
               {link.label}
-            </a>
+            </Link>
           </li>
         ))}
       </ul>
@@ -162,7 +162,7 @@ export default function Header() {
           style={{ background: "var(--color-background)", borderColor: "var(--color-border)" }}
         >
           {navLinks.map((link) => (
-            <a
+            <Link
               key={link.href}
               href={link.href}
               className="text-sm font-medium no-underline"
@@ -170,7 +170,7 @@ export default function Header() {
               onClick={() => setMobileOpen(false)}
             >
               {link.label}
-            </a>
+            </Link>
           ))}
           <Link
             href="/booking"
