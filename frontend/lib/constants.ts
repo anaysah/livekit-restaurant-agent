@@ -70,6 +70,7 @@ export const UI_TO_AGENT_EVENTS = {
   FORM_UPDATE:    "FORM_UPDATE",    // User left a field (onBlur)
   FORM_SUBMITTED: "FORM_SUBMITTED", // User submitted the form
   PAGE_CHANGED:   "PAGE_CHANGED",   // Navigation happened
+  SESSION_SYNC:   "SESSION_SYNC",   // Sent once when agent first joins — full UI state snapshot
 } as const;
 
 export type UIToAgentEventType = typeof UI_TO_AGENT_EVENTS[keyof typeof UI_TO_AGENT_EVENTS];

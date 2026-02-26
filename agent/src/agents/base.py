@@ -98,6 +98,43 @@ class BaseAgent(Agent):
                 agent_flow.info(f"✅ Form updated: {form_id} → {values}")
                 self._queue_llm_update(f"User updated form '{form_id}' with values: {values}")
 
+        elif msg_type == "SESSION_SYNC":
+            # Fired once when agent first joins — full UI state snapshot
+            page = payload.get("page")
+            forms = payload.get("forms", {})
+
+            # Save all pre-filled form data into UserData
+            for form_id, values in forms.items():
+                if values:
+                    self._userdata.apply_form_update(form_id, values)
+
+            if page:
+                self._userdata.update_meta({"current_page": page})
+
+            agent_flow.info(f"✅ Session sync: page={page}, forms={list(forms.keys())}")
+
+            # Switch to the right agent for the current page (same logic as PAGE_CHANGED)
+            target_name = self.PAGE_AGENT_MAP.get(page) if page else None
+            current_agent = self.session.current_agent
+            target_agent = self._userdata.agents.get(target_name) if target_name else None
+
+            if target_agent is not None and target_agent is not current_agent:
+                agent_flow.info(f"🔀 SESSION_SYNC: switching to '{target_name}' for page: {page}")
+                try:
+                    loop = asyncio.get_running_loop()
+                    loop.create_task(self._switch_agent_for_page(target_name, page))
+                except RuntimeError:
+                    pass
+            else:
+                # Same agent — queue update so it greets with context
+                update_parts = []
+                if page:
+                    update_parts.append(f"User is on the '{page}' page")
+                if forms:
+                    update_parts.append(f"User had already filled in: {forms}")
+                if update_parts:
+                    self._queue_llm_update(". ".join(update_parts))
+
         elif msg_type == "PAGE_CHANGED":
             page = payload.get("page")
             if page:
