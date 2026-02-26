@@ -64,7 +64,7 @@ const placements: DoodlePlacement[] = [
   { src: '/doodles/pancake.svg',         size:  60, top: 1780,  left: '24%',  rotate: -38 },
   { src: '/doodles/pizza.svg',           size:  48, top: 1880,  left: '68%',  rotate:  22 },
   { src: '/doodles/square-sandwich.svg', size:  54, top: 2060,  left: '42%',  rotate: -14 },
-  { src: '/doodles/burger.svg',          size:  62, top: 2200,  left: '85%',  rotate:  32 },
+//   { src: '/doodles/burger.svg',          size:  62, top: 2200,  left: '85%',  rotate:  32 },
   { src: '/doodles/taco.svg',            size:  50, top: 2460,  left: '16%',  rotate: -20 },
   { src: '/doodles/toast.svg',           size:  44, top: 2550,  left: '60%',  rotate:  10 },
   { src: '/doodles/egg.svg',             size:  56, top: 2780,  left: '35%',  rotate: -30 },
