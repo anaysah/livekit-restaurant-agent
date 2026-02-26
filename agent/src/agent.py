@@ -1,5 +1,6 @@
 import asyncio
 import http.client as http_client
+import json
 import logging
 import os
 from dataclasses import dataclass, field
@@ -174,10 +175,39 @@ async def my_agent(ctx: JobContext):
         userdata.usage_collector.collect(ev.metrics)
         
     
-    @ctx.room.on("data_received")
-    def _on_data_received(packet: rtc.DataPacket):
-        # agent_flow.info(f"📥 Data received from {packet.participant.identity} on topic '{packet.topic}': {packet.data.decode()}")
-        pass
+    # @ctx.room.on("data_received")
+    # def _on_data_received(packet: rtc.DataPacket):
+    #     if packet.topic != "ui-to-agent":
+    #         return  # Ignore messages not meant for the agent
+        
+    #     try:
+    #         msg = json.loads(packet.data.decode())
+    #         msg_type = msg.get("type")
+    #         payload = msg.get("payload", {})
+    #         agent_flow.info(f"📥 UI→Agent: type={msg_type} payload={payload}")
+
+    #         if msg_type in ("FORM_UPDATE", "FORM_SUBMITTED"):
+    #             form_id = payload.get("formId")
+    #             values = payload.get("values", {})
+    #             if form_id and values:
+    #                 userdata.apply_form_update(form_id, values)
+    #                 agent_flow.info(f"✅ Form updated: {form_id} → {values}")
+                    
+                    
+
+    #                 # Inject updated context and make agent respond
+    #                 session.generate_reply(
+    #                     instructions=f"The user just updated the form '{form_id}' with values {values}."
+    #                 )
+
+    #         elif msg_type == "PAGE_CHANGED":
+    #             page = payload.get("page")
+    #             if page:
+    #                 userdata.update_meta({"current_page": page})
+    #                 agent_flow.info(f"✅ Page changed: {page}")
+
+    #     except Exception as e:
+    #         agent_flow.error(f"❌ Error handling data: {e}")
     
     # async def save_transcript():
     #     import json

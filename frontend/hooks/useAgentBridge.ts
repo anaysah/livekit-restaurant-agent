@@ -6,7 +6,7 @@ import { useRoomContext } from "@livekit/components-react";
 import { useAppStore } from "@/lib/store/app-store";
 import type { UIToAgentMessage } from "@/types/agent-bridge";
 import { DataPacket_Kind, Encryption_Type, RemoteParticipant } from "livekit-client";
-import { AGENT_UI_TOPIC_NAME } from "@/lib/constants";
+import { AGENT_UI_TOPIC_NAME, UI_TO_AGENT_TOPIC_NAME } from "@/lib/constants";
 
 export function useAgentBridge() {
   const room = useRoomContext();
@@ -28,7 +28,7 @@ export function useAgentBridge() {
     console.log("[Bridge] 📤 Sending:", msg);
     room.localParticipant.publishData(
       new TextEncoder().encode(JSON.stringify(msg)),
-      { reliable: true }
+      { reliable: true, topic: UI_TO_AGENT_TOPIC_NAME }
     );
   }, [outboundSignal, room]);
 

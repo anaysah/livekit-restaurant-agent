@@ -199,4 +199,5 @@ class Reservation(BaseAgent):
 
     async def on_exit(self):
         agent_flow.info("📌 Exiting CollectInfoTask")
+        await super().on_exit()
       

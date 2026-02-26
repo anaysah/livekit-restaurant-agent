@@ -2,12 +2,14 @@
 
 // booking/page.tsx
 
-import React, { useState } from 'react'
+import React from 'react'
 import BookingForm from '@/components/website/booking-form'
 import SeatingPlan from '@/components/website/booking/seating-plan'
+import { useAppStore } from '@/lib/store/app-store'
+import { FORMS } from '@/lib/constants'
 
 export default function BookingPage() {
-  const [selectedTable, setSelectedTable] = useState<{ id: number; seats: number } | null>(null)
+  const updateForm = useAppStore((s) => s.updateForm)
 
   return (
     <div
@@ -71,7 +73,7 @@ export default function BookingPage() {
               </button>
             </div>
           )} */}
-          <BookingForm selectedTable={selectedTable} />
+          <BookingForm />
         </div>
 
         {/* Right — Seating Plan (sticky) */}
@@ -80,7 +82,12 @@ export default function BookingPage() {
           background: "var(--color-background)",
           }}>
           <SeatingPlan
-            onSelect={(table: { id: number; seats: number } | null) => setSelectedTable(table)}
+            onSelect={(table: { id: number; seats: number } | null) =>
+              updateForm(FORMS.BOOKING.id, {
+                table_id:    table?.id    ?? null,
+                table_seats: table?.seats ?? null,
+              })
+            }
           />
         </div>
       </div>

@@ -2,14 +2,13 @@
 
 "use client";
 
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
 import { useAppStore, selectFormData } from "@/lib/store/app-store";
 import { useRegisterElement } from "@/hooks/useRegisterElement";
 import { FORMS, UI_TO_AGENT_EVENTS } from "@/lib/constants";
+import { useFormSync } from "@/hooks/useFormSync";
 
-type SelectedTable = { id: number; seats: number } | null
-
-export default function BookingForm({ selectedTable }: { selectedTable?: SelectedTable }) {
+export default function BookingForm() {
   // 1. Register Container for Scrolling
   const containerRef = useRegisterElement(FORMS.BOOKING.id);
 
@@ -18,23 +17,10 @@ export default function BookingForm({ selectedTable }: { selectedTable?: Selecte
   const updateForm = useAppStore((s) => s.updateForm);
   const dispatchOutboundSignal = useAppStore((s) => s.dispatchOutboundSignal);
 
-  // Sync selectedTable prop → form store whenever it changes
-  useEffect(() => {
-    updateForm(FORMS.BOOKING.id, {
-      table_id: selectedTable?.id ?? null,
-      table_seats: selectedTable?.seats ?? null,
-    });
-  }, [selectedTable, updateForm]);
+  // 3. Auto-sync valid field changes → agent (per-field rules + debounce)
+  useFormSync(FORMS.BOOKING.id);
 
-  // 3. Outbound Handlers
-  // onBlur: User left a field -> send current form snapshot to agent
-  const handleBlur = useCallback(() => {
-    dispatchOutboundSignal(UI_TO_AGENT_EVENTS.FORM_UPDATE, {
-      formId: FORMS.BOOKING.id,
-      values: formData,
-    });
-  }, [dispatchOutboundSignal, formData]);
-
+  // 4. Outbound Handlers
   // onSubmit: User confirmed booking -> send full form to agent
   const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
@@ -65,14 +51,14 @@ export default function BookingForm({ selectedTable }: { selectedTable?: Selecte
               </label>
               <div
                 className="w-full px-4 py-2 border rounded-sm flex items-center gap-3 min-h-[42px]"
-                style={selectedTable
+                style={formData.table_id
                   ? { background: "color-mix(in srgb, var(--color-primary) 8%, var(--color-background))", borderColor: "color-mix(in srgb, var(--color-primary) 40%, transparent)" }
                   : { background: "var(--color-background)", borderColor: "var(--color-border)" }
                 }
               >
-                {selectedTable ? (
+                {formData.table_id ? (
                   <span className="text-sm font-medium" style={{ color: "var(--color-primary)" }}>
-                    🪑 Table {selectedTable.id} &mdash; {selectedTable.seats} seats
+                    🪑 Table {formData.table_id} &mdash; {formData.table_seats} seats
                   </span>
                 ) : (
                   <span className="text-sm" style={{ color: "var(--color-text-muted)" }}>
@@ -93,7 +79,6 @@ export default function BookingForm({ selectedTable }: { selectedTable?: Selecte
                   required
                   value={formData.customer_name || ""}
                   onChange={(e) => updateForm(FORMS.BOOKING.id, { customer_name: e.target.value })}
-                  onBlur={handleBlur}
                   className="w-full px-4 py-2 bg-background border border-border rounded-sm focus:outline-none focus:border-primary text-foreground"
                   placeholder="John Doe"
                 />
@@ -109,7 +94,6 @@ export default function BookingForm({ selectedTable }: { selectedTable?: Selecte
                   required
                   value={formData.customer_phone || ""}
                   onChange={(e) => updateForm(FORMS.BOOKING.id, { customer_phone: e.target.value })}
-                  onBlur={handleBlur}
                   className="w-full px-4 py-2 bg-background border border-border rounded-sm focus:outline-none focus:border-primary text-foreground"
                   placeholder="+1 234 567 890"
                 />
@@ -124,7 +108,6 @@ export default function BookingForm({ selectedTable }: { selectedTable?: Selecte
                   required
                   value={formData.no_of_guests || "2"}
                   onChange={(e) => updateForm(FORMS.BOOKING.id, { no_of_guests: e.target.value })}
-                  onBlur={handleBlur}
                   className="w-full px-4 py-2 bg-background border border-border rounded-sm focus:outline-none focus:border-primary text-foreground"
                 >
                   {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
@@ -143,7 +126,6 @@ export default function BookingForm({ selectedTable }: { selectedTable?: Selecte
                   required
                   value={formData.reservation_date || ""}
                   onChange={(e) => updateForm(FORMS.BOOKING.id, { reservation_date: e.target.value })}
-                  onBlur={handleBlur}
                   className="w-full px-4 py-2 bg-background border border-border rounded-sm focus:outline-none focus:border-primary text-foreground"
                 />
               </div>
@@ -158,7 +140,6 @@ export default function BookingForm({ selectedTable }: { selectedTable?: Selecte
                   required
                   value={formData.reservation_time || ""}
                   onChange={(e) => updateForm(FORMS.BOOKING.id, { reservation_time: e.target.value })}
-                  onBlur={handleBlur}
                   className="w-full px-4 py-2 bg-background border border-border rounded-sm focus:outline-none focus:border-primary text-foreground"
                 />
               </div>
@@ -173,7 +154,6 @@ export default function BookingForm({ selectedTable }: { selectedTable?: Selecte
                 rows={4}
                 value={formData.special_requests || ""}
                 onChange={(e) => updateForm(FORMS.BOOKING.id, { special_requests: e.target.value })}
-                onBlur={handleBlur}
                 className="w-full px-4 py-2 bg-background border border-border rounded-sm focus:outline-none focus:border-primary text-foreground resize-none"
                 placeholder="Any special requirements or requests..."
               />

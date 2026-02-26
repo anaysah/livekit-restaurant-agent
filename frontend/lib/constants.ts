@@ -63,6 +63,7 @@ export const AGENT_UI_ACTIONS = {
 }
 
 export const AGENT_UI_TOPIC_NAME = "agent-to-ui"; // Data channel topic for agent -> UI communication
+export const UI_TO_AGENT_TOPIC_NAME = "ui-to-agent"; // Data channel topic for UI -> agent communication
 
 // UI -> Agent outbound event types
 export const UI_TO_AGENT_EVENTS = {
