@@ -29,6 +29,7 @@ from livekit.plugins import deepgram, noise_cancellation, silero, groq, mistrala
 from livekit.plugins.turn_detector.multilingual import MultilingualModel
 
 
+from src.agents.order_food import OrderFood
 from src.dataclass import UserData, RunContext_T
 from src.logger_config import agent_flow
 from src.tasks import CollectReservationInfo
@@ -156,6 +157,7 @@ async def my_agent(ctx: JobContext):
     userdata.agents.update({
         "greeter": Greeter(models["tts"]("thalia")),
         "reservation": Reservation(models["tts"]("odysseus")),
+        "order_food": OrderFood(models["tts"]("odysseus")),  # Reusing Reservation agent for orders
     })
     userdata.usage_collector = metrics.UsageCollector()
 
@@ -173,67 +175,6 @@ async def my_agent(ctx: JobContext):
     @session.on("metrics_collected")
     def _on_metrics_collected(ev: MetricsCollectedEvent):
         userdata.usage_collector.collect(ev.metrics)
-        
-    
-    # @ctx.room.on("data_received")
-    # def _on_data_received(packet: rtc.DataPacket):
-    #     if packet.topic != "ui-to-agent":
-    #         return  # Ignore messages not meant for the agent
-        
-    #     try:
-    #         msg = json.loads(packet.data.decode())
-    #         msg_type = msg.get("type")
-    #         payload = msg.get("payload", {})
-    #         agent_flow.info(f"📥 UI→Agent: type={msg_type} payload={payload}")
-
-    #         if msg_type in ("FORM_UPDATE", "FORM_SUBMITTED"):
-    #             form_id = payload.get("formId")
-    #             values = payload.get("values", {})
-    #             if form_id and values:
-    #                 userdata.apply_form_update(form_id, values)
-    #                 agent_flow.info(f"✅ Form updated: {form_id} → {values}")
-                    
-                    
-
-    #                 # Inject updated context and make agent respond
-    #                 session.generate_reply(
-    #                     instructions=f"The user just updated the form '{form_id}' with values {values}."
-    #                 )
-
-    #         elif msg_type == "PAGE_CHANGED":
-    #             page = payload.get("page")
-    #             if page:
-    #                 userdata.update_meta({"current_page": page})
-    #                 agent_flow.info(f"✅ Page changed: {page}")
-
-    #     except Exception as e:
-    #         agent_flow.error(f"❌ Error handling data: {e}")
-    
-    # async def save_transcript():
-    #     import json
-    #     from datetime import datetime
-        
-    #     # Session history nikalo
-    #     # history = session.history.to_dict() # ismei sirf conversation hoti hai
-    #     history = ctx.make_session_report().to_dict() # ismei listning speaking vagera event bhi hote hain
-        
-    #     # File mein save karo
-    #     filename = f"logs/transcript_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-    #     with open(filename, 'w') as f:
-    #         json.dump(history, f, indent=2)
-        
-    #     print(f"✅ Saved: {filename}")
-    
-    # Callback register karo
-    # ctx.add_shutdown_callback(save_transcript)
-    
-    # session.on("conversation_item_added", lambda event: conversation_logger.info(f"{event.item.role}: {event.item.content or ''}"))
-    # @session.on("conversation_item_added")
-    # def log_conversation(event):
-    #     item = event.item
-    #     # log full item for debugging
-    #     conversation_logger.info(f"{item.role}: {item}")
-    
 
     await session.start(
         agent=userdata.agents["greeter"],

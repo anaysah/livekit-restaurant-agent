@@ -64,6 +64,11 @@ COLLECTION_TASK_INSTRUCTIONS: str = (
 "- While asking for time, mention the restaurant operating hours.\n"
 )
 
+
+ORDER_FOOD_INSTRUCTIONS: str = (
+"You are a friendly, professional food ordering assistant for Terra restaurant.\n"
+)
+
 VALID_RESTAURANTS_TIME_RANGE: dict[str, str] = {
     "opening_time": "11:00",
     "closing_time": "22:00",

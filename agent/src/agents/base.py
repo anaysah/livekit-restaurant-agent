@@ -20,6 +20,14 @@ class BaseAgent(Agent):
     # None means full summarize() is used.
     _context_form_id: str | None = None
 
+    # Maps frontend page IDs (matchingPage.id from constants.ts PAGES) → agent keys in userdata.agents.
+    # Override in subclasses to customise routing. Empty dict disables auto-switching.
+    PAGE_AGENT_MAP: dict[str, str] = {
+        "booking": "reservation",
+        "order":   "order_food",
+        "home":    "greeter",
+    }
+
     async def on_enter(self) -> None:
         agent_name = self.__class__.__name__
         agent_flow.info(f"🚀 ENTERING AGENT: {agent_name}")
@@ -54,7 +62,7 @@ class BaseAgent(Agent):
         )
         chat_ctx.add_message(
             role="system",
-            content=f"You are {agent_name} agent. Current saved user data in Database is:\n{data_summary}"
+            content=f"Current saved user data in Database is:\n{data_summary}"
         )
         await self.update_chat_ctx(chat_ctx)
         await self.session.generate_reply()
@@ -81,7 +89,18 @@ class BaseAgent(Agent):
             if page:
                 self._userdata.update_meta({"current_page": page})
                 agent_flow.info(f"✅ Page changed: {page}")
-                self._queue_llm_update(f"User navigated to page: {page}")
+                target_name = self.PAGE_AGENT_MAP.get(page)
+                current_agent = self.session.current_agent
+                target_agent = self._userdata.agents.get(target_name) if target_name else None
+                if target_agent is not None and target_agent is not current_agent:
+                    agent_flow.info(f"🔀 Auto-switching to '{target_name}' agent for page: {page}")
+                    try:
+                        loop = asyncio.get_running_loop()
+                        loop.create_task(self._switch_agent_for_page(target_name))
+                    except RuntimeError:
+                        pass
+                else:
+                    self._queue_llm_update(f"User navigated to page: {page}")
 
     def _queue_llm_update(self, update_text: str):
         """Collect UI updates and debounce LLM reply so rapid messages are batched."""
@@ -160,6 +179,21 @@ class BaseAgent(Agent):
             await self.session.say("I'm sorry, I'm having trouble forming a response. Could you please repeat that?")
         except RuntimeError as e:
             agent_flow.warning(f"⚠️ Silence watchdog: session no longer active: {e}")
+
+    async def _switch_agent_for_page(self, agent_name: str) -> None:
+        """Switch to a different agent triggered by a page navigation event."""
+        try:
+            userdata = self._userdata
+            next_agent = userdata.agents.get(agent_name)
+            if next_agent is None:
+                agent_flow.warning(f"⚠️ No agent found for name: {agent_name}")
+                return
+            userdata.prev_agent = self.session.current_agent
+            await self.session.interrupt(force=True)
+            self.session.update_agent(next_agent)
+            agent_flow.info(f"✅ Agent switched to: {agent_name}")
+        except RuntimeError as e:
+            agent_flow.warning(f"⚠️ Agent switch failed: {e}")
 
     async def _transfer_to_agent(self, name: str, context: RunContext_T) -> tuple[Agent, str]:
         userdata = context.userdata
