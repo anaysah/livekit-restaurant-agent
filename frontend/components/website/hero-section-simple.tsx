@@ -3,6 +3,7 @@
 
 import React from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 export default function HeroSection() {
   return (
@@ -11,13 +12,14 @@ export default function HeroSection() {
       className="relative overflow-hidden" //how to padding in botoom?
       style={{
         minHeight: "100svh",
-        display: "grid",
-        gridTemplateColumns: "1fr 1fr",
+        display: "flex",
+        // gridTemplateColumns: "1fr 1fr",
         alignItems: "center",
-        padding: "0 5%",
-        paddingTop: "",
-        paddingBottom: "20px",
-        gap: "60px",
+        paddingLeft: "5%",
+        // padding: "0 5%",
+        // paddingTop: "",
+        // paddingBottom: "20px",
+        // gap: "60px",
       }}
     >
       {/* Background radial gradient */}
@@ -32,7 +34,7 @@ export default function HeroSection() {
       />
 
       {/* ── Left: Content ── */}
-      <div className="relative z-10">
+      <div className="relative z-10 w-auto">
         {/* Eyebrow */}
         <div
           className="terra-fade-up inline-flex items-center gap-2.5 text-[11px] font-semibold tracking-[4px] uppercase mb-6"
@@ -45,7 +47,7 @@ export default function HeroSection() {
 
         {/* Title */}
         <h1
-          className="terra-fade-up font-bold mb-6"
+          className="terra-fade-up font-bold mb-6 whitespace-nowrap"
           style={{
             fontFamily: "var(--font-serif)",
             fontSize: "clamp(48px, 5.5vw, 76px)",
@@ -178,93 +180,25 @@ export default function HeroSection() {
 
       {/* ── Right: Visual ── */}
       <div
-        className="terra-fade-up relative z-10 flex items-center justify-center"
-        style={{ animationDelay: "0.3s" }}
+        className="hero-visual-wrap relative flex items-center justify-center terra-fade-up"
+        style={{ animationDelay: "0.3s", overflow: "hidden", alignSelf: "stretch" }}
       >
-        {/* Hero plate circle */}
-        <div
-          className="terra-float relative flex items-center justify-center rounded-full"
+        <Image
+          src="/group-5.png"
+          alt="Food journey"
+          width={700}
+          height={800}
+          priority
           style={{
             width: "100%",
-            maxWidth: "500px",
-            aspectRatio: "1",
-            background: "var(--color-background-subtle)",
-            border: "1px solid var(--color-border)",
-            fontSize: "clamp(120px, 18vw, 200px)",
-            boxShadow: "var(--shadow-lg)",
+            height: "auto",
+            objectFit: "cover",
+            objectPosition: "center bottom",
+            marginTop: "-110px",
+            marginBottom: "-60px",
+            // filter: "drop-shadow(0 24px 48px rgba(44,28,16,0.12))",
           }}
-        >
-          {/* Dashed outer rings */}
-          <div
-            className="absolute rounded-full pointer-events-none"
-            style={{
-              inset: "-12px",
-              border: "1px dashed var(--color-border)",
-            }}
-          />
-          <div
-            className="absolute rounded-full pointer-events-none"
-            style={{
-              inset: "-28px",
-              border: "1px dashed color-mix(in srgb, var(--color-border) 40%, transparent)",
-            }}
-          />
-          🍽️
-
-          {/* Badge 1 — Farm to Table */}
-          <div
-            className="terra-badge1 absolute flex items-center gap-2 rounded-xl px-3.5 py-2.5 whitespace-nowrap"
-            style={{
-              top: "10%",
-              right: "-5%",
-              background: "var(--color-card)",
-              border: "1px solid var(--color-border)",
-              boxShadow: "var(--shadow-md)",
-            }}
-          >
-            <span className="text-lg">🌿</span>
-            <div>
-              <div className="text-xs font-semibold" style={{ color: "var(--color-text-main)" }}>Farm to Table</div>
-              <div className="text-[10px]" style={{ color: "var(--color-text-muted)" }}>100% Seasonal</div>
-            </div>
-          </div>
-
-          {/* Badge 2 — Award Winning */}
-          <div
-            className="terra-badge2 absolute flex items-center gap-2 rounded-xl px-3.5 py-2.5 whitespace-nowrap"
-            style={{
-              bottom: "18%",
-              left: "-8%",
-              background: "var(--color-card)",
-              border: "1px solid var(--color-border)",
-              boxShadow: "var(--shadow-md)",
-            }}
-          >
-            <span className="text-lg">⭐</span>
-            <div>
-              <div className="text-xs font-semibold" style={{ color: "var(--color-text-main)" }}>Award Winning</div>
-              <div className="text-[10px]" style={{ color: "var(--color-text-muted)" }}>Best Fusion 2024</div>
-            </div>
-          </div>
-
-          {/* Badge 3 — Open Today */}
-          <div
-            className="terra-badge3 absolute flex items-center gap-2 rounded-xl px-3.5 py-2.5 whitespace-nowrap"
-            style={{
-              top: "45%",
-              right: "-10%",
-              background: "var(--color-card)",
-              border: "1px solid var(--color-border)",
-              boxShadow: "var(--shadow-md)",
-            }}
-          >
-            <span className="text-lg">🕐</span>
-            <div>
-              <div className="text-xs font-semibold" style={{ color: "var(--color-text-main)" }}>Open Today</div>
-              <div className="text-[10px]" style={{ color: "var(--color-text-muted)" }}>12pm – 11pm</div>
-            </div>
-          </div>
-        </div>
+        />
       </div>
 
       {/* ── Responsive: stack on mobile ── */}

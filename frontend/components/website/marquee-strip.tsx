@@ -11,7 +11,7 @@ export default function MarqueeStrip() {
 
   return (
     <div
-      className="overflow-hidden py-3.5 my-2"
+      className="overflow-hidden py-3.5"
       style={{ background: "var(--color-primary)" }}
     >
       <div className="terra-marquee flex gap-0 whitespace-nowrap" style={{ width: "max-content" }}>
