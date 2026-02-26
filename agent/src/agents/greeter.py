@@ -28,20 +28,33 @@ class Greeter(BaseAgent):
     async def to_reservation(
         self,
         context: RunContext_T,
-        # ADDED DUMMY ARGUMENT
         request: Annotated[str, Field(description="User request confirmation")] = "reservation",
     ) -> tuple[Agent, str]:
         """Called when user wants to make a reservation."""
-        # Send navigation message to frontend
         userdata = context.userdata
         if userdata.job_ctx:
             await send_to_ui(
                 userdata.job_ctx,
                 "NAVIGATE_PAGE",
-                {
-                    "page": "booking",
-                }
+                {"page": "booking"}
             )
             agent_flow.info("🔄 Navigating user to booking page")
         return await self._transfer_to_agent("reservation", context)
+
+    @function_tool()
+    async def to_order_food(
+        self,
+        context: RunContext_T,
+        request: Annotated[str, Field(description="User request confirmation")] = "order",
+    ) -> tuple[Agent, str]:
+        """Called when user wants to order food."""
+        userdata = context.userdata
+        if userdata.job_ctx:
+            await send_to_ui(
+                userdata.job_ctx,
+                "NAVIGATE_PAGE",
+                {"page": "order"}
+            )
+            agent_flow.info("🔄 Navigating user to order page")
+        return await self._transfer_to_agent("order_food", context)
   

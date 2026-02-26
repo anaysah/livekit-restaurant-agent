@@ -64,6 +64,20 @@ class BaseAgent(Agent):
             role="system",
             content=f"Current saved user data in Database is:\n{data_summary}"
         )
+
+        # If this agent was activated by a page navigation, inject that trigger as context
+        page_trigger = userdata.get_meta("page_switch_trigger")
+        if page_trigger:
+            chat_ctx.add_message(
+                role="system",
+                content=(
+                    f"The user just navigated to the '{page_trigger}' page. "
+                    f"You have been automatically activated because this page is your responsibility. "
+                    f"Greet the user briefly and offer your assistance relevant to this page."
+                )
+            )
+            userdata.update_meta({"page_switch_trigger": None})
+
         await self.update_chat_ctx(chat_ctx)
         await self.session.generate_reply()
         
@@ -96,7 +110,7 @@ class BaseAgent(Agent):
                     agent_flow.info(f"🔀 Auto-switching to '{target_name}' agent for page: {page}")
                     try:
                         loop = asyncio.get_running_loop()
-                        loop.create_task(self._switch_agent_for_page(target_name))
+                        loop.create_task(self._switch_agent_for_page(target_name, page))
                     except RuntimeError:
                         pass
                 else:
@@ -180,7 +194,7 @@ class BaseAgent(Agent):
         except RuntimeError as e:
             agent_flow.warning(f"⚠️ Silence watchdog: session no longer active: {e}")
 
-    async def _switch_agent_for_page(self, agent_name: str) -> None:
+    async def _switch_agent_for_page(self, agent_name: str, page: str | None = None) -> None:
         """Switch to a different agent triggered by a page navigation event."""
         try:
             userdata = self._userdata
@@ -188,8 +202,24 @@ class BaseAgent(Agent):
             if next_agent is None:
                 agent_flow.warning(f"⚠️ No agent found for name: {agent_name}")
                 return
+
+            # Cancel pending debounce so it doesn't fire on the outgoing agent
+            if hasattr(self, "_debounce_task") and self._debounce_task and not self._debounce_task.done():
+                self._debounce_task.cancel()
+
+            # Cancel silence watchdog so it doesn't fire on the outgoing agent
+            self._cancel_silence_watchdog()
+
             userdata.prev_agent = self.session.current_agent
+            if page:
+                userdata.update_meta({"page_switch_trigger": page})
+
+            # Force-interrupt any ongoing speech/generation
             await self.session.interrupt(force=True)
+
+            # Yield to let the interrupt fully propagate through the TTS/audio pipeline
+            await asyncio.sleep(0.1)
+
             self.session.update_agent(next_agent)
             agent_flow.info(f"✅ Agent switched to: {agent_name}")
         except RuntimeError as e:
