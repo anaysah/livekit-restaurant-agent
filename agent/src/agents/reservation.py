@@ -1,26 +1,29 @@
+# agents/ reservation.py
+
 from datetime import datetime as dt
 from typing import Annotated
 from pydantic import Field
 import re
 
 from src.agents.base import BaseAgent
-from src.dataclass import UserData, RunContext_T, BOOKING_FORM_ID
+from src.dataclass import UserData, RunContext_T, BOOKING_FORM_ID, ORDER_FORM_ID
 from src.fn import send_to_ui
 from src.variables import COMMON_RULES, COLLECTION_TASK_INSTRUCTIONS, MAX_RESERVATION_GUESTS, VALID_RESTAURANTS_TIME_RANGE
 from src.logger_config import agent_flow
 
 from livekit.agents import (
     function_tool,
+    Agent,
 )
-
-from src.variables import (
-    COLLECTION_TASK_INSTRUCTIONS,
-    COMMON_RULES,
-    MAX_RESERVATION_GUESTS,
-    VALID_RESTAURANTS_TIME_RANGE,
-)
+from livekit.agents import llm
 
 class Reservation(BaseAgent):
+    _context_form_id = BOOKING_FORM_ID  # used by BaseAgent.on_enter initial log
+
+    # Sliding window config — only for Reservation
+    _STATE_MARKER = "[STATE_SNAPSHOT]"
+    _WINDOW_SIZE  = 6  # last N non-system items kept per LLM call
+
     TASK_SPECIFIC_CONTEXT: str = (
         f"Current datetime: {dt.now().strftime('%Y-%m-%d %H:%M')}\n "
         f"No of guests must be between 1 and {MAX_RESERVATION_GUESTS}.\n "
@@ -31,9 +34,41 @@ class Reservation(BaseAgent):
         super().__init__(
             instructions=f"{COMMON_RULES} {COLLECTION_TASK_INSTRUCTIONS} \n {self.TASK_SPECIFIC_CONTEXT}",
             tts=tts,
-            # llm=models["llm"],
         )
-        # self.userdata: UserData = UserData()
+
+    def llm_node(self, chat_ctx: llm.ChatContext, tools, model_settings):
+        """Before every LLM call:
+        1. Drop any stale [STATE_SNAPSHOT] system messages
+        2. Keep only the last _WINDOW_SIZE conversation items
+        3. Inject a fresh booking-form state snapshot
+        """
+        userdata: UserData = getattr(self, "_userdata", None)
+
+        instruction_items: list = []
+        conv_items: list = []
+        for item in chat_ctx.items:
+            if item.type == "message" and item.role == "system":
+                text = item.text_content or ""
+                if text.startswith(self._STATE_MARKER):
+                    continue  # drop stale snapshot
+                instruction_items.append(item)
+            else:
+                conv_items.append(item)
+
+        windowed = conv_items[-self._WINDOW_SIZE:]
+
+        if userdata is not None:
+            data_summary = userdata.summarize_form(BOOKING_FORM_ID)
+            snapshot_msg = llm.ChatMessage(
+                role="system",
+                content=[f"{self._STATE_MARKER}\n{data_summary}"],
+            )
+            new_items = instruction_items + [snapshot_msg] + windowed
+        else:
+            new_items = instruction_items + windowed
+
+        new_ctx = llm.ChatContext(items=new_items)
+        return Agent.default.llm_node(self, new_ctx, tools, model_settings)
         
     @function_tool()
     async def get_todays_date_n_time(
@@ -56,7 +91,7 @@ class Reservation(BaseAgent):
         await send_to_ui(self.session.userdata.job_ctx, "FORM_PREFILL", {
             "formId": BOOKING_FORM_ID, "values": {"customer_name": name}
         })
-        return "Name collected successfully. Continue collecting remaining information."
+        return '{"status": "ok"}'
        
     @function_tool
     async def save_customer_phone(
@@ -78,7 +113,7 @@ class Reservation(BaseAgent):
             "formId": BOOKING_FORM_ID, "values": {"customer_phone": phone}
         })
         # return self._check_data_collection_complete
-        return "Phone number collected successfully. Continue collecting remaining information."
+        return '{"status": "ok"}'
     
     @function_tool
     async def save_guests(
@@ -96,8 +131,8 @@ class Reservation(BaseAgent):
         await send_to_ui(self.session.userdata.job_ctx, "FORM_PREFILL", {
             "formId": BOOKING_FORM_ID, "values": {"no_of_guests": no_of_guests}
         })
-        # return self._check_data_collection_complete("Number of guests
-        return "Number of guests collected successfully. Continue collecting remaining information."
+        # return self._check_data_collection_complete("Number of guests")
+        return '{"status": "ok"}'
     
     @function_tool
     async def save_reservation_date(
@@ -118,7 +153,7 @@ class Reservation(BaseAgent):
         await send_to_ui(self.session.userdata.job_ctx, "FORM_PREFILL", {
             "formId": BOOKING_FORM_ID, "values": {"reservation_date": reservation_date}
         })
-        return f"Reservation date {reservation_date} collected successfully. Continue collecting remaining information."
+        return '{"status": "ok"}'
 
     @function_tool
     async def save_reservation_time(
@@ -140,7 +175,7 @@ class Reservation(BaseAgent):
         await send_to_ui(self.session.userdata.job_ctx, "FORM_PREFILL", {
             "formId": BOOKING_FORM_ID, "values": {"reservation_time": reservation_time}
         })
-        return f"Reservation time {reservation_time} collected successfully. Continue collecting remaining information."
+        return '{"status": "ok"}'
     
     @function_tool
     async def save_special_requests(
@@ -154,8 +189,8 @@ class Reservation(BaseAgent):
         await send_to_ui(self.session.userdata.job_ctx, "FORM_PREFILL", {
             "formId": BOOKING_FORM_ID, "values": {"special_requests": special_requests}
         })
-        # return self._check_data_collection_complete("Special
-        return "Special requests collected successfully. Continue collecting remaining information."
+        # return self._check_data_collection_complete("Special requests")
+        return '{"status": "ok"}'
 
     @function_tool
     async def save_table(
@@ -171,7 +206,7 @@ class Reservation(BaseAgent):
         await send_to_ui(self.session.userdata.job_ctx, "FORM_PREFILL", {
             "formId": BOOKING_FORM_ID, "values": {"table_id": table_id, "table_seats": table_seats}
         })
-        return f"Table {table_id} with {table_seats} seats saved successfully. Continue collecting remaining information."
+        return '{"status": "ok"}'
         
     @function_tool
     async def check_data_collection_complete(
@@ -186,6 +221,8 @@ class Reservation(BaseAgent):
             "reservation_date",
             "reservation_time",
             "special_requests",
+            "table_id",
+            "table_seats",
         ]
         
         not_collected_fields = [
@@ -195,7 +232,7 @@ class Reservation(BaseAgent):
         if not_collected_fields:
             return f"Remaining information to save: {', '.join(not_collected_fields)}."
         
-        return "Tell them all data completed."
+        return '{"status": "completed"}'
 
     async def on_exit(self):
         agent_flow.info("📌 Exiting CollectInfoTask")

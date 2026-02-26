@@ -1,7 +1,6 @@
 from dataclasses import dataclass, field, asdict
 from typing import Any, Optional
 from livekit.agents import Agent, metrics
-import yaml
 
 # Form IDs — must match frontend constants.ts
 BOOKING_FORM_ID = "booking-form"
@@ -149,20 +148,85 @@ class UserData:
     # ── Summarize ─────────────────────────────────────────────────────
 
     def summarize(self) -> str:
-        """Human-readable YAML summary passed to LLM context."""
-        output: dict[str, Any] = {}
+        """Human-readable summary passed to LLM context.
+        Shows ALL fields (collected + pending) so the agent knows exactly
+        what's done and what still needs to be asked.
+        """
+        lines: list[str] = []
 
-        booking_dict = self.booking.to_dict()
-        if booking_dict:
-            output[BOOKING_FORM_ID] = booking_dict
+        # ── Booking / Reservation form ───────────────────────────────
+        booking = self.booking
+        booking_fields = {
+            "customer_name":    booking.customer_name,
+            "customer_phone":   booking.customer_phone,
+            "no_of_guests":     booking.no_of_guests,
+            "reservation_date": booking.reservation_date,
+            "reservation_time": booking.reservation_time,
+            "special_requests": booking.special_requests,
+            "table_id":         booking.table_id,
+            "table_seats":      booking.table_seats,
+        }
+        lines.append("=== Booking Reservation Form ===")
+        for field_name, value in booking_fields.items():
+            if value is not None:
+                lines.append(f"  {field_name}: {value}")
+            else:
+                lines.append(f"  {field_name}: (not collected yet)")
 
-        order_dict = self.order.to_dict()
-        if order_dict.get("items"):
-            output[ORDER_FORM_ID] = order_dict
+        # ── Order / Cart form ────────────────────────────────────────
+        if self.order.items:
+            lines.append("=== Order Cart ===")
+            for item in self.order.items:
+                lines.append(f"  - {item.name} x{item.quantity} @ ₹{item.price}")
+            lines.append(f"  total_items: {self.order.total_items}")
+            lines.append(f"  total_price: ₹{self.order.total_price}")
 
+        # ── Session meta ─────────────────────────────────────────────
         if self.meta:
-            output["meta"] = self.meta
+            lines.append("=== Session Info ===")
+            for k, v in self.meta.items():
+                lines.append(f"  {k}: {v}")
 
-        return yaml.dump(output, default_flow_style=False, indent=2) if output else "No data collected yet."
+        return "\n".join(lines) if lines else "No data collected yet."
+
+    def summarize_form(self, form_id: str) -> str:
+        """Return a summary of a single form by its ID.
+        
+        Usage:
+            userdata.summarize_form(BOOKING_FORM_ID)
+            userdata.summarize_form(ORDER_FORM_ID)
+        """
+        if form_id == BOOKING_FORM_ID:
+            booking = self.booking
+            fields = {
+                "customer_name":    booking.customer_name,
+                "customer_phone":   booking.customer_phone,
+                "no_of_guests":     booking.no_of_guests,
+                "reservation_date": booking.reservation_date,
+                "reservation_time": booking.reservation_time,
+                "special_requests": booking.special_requests,
+                "table_id":         booking.table_id,
+                "table_seats":      booking.table_seats,
+            }
+            lines = ["=== Booking Reservation Form ==="]
+            for field_name, value in fields.items():
+                if value is not None:
+                    lines.append(f"  {field_name}: {value}")
+                else:
+                    lines.append(f"  {field_name}: (not collected yet)")
+            return "\n".join(lines)
+
+        if form_id == ORDER_FORM_ID:
+            order = self.order
+            if not order.items:
+                return "=== Order Cart ===\n  (empty)"
+            lines = ["=== Order Cart ==="]
+            for item in order.items:
+                lines.append(f"  - {item.name} x{item.quantity} @ ₹{item.price}")
+            lines.append(f"  total_items: {order.total_items}")
+            lines.append(f"  total_price: ₹{order.total_price}")
+            return "\n".join(lines)
+
+        return f"Unknown form_id: {form_id}"
 
 RunContext_T = RunContext[UserData]

@@ -1,3 +1,5 @@
+# agents/base.py
+
 from livekit.agents import (
     Agent,
     function_tool,
@@ -13,6 +15,11 @@ from src.fn import summarize_agent_handoff
 
 
 class BaseAgent(Agent):
+    # Override in subclasses to scope the context summary to a specific form.
+    # e.g. _context_form_id = BOOKING_FORM_ID
+    # None means full summarize() is used.
+    _context_form_id: str | None = None
+
     async def on_enter(self) -> None:
         agent_name = self.__class__.__name__
         agent_flow.info(f"🚀 ENTERING AGENT: {agent_name}")
@@ -40,9 +47,14 @@ class BaseAgent(Agent):
             chat_ctx = summarized_ctx
 
 
+        data_summary = (
+            userdata.summarize_form(self._context_form_id)
+            if self._context_form_id
+            else userdata.summarize()
+        )
         chat_ctx.add_message(
             role="system",
-            content=f"You are {agent_name} agent. Current saved user data in Database is {userdata.summarize()}"
+            content=f"You are {agent_name} agent. Current saved user data in Database is:\n{data_summary}"
         )
         await self.update_chat_ctx(chat_ctx)
         await self.session.generate_reply()
@@ -107,9 +119,9 @@ class BaseAgent(Agent):
 
         try:
             # Interrupt any currently running speech/generation before starting fresh
-            if self.session.current_speech is not None:
-                agent_flow.info("⛔ Interrupting current speech for UI update...")
-                await self.session.interrupt(force=True)
+            # if self.session.current_speech is not None:
+            #     agent_flow.info("⛔ Interrupting current speech for UI update...")
+            await self.session.interrupt(force=True)
 
             agent_flow.info(f"🤖 Triggering LLM reply after {len(updates)} UI update(s): {updates}")
             await self.session.generate_reply()
