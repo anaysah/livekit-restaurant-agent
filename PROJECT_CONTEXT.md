@@ -35,6 +35,25 @@ user never has to touch a form.
 Both sides share a single Zustand store (`AppStore`) as the source of truth. The agent drives the
 right side; the user can also interact with the website directly and the agent stays in sync.
 
+### Core principle — Agent executes, UI collects
+
+The agent is the decision-maker and the only entity that calls the backend (make reservation,
+place order, etc.). The UI's job is to collect and display data — not to call APIs directly.
+
+```
+User (voice or form)  →  data reaches agent  →  agent calls backend tool
+                               ↕
+                         UI displays state
+```
+
+The "Confirm Booking" / "Place Order" submit buttons do **not** call any backend API. They
+dispatch a `FORM_SUBMITTED` signal to the agent, which then decides to call `make_reservation()`
+or `place_order()` tools. This means:
+
+- A voice user saying "yes, confirm" and a UI user clicking "Confirm" trigger the same agent path.
+- The UI form is an alternate input method, not an independent system.
+- The agent is the single source of backend truth.
+
 ---
 
 ## Backend — Python Agent (`/agent/src/`)

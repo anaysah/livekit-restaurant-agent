@@ -10,52 +10,9 @@ import { useEffect, useRef } from "react";
 import { useAppStore, selectFormData } from "@/lib/store/app-store";
 import { useShallow } from "zustand/react/shallow";
 import { UI_TO_AGENT_EVENTS } from "@/lib/constants";
+import { BOOKING_FIELD_RULES as FIELD_RULES, TABLE_FIELDS } from "@/lib/form-rules";
 
-// ─── Per-field rules ────────────────────────────────────────────────────────
-
-type FieldRule = {
-  debounce: number;                        // ms delay before sending
-  validate?: (value: unknown) => boolean;  // must return true to send
-};
-
-const FIELD_RULES: Record<string, FieldRule> = {
-  customer_name: {
-    debounce: 800,
-    validate: (v) => typeof v === "string" && v.trim().length >= 2,
-  },
-  customer_phone: {
-    debounce: 800,
-    validate: (v) => {
-      const digits = String(v ?? "").replace(/\D/g, "");
-      return digits.length >= 10;
-    },
-  },
-  no_of_guests: {
-    debounce: 0,
-    validate: (v) => {
-      const n = Number(v);
-      return !isNaN(n) && n >= 1 && n <= 20;
-    },
-  },
-  reservation_date: {
-    debounce: 0,
-    validate: (v) => typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v),
-  },
-  reservation_time: {
-    debounce: 0,
-    validate: (v) => typeof v === "string" && /^\d{2}:\d{2}$/.test(v),
-  },
-  special_requests: {
-    debounce: 1200,
-    // Optional field — empty / null / undefined is fine; if filled, min 3 chars
-    validate: (v) => !v || (typeof v === "string" && v.trim().length >= 3),
-  },
-};
-
-// table_id + table_seats are always sent together in one message
-const TABLE_FIELDS = new Set(["table_id", "table_seats"]);
-
-// ─── Hook ────────────────────────────────────────────────────────────────────
+// ─── Hook ──────────────────────────────────────────────────────────────────── 
 
 export function useFormSync(formId: string) {
   // useShallow prevents infinite loop from object selector returning new reference each render
