@@ -131,7 +131,7 @@ export const AgentMessagesContainer = ({ messages, isConnected, agentJoined }: A
               ? 'Ready to chat'
               : 'Agent is joining...'}
           </p>
-          <p className="text-xs text-text-muted leading-relaxed max-w-[200px]">
+          <p className="text-xs text-text-muted leading-relaxed max-w-50">
             {!isConnected
               ? 'Press connect to start your session with Terra.'
               : agentJoined
@@ -144,13 +144,14 @@ export const AgentMessagesContainer = ({ messages, isConnected, agentJoined }: A
   }
 
   return (
-    <div
-      ref={scrollRef}
-      className="flex-1 overflow-y-auto bg-background px-3 py-4 relative"
-      style={{ scrollbarWidth: 'thin' }}
-    >
+    <div className="flex-1 relative bg-background overflow-hidden">
       <ChatDoodlePattern />
-      <div className="relative z-10 space-y-3">
+      <div
+        ref={scrollRef}
+        className="absolute inset-0 overflow-y-auto px-3 py-4"
+        style={{ scrollbarWidth: 'thin' }}
+      >
+        <div className="relative z-10 space-y-3">
       {messages.map((msg, idx) => {
         const isUser = msg.from?.isLocal === true
         const key = msg.id || `${msg.timestamp}-${idx}`
@@ -206,6 +207,7 @@ export const AgentMessagesContainer = ({ messages, isConnected, agentJoined }: A
         )
       })}
       </div>{/* end z-10 wrapper */}
-    </div>
+      </div>{/* end scroll div */}
+    </div>  
   )
 }
