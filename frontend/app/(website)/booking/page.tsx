@@ -14,7 +14,7 @@ export default function BookingPage() {
   return (
     <div
       className="min-h-screen px-[5%] py-[100px]"
-      style={{ background: "var(--color-background)" }}
+      // style={{ background: "var(--color-background)" }}
     >
       {/* ── Page Header ── */}
       <div className="mb-14">

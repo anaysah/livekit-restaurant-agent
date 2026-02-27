@@ -8,11 +8,20 @@ export default function layout({children}:{children:React.ReactNode}) {
       className="flex-1 h-screen overflow-y-auto"
       style={{ background: "var(--color-background)" }}
     >
-      {/* relative here grows to full content height — DoodleBackground's 100% covers the whole page */}
-      <div className="relative overflow-x-hidden">
+      {/*
+        Header is a direct child of the scroll container with no overflow ancestor
+        between them — this is the only way position:sticky works correctly.
+      */}
+      <Header />
+
+      {/*
+        Content wrapper: position:relative so DoodleBackground (absolute, height:100%)
+        fills exactly the content height. No overflow set here — DoodleBackground
+        handles its own clipping internally via overflow:hidden.
+      */}
+      <div className="relative">
         <DoodleBackground />
         <div className="relative z-10">
-          <Header />
           {children}
         </div>
       </div>
