@@ -1,90 +1,87 @@
 "use client"
 
+import { useTheme } from "next-themes"
 import { useState, useEffect } from "react"
 
+// ─── Types ─────────────────────────────────────────────────────────────────────
+
 type Seats = 2 | 4 | 6 | 8
-type Table = { id: number; seats: Seats; x: number; y: number; w: number; h: number }
-type PaletteEntry = { color: string; fill: string; text: string; chip: string; chipText: string; label: string }
+
+type Table = {
+  id:    number
+  seats: Seats
+  x:     number
+  y:     number
+  w:     number
+  h:     number
+}
+
+type PaletteEntry = {
+  color:    string
+  fill:     string
+  text:     string
+  chipText: string
+  label:    string
+}
+
 type ChairPos = { cx: number; cy: number; rotate: number }
 
-/* ═══════════════════════════════════════════════════════════
-   LAYOUT PLAN  (viewBox 820 × 660)
-
-   ┌─────────────────────────────────────────────┬──────────┐
-   │  🪟 Window strip (top)                      │          │
-   │  W1  W2  W3  W4  W5  W6   ← 2-seaters      │   BAR /  │
-   │─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   aisle           │  KITCHEN │
-   │  [4] [4] [4]   [4] [4]    ← 4-seaters row1 │          │
-   │                            aisle           ├──────────┤
-   │  [4] [4] [4]   [4] [4]    ← 4-seaters row2 │          │
-   │─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   aisle           │ PRIVATE  │
-   │  (6)    (6)    (6)         ← 6-seaters      │  DINING  │
-   │─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   aisle           │          │
-   │  [═══8═══]   [═══8═══]     ← 8-seaters      │          │
-   │                                             │          │
-   │          ↑ ENTRY (clear zone)               │          │
-   └─────────────────────────────────────────────┴──────────┘
-
-   Entry is bottom-centre — 120px clear zone, no tables below y=570
-   Main aisle runs vertically centre-left (x≈290)
-   Bar right side x=570–790
-═══════════════════════════════════════════════════════════ */
+// ─── Floor plan data (viewBox 562 × 660) ───────────────────────────────────────
 
 const TABLES: Table[] = [
-  // ── Window row — 2-seaters (6 tables, along top wall) ──
-  // Spaced with gap at centre for entry path to bar
+  // Window row — 2-seaters (along top wall)
   { id:  1, seats: 2, x:  48, y:  52, w: 44, h: 44 },
   { id:  2, seats: 2, x: 112, y:  52, w: 44, h: 44 },
   { id:  3, seats: 2, x: 176, y:  52, w: 44, h: 44 },
   { id:  4, seats: 2, x: 258, y:  52, w: 44, h: 44 },
   { id:  5, seats: 2, x: 322, y:  52, w: 44, h: 44 },
   { id:  6, seats: 2, x: 386, y:  52, w: 44, h: 44 },
-
-  // ── 4-seater row 1 (below window, left block + right block with aisle) ──
+  // 4-seater row 1 (left block + right block with centre aisle)
   { id:  7, seats: 4, x:  48, y: 150, w: 64, h: 64 },
   { id:  8, seats: 4, x: 138, y: 150, w: 64, h: 64 },
   { id:  9, seats: 4, x: 228, y: 150, w: 64, h: 64 },
-  // gap at x≈310 (centre aisle ~30px)
   { id: 10, seats: 4, x: 322, y: 150, w: 64, h: 64 },
   { id: 11, seats: 4, x: 412, y: 150, w: 64, h: 64 },
-
-  // ── 4-seater row 2 ──
+  // 4-seater row 2
   { id: 12, seats: 4, x:  48, y: 272, w: 64, h: 64 },
   { id: 13, seats: 4, x: 138, y: 272, w: 64, h: 64 },
   { id: 14, seats: 4, x: 228, y: 272, w: 64, h: 64 },
   { id: 15, seats: 4, x: 322, y: 272, w: 64, h: 64 },
   { id: 16, seats: 4, x: 412, y: 272, w: 64, h: 64 },
-
-  // ── 6-seater round tables (social zone) ──
+  // 6-seater round tables (social zone)
   { id: 17, seats: 6, x:  55, y: 378, w: 74, h: 74 },
   { id: 18, seats: 6, x: 193, y: 378, w: 74, h: 74 },
   { id: 19, seats: 6, x: 331, y: 378, w: 74, h: 74 },
-
-  // ── 8-seater banquet tables (away from entry, not touching bottom wall) ──
+  // 8-seater banquet tables
   { id: 20, seats: 8, x:  48, y: 498, w: 124, h: 56 },
   { id: 21, seats: 8, x: 218, y: 498, w: 124, h: 56 },
 ]
 
-const BOOKED = new Set([2, 8, 17])
+// ─── Colour palette (light / dark variant per seat count) ─────────────────────
 
-const PALETTE: Record<number, { light: PaletteEntry; dark: PaletteEntry }> = {
+const PALETTE: Record<Seats, { light: PaletteEntry; dark: PaletteEntry }> = {
   2: {
-    light: { color: "#C4613A", fill: "#FAEAE2", text: "#9A3F1F", chip: "#C4613A", chipText: "#fff",    label: "Duo"     },
-    dark:  { color: "#E07A52", fill: "#2D180E", text: "#F0A882", chip: "#E07A52", chipText: "#141009", label: "Duo"     },
+    light: { color: "#C4613A", fill: "#FAEAE2", text: "#9A3F1F", chipText: "#fff",    label: "Duo"     },
+    dark:  { color: "#E07A52", fill: "#2D180E", text: "#F0A882", chipText: "#141009", label: "Duo"     },
   },
   4: {
-    light: { color: "#6B7C45", fill: "#EDF0E1", text: "#4A5A28", chip: "#6B7C45", chipText: "#fff",    label: "Classic" },
-    dark:  { color: "#8A9E5C", fill: "#1C2210", text: "#B4C882", chip: "#8A9E5C", chipText: "#141009", label: "Classic" },
+    light: { color: "#6B7C45", fill: "#EDF0E1", text: "#4A5A28", chipText: "#fff",    label: "Classic" },
+    dark:  { color: "#8A9E5C", fill: "#1C2210", text: "#B4C882", chipText: "#141009", label: "Classic" },
   },
   6: {
-    light: { color: "#9B7A3A", fill: "#F5EDD8", text: "#6D5218", chip: "#9B7A3A", chipText: "#fff",    label: "Social"  },
-    dark:  { color: "#C49A52", fill: "#261C08", text: "#DEC088", chip: "#C49A52", chipText: "#141009", label: "Social"  },
+    light: { color: "#9B7A3A", fill: "#F5EDD8", text: "#6D5218", chipText: "#fff",    label: "Social"  },
+    dark:  { color: "#C49A52", fill: "#261C08", text: "#DEC088", chipText: "#141009", label: "Social"  },
   },
   8: {
-    light: { color: "#7A5C4A", fill: "#EEE4DC", text: "#543C2C", chip: "#7A5C4A", chipText: "#fff",    label: "Banquet" },
-    dark:  { color: "#A87A62", fill: "#221510", text: "#D4A48A", chip: "#A87A62", chipText: "#141009", label: "Banquet" },
+    light: { color: "#7A5C4A", fill: "#EEE4DC", text: "#543C2C", chipText: "#fff",    label: "Banquet" },
+    dark:  { color: "#A87A62", fill: "#221510", text: "#D4A48A", chipText: "#141009", label: "Banquet" },
   },
 }
+
+// dark + neon use dark palette; light + pink use light palette
+const DARK_THEMES = new Set(["dark", "neon"])
+
+// ─── Filter options ────────────────────────────────────────────────────────────
 
 const FILTER_OPTS = [
   { val: 0, label: "All"     },
@@ -93,6 +90,8 @@ const FILTER_OPTS = [
   { val: 6, label: "6 Seats" },
   { val: 8, label: "8 Seats" },
 ]
+
+// ─── Chair geometry helper ─────────────────────────────────────────────────────
 
 function getChairs(t: Table): ChairPos[] {
   const cx  = t.x + t.w / 2
@@ -111,10 +110,10 @@ function getChairs(t: Table): ChairPos[] {
   ]
 
   if (t.seats === 4) return [
-    { cx,       cy: top,    rotate: 0  },
-    { cx,       cy: bottom, rotate: 0  },
-    { cx: left,  cy,        rotate: 90 },
-    { cx: right, cy,        rotate: 90 },
+    { cx,        cy: top,    rotate: 0  },
+    { cx,        cy: bottom, rotate: 0  },
+    { cx: left,  cy,         rotate: 90 },
+    { cx: right, cy,         rotate: 90 },
   ]
 
   if (t.seats === 6) {
@@ -122,13 +121,14 @@ function getChairs(t: Table): ChairPos[] {
     return Array.from({ length: 6 }, (_, i) => {
       const a = (i / 6) * Math.PI * 2 - Math.PI / 2
       return {
-        cx: cx + Math.cos(a) * rad,
-        cy: cy + Math.sin(a) * rad,
+        cx:     cx + Math.cos(a) * rad,
+        cy:     cy + Math.sin(a) * rad,
         rotate: (a * 180) / Math.PI + 90,
       }
     })
   }
 
+  // 8-seater: 3 top + 3 bottom + 1 each side
   const off = [-36, 0, 36]
   return [
     ...off.map(dx => ({ cx: cx + dx, cy: top,    rotate: 0  })),
@@ -138,23 +138,15 @@ function getChairs(t: Table): ChairPos[] {
   ]
 }
 
-function useIsDark(): boolean {
-  const [dark, setDark] = useState(
-    () => typeof document !== "undefined" && document.documentElement.dataset.theme === "dark"
-  )
-  useEffect(() => {
-    const obs = new MutationObserver(() =>
-      setDark(document.documentElement.dataset.theme === "dark")
-    )
-    obs.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] })
-    return () => obs.disconnect()
-  }, [])
-  return dark
-}
+// ─── TableUnit ─────────────────────────────────────────────────────────────────
 
 type TableUnitProps = {
-  table: Table; selected: boolean; booked: boolean
-  onClick: () => void; show: boolean; isDark: boolean
+  table:    Table
+  selected: boolean
+  booked:   boolean
+  onClick:  () => void
+  show:     boolean
+  isDark:   boolean
 }
 
 function TableUnit({ table, selected, booked, onClick, show, isDark }: TableUnitProps) {
@@ -169,7 +161,7 @@ function TableUnit({ table, selected, booked, onClick, show, isDark }: TableUnit
   const bkText   = isDark ? "#3A2E22" : "#C0AD97"
   const bkChair  = isDark ? "#251D14" : "#EDE4D8"
 
-  const tFill   = booked ? bkFill   : selected ? p.color   : isDark ? "#1E1710" : "#FFFFFF"
+  const tFill   = booked ? bkFill   : selected ? p.color    : isDark ? "#1E1710" : "#FFFFFF"
   const tStroke = booked ? bkStroke : p.color
   const tText   = booked ? bkText   : selected ? p.chipText : p.text
   const cFill   = booked ? bkChair  : p.fill
@@ -179,14 +171,14 @@ function TableUnit({ table, selected, booked, onClick, show, isDark }: TableUnit
     <g
       onClick={booked ? undefined : onClick}
       style={{
-        cursor: booked ? "not-allowed" : "pointer",
-        opacity: show ? 1 : 0,
-        transform: show ? "scale(1)" : "scale(0.7)",
+        cursor:          booked ? "not-allowed" : "pointer",
+        opacity:         show ? 1 : 0,
+        transform:       show ? "scale(1)" : "scale(0.7)",
         transformOrigin: `${cx}px ${cy}px`,
-        transition: "opacity 0.4s ease, transform 0.45s cubic-bezier(0.34,1.56,0.64,1)",
+        transition:      "opacity 0.4s ease, transform 0.45s cubic-bezier(0.34,1.56,0.64,1)",
       }}
     >
-      {/* Selection halo */}
+      {/* Dashed selection halo */}
       {selected && !booked && (round
         ? <circle cx={cx} cy={cy} r={table.w / 2 + 13}
             fill="none" stroke={p.color} strokeWidth={1.5} opacity={0.4} strokeDasharray="5 4" />
@@ -194,17 +186,17 @@ function TableUnit({ table, selected, booked, onClick, show, isDark }: TableUnit
             fill="none" stroke={p.color} strokeWidth={1.5} opacity={0.4} strokeDasharray="5 4" />
       )}
 
+      {/* Chairs */}
       {chairs.map((c, i) => (
-        <rect
-          key={i}
+        <rect key={i}
           x={c.cx - 9} y={c.cy - 2.5}
-          width={18} height={5}
-          rx={2}
+          width={18} height={5} rx={2}
           fill={cFill} stroke={cStroke} strokeWidth={1.2}
           transform={`rotate(${c.rotate}, ${c.cx}, ${c.cy})`}
         />
       ))}
 
+      {/* Table surface */}
       {round
         ? <circle cx={cx} cy={cy} r={table.w / 2}
             fill={tFill} stroke={tStroke} strokeWidth={selected ? 2.5 : 1.5} />
@@ -212,6 +204,7 @@ function TableUnit({ table, selected, booked, onClick, show, isDark }: TableUnit
             fill={tFill} stroke={tStroke} strokeWidth={selected ? 2.5 : 1.5} />
       }
 
+      {/* Table ID + seat count */}
       <text x={cx} y={cy - 5} textAnchor="middle" dominantBaseline="middle"
         fontSize={10.5} fontWeight="700" fill={tText} fontFamily="ui-sans-serif, system-ui">
         T{table.id}
@@ -224,19 +217,43 @@ function TableUnit({ table, selected, booked, onClick, show, isDark }: TableUnit
   )
 }
 
-type SeatingPlanProps = { onSelect?: (table: Table | null) => void }
+// ─── SeatingPlan ───────────────────────────────────────────────────────────────
 
-export default function SeatingPlan({ onSelect }: SeatingPlanProps) {
+type SeatingPlanProps = {
+  /** Called whenever the user selects or deselects a table */
+  onSelect?:  (table: Table | null) => void
+  /** Table IDs that are already booked and cannot be selected */
+  bookedIds?: number[]
+}
+
+export default function SeatingPlan({
+  onSelect,
+  bookedIds = [2, 8, 17],
+}: SeatingPlanProps) {
   const [selected, setSelected] = useState<number | null>(null)
   const [filter,   setFilter]   = useState(0)
   const [visible,  setVisible]  = useState<Set<number>>(new Set())
-  const isDark = useIsDark()
+  const [mounted,  setMounted]  = useState(false)
 
+  const { resolvedTheme } = useTheme()
+
+  useEffect(() => { setMounted(true) }, [])
+
+  // Staggered entrance animation — timers cleaned up on unmount
   useEffect(() => {
-    TABLES.forEach((t, i) =>
-      setTimeout(() => setVisible(v => new Set([...v, t.id])), i * 45)
+    const timers = TABLES.map((t, i) =>
+      setTimeout(
+        () => setVisible(v => { const n = new Set(v); n.add(t.id); return n }),
+        i * 45,
+      )
     )
+    return () => timers.forEach(clearTimeout)
   }, [])
+
+  const isDark = mounted ? DARK_THEMES.has(resolvedTheme ?? "") : false
+  const booked = new Set(bookedIds)
+  const sel    = TABLES.find(t => t.id === selected) ?? null
+  const selP   = sel ? (isDark ? PALETTE[sel.seats].dark : PALETTE[sel.seats].light) : null
 
   const toggle = (id: number) => {
     const next = selected === id ? null : id
@@ -244,41 +261,71 @@ export default function SeatingPlan({ onSelect }: SeatingPlanProps) {
     onSelect?.(next ? (TABLES.find(t => t.id === next) ?? null) : null)
   }
 
-  const sel  = TABLES.find(t => t.id === selected) ?? null
-  const selP = sel ? (isDark ? PALETTE[sel.seats].dark : PALETTE[sel.seats].light) : null
-
-  // Theme tokens for SVG environment
+  // SVG colour tokens derived from current theme
   const svgBg     = isDark ? "#141009" : "#FAF7F2"
   const wall      = isDark ? "#2C2218" : "#DECCB8"
   const div       = isDark ? "#251D14" : "#EAD9C6"
   const zoneClr   = isDark ? "#4A3828" : "#C0A488"
   const winFill   = isDark ? "#2D180E" : "#FAEAE2"
   const winStroke = isDark ? "#7A3A20" : "#DDA080"
-  const barBg     = isDark ? "#1A1208" : "#F0E8DC"
-  const plantFill = isDark ? "#1C2210" : "#E8F0DC"
-  const plantRing = isDark ? "#3A4A20" : "#A8C070"
   const entryFill = isDark ? "#2C2218" : "#4A3828"
   const entryText = isDark ? "#5A4838" : "#A89080"
 
   return (
     <div
-      className="rounded-lg border transition-colors duration-300 h-full flex flex-col overflow-hidden"
+      className="rounded-lg border transition-colors duration-300 flex flex-col overflow-hidden"
       style={{ background: "var(--color-card)", borderColor: "var(--color-border)" }}
     >
-      {/* Floor plan */}
-      <div className="relative flex-1 min-h-0">
 
-        {/* Window hint */}
-        <p className="absolute top-2 left-1/2 -translate-x-1/2 z-10 pointer-events-none select-none
-                      text-[8px] tracking-[4px] uppercase"
-           style={{ color: winStroke }}>
+      {/* ── Filter pills ──────────────────────────────────────────────────────── */}
+      <div
+        className="flex items-center gap-2 px-3 py-2.5 border-b shrink-0 flex-wrap"
+        style={{ borderColor: "var(--color-border)" }}
+      >
+        <span
+          className="text-[10px] tracking-widest uppercase mr-1 select-none"
+          style={{ color: "var(--color-text-muted)" }}
+        >
+          Filter
+        </span>
+        {FILTER_OPTS.map(opt => {
+          const active = filter === opt.val
+          const p = opt.val !== 0
+            ? (isDark ? PALETTE[opt.val as Seats].dark : PALETTE[opt.val as Seats].light)
+            : null
+          return (
+            <button
+              key={opt.val}
+              onClick={() => setFilter(opt.val)}
+              className="text-[11px] px-3 py-1 rounded-full border transition-all duration-200 cursor-pointer font-medium"
+              style={
+                active && p
+                  ? { background: p.color, borderColor: p.color, color: p.chipText }
+                  : active
+                  ? { background: "var(--color-primary)", borderColor: "var(--color-primary)", color: "var(--color-primary-fg)" }
+                  : { background: "transparent", borderColor: "var(--color-border)", color: "var(--color-text-muted)" }
+              }
+            >
+              {opt.label}
+            </button>
+          )
+        })}
+      </div>
+
+      {/* ── Floor plan SVG ────────────────────────────────────────────────────── */}
+      <div className="relative w-full">
+
+        <p
+          className="absolute top-2 left-1/2 -translate-x-1/2 z-10 pointer-events-none select-none
+                     text-[8px] tracking-[4px] uppercase"
+          style={{ color: winStroke }}
+        >
           ❖ Window Seating ❖
         </p>
 
         <svg
           viewBox="0 0 562 660"
-          className="w-full h-full block"
-          style={{ background: "var(--color-card)" }}
+          className="w-full h-auto block"
           xmlns="http://www.w3.org/2000/svg"
           preserveAspectRatio="xMidYMid meet"
         >
@@ -292,97 +339,53 @@ export default function SeatingPlan({ onSelect }: SeatingPlanProps) {
           )}
 
           {/* Outer walls */}
-          <rect x="26" y="26" width="510" height="608" 
-            fill="#FAF7F2" stroke={wall} strokeWidth="2.5" rx="5" />
+          <rect x="26" y="26" width="510" height="608"
+            fill={svgBg} stroke={wall} strokeWidth="2.5" rx="5" />
 
-          {/* ── Top wall windows ── */}
+          {/* Top wall windows */}
           {[52, 116, 180, 262, 326, 390].map(wx => (
             <rect key={wx} x={wx} y={24} width={40} height={5} rx={2}
               fill={winFill} stroke={winStroke} strokeWidth={1} />
           ))}
 
-          {/* ── Right-side WALL separating tables from bar ── */}
-          {/* <line x1="568" y1="30" x2="568" y2="630"
-            stroke={wall} strokeWidth="1.8" /> */}
+          {/* Zone dividers */}
+          {[130, 250, 366, 480].map(y => (
+            <line key={y} x1="34" y1={y} x2="528" y2={y}
+              stroke={div} strokeWidth="1.2" strokeDasharray="6 5" />
+          ))}
 
-          {/* ── Zone dividers (left section only) ── */}
-          {/* Below window row */}
-          <line x1="34" y1="130" x2="528" y2="130"
-            stroke={div} strokeWidth="1.2" strokeDasharray="6 5" />
-          {/* Between 4-seater rows */}
-          <line x1="34" y1="250" x2="528" y2="250"
-            stroke={div} strokeWidth="1.2" strokeDasharray="6 5" />
-          {/* Below 4-seater zone */}
-          <line x1="34" y1="366" x2="528" y2="366"
-            stroke={div} strokeWidth="1.2" strokeDasharray="6 5" />
-          {/* Below 6-seater zone */}
-          <line x1="34" y1="480" x2="528" y2="480"
-            stroke={div} strokeWidth="1.2" strokeDasharray="6 5" />
-
-          {/* ── Zone labels — small, left-aligned, above each zone ── */}
-          {[
-            ["🪟 WINDOW",  34, 125 ],
-            ["CASUAL",     34, 245 ],
-            ["SOCIAL",     34, 360 ],
-            ["BANQUET",    34, 474 ],
-          ].map(([label, x, y]) => (
-            <text key={label as string} x={x as number} y={y as number}
+          {/* Zone labels */}
+          {([
+            ["🪟 WINDOW", 34, 125] as const,
+            ["CASUAL",    34, 245] as const,
+            ["SOCIAL",    34, 360] as const,
+            ["BANQUET",   34, 474] as const,
+          ]).map(([label, x, y]) => (
+            <text key={label} x={x} y={y}
               fontSize={7.5} fill={zoneClr} fontFamily="ui-sans-serif"
               letterSpacing={2} fontWeight="600" opacity={0.8}>
-              {label as string}
+              {label}
             </text>
           ))}
 
-          {/* ── Centre aisle hint — very subtle vertical guide ── */}
+          {/* Centre aisle guide */}
           <line x1="302" y1="148" x2="302" y2="480"
             stroke={div} strokeWidth="0.8" strokeDasharray="3 8" opacity={0.5} />
 
-          {/* ── BAR + KITCHEN (right side, full height) ── */}
-          {/* Bar top section */}
-          {/* <rect x="576" y="34" width="210" height="240" rx="6"
-            fill={barBg} stroke={div} strokeWidth="1.2" />
-          <text x="681" y="135" textAnchor="middle" fontSize={28}>🍸</text>
-          <text x="681" y="160" textAnchor="middle" fontSize={9}
-            fill={zoneClr} fontFamily="sans-serif" letterSpacing={3}>BAR</text>
-          <line x1="584" y1="182" x2="778" y2="182"
-            stroke={div} strokeWidth="0.8" strokeDasharray="4 3" />
-          <text x="681" y="202" textAnchor="middle" fontSize={8}
-            fill={zoneClr} opacity={0.7} fontFamily="sans-serif">Open Kitchen</text>
-          <text x="681" y="222" textAnchor="middle" fontSize={20}>👨‍🍳</text> */}
-
-          {/* Private dining (right, lower) */}
-          {/* <rect x="576" y="290" width="210" height="348" rx="6"
-            fill={barBg} stroke={div} strokeWidth="1.2" />
-          <text x="681" y="450" textAnchor="middle" fontSize={22}>🕯️</text>
-          <text x="681" y="474" textAnchor="middle" fontSize={8}
-            fill={zoneClr} fontFamily="sans-serif" letterSpacing={2}>PRIVATE DINING</text> */}
-
-          {/* ── Plants — corners & aisle break ── */}
-          {/* {[
-            [500, 400], [500, 510], [34, 400], [34, 510],
-          ].map(([px, py]) => (
-            <g key={`${px}-${py}`}>
-              <circle cx={px} cy={py} r={11} fill={plantFill} stroke={plantRing} strokeWidth={1.3} />
-              <text x={px} y={py + 4} textAnchor="middle" fontSize={12}>🌿</text>
-            </g>
-          ))} */}
-
-          {/* ── Entry zone — bottom centre, clearly open ── */}
-          {/* Entry walkway shading — subtle */}
-          {/* <rect x="300" y="572" width="148" height="58" rx="4"
-            fill={isDark ? "#1A1208" : "#F5EFE7"} opacity={0.6} /> */}
-          {/* Entry marker bar */}
+          {/* Entry marker */}
           <rect x="400" y="624" width="72" height="6" rx="3" fill={entryFill} />
-          <text x="437" y="642" textAnchor="middle" fontSize={8}
-            fill={entryText} fontFamily="sans-serif" letterSpacing={3}>ENTRY</text>
+          <text x="437" y="642" textAnchor="middle"
+            fontSize={8} fill={entryText} fontFamily="sans-serif" letterSpacing={3}>
+            ENTRY
+          </text>
 
-          {/* ── Tables ── */}
+          {/* Tables */}
           {TABLES.map(t => (
             <TableUnit
               key={t.id}
               table={t}
               selected={selected === t.id}
-              booked={BOOKED.has(t.id)}
+              booked={booked.has(t.id)}
               onClick={() => toggle(t.id)}
               show={visible.has(t.id) && (filter === 0 || t.seats === filter)}
               isDark={isDark}
@@ -391,44 +394,8 @@ export default function SeatingPlan({ onSelect }: SeatingPlanProps) {
         </svg>
       </div>
 
-      {/* ── Selection bar ── */}
-      {/* <div
-        className="flex items-center justify-between px-4 py-2.5 border-t shrink-0 transition-all duration-300"
-        style={sel && selP
-          ? { background: selP.fill, borderColor: selP.color + "55" }
-          : { background: "var(--color-background-subtle)", borderColor: "var(--color-border)" }
-        }
-      >
-        {sel && selP ? (
-          <>
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold shrink-0"
-                   style={{ background: selP.color, color: selP.chipText }}>
-                T{sel.id}
-              </div>
-              <div>
-                <div className="text-sm font-semibold" style={{ color: selP.text }}>
-                  Table {sel.id} — {selP.label} · {sel.seats} Seats
-                </div>
-                <div className="text-xs mt-0.5" style={{ color: "var(--color-text-muted)" }}>
-                  Full table reservation
-                </div>
-              </div>
-            </div>
-            <button
-              onClick={() => toggle(sel.id)}
-              className="text-xs font-medium border rounded-lg px-3 py-1.5 bg-transparent cursor-pointer hover:opacity-60 transition-opacity shrink-0"
-              style={{ borderColor: selP.color + "50", color: selP.text }}
-            >
-              Clear
-            </button>
-          </>
-        ) : (
-          <p className="text-sm w-full text-center" style={{ color: "var(--color-text-muted)" }}>
-            Click a table to select it
-          </p>
-        )}
-      </div> */}
+      {/* ── Selection bar ─────────────────────────────────────────────────────── */}
+      
     </div>
   )
 }

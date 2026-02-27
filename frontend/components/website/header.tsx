@@ -4,7 +4,9 @@
 import Link from "next/link"
 import { useState, useEffect } from "react" // Added useEffect
 import { useTheme } from "next-themes"
-import { Menu, X } from "lucide-react"
+import { Menu, Moon, X } from "lucide-react"
+import { CiDark } from "react-icons/ci"
+import { MdOutlineLightMode } from "react-icons/md"
 
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -90,7 +92,7 @@ export default function Header() {
         >
           {/* 3. Only render the icon if mounted. 
               This prevents the server guessing the wrong theme and causing a crash. */}
-          {mounted ? (theme === "dark" ? "☀️" : "🌙") : null}
+          {mounted ? (theme === "dark" ? <MdOutlineLightMode /> :<Moon />) : null}
         </button>
 
         {/* Order Food */}
