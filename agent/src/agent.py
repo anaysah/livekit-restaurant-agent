@@ -129,7 +129,7 @@ IS_STT_ENABLED = os.getenv("IS_STT_ENABLED", "true").lower() in ["true", "1", "y
 models = {
     "llm": get_provider(LLM_MODELS,"mistral","mistral-large-latest"),
     "tts": lambda model: deepgram.TTS(model=VOICE_MODELS[model]) if IS_TTS_ENABLED else None,
-    "stt": deepgram.STT() if IS_STT_ENABLED else None,  # Using STT instead of STTv2
+    "stt": lambda: deepgram.STT() if IS_STT_ENABLED else None,  # Using STT instead of STTv2
     "vad": silero.VAD.load(),
 }
 
@@ -164,7 +164,7 @@ async def my_agent(ctx: JobContext):
     # Set up a voice AI pipeline using OpenAI, Cartesia, AssemblyAI, and the LiveKit turn detector
     session = AgentSession[UserData](
         userdata=userdata,
-        stt=models["stt"],
+        stt=models["stt"](),
         llm=models["llm"],
         tts=models["tts"]("thalia"),
         turn_detection=MultilingualModel(),
