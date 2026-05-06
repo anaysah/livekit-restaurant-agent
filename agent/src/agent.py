@@ -94,6 +94,7 @@ LLM_MODELS = {
         "provider": lambda model: mistralai.LLM(
             model=model,
             temperature=float(TEMPERATURE),
+            api_key=os.getenv("MISTRALAI_API_KEY")
         )
     },
     "cerebras":{
