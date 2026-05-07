@@ -1,0 +1,22 @@
+name: Deploy LiveKit Agent
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'agent/**'   # Trigger only when files inside agent/ change
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to LiveKit Cloud
+        uses: livekit/deploy-action@v2
+        with:
+          OPERATION: deploy
+          WORKING_DIRECTORY: ./agent
