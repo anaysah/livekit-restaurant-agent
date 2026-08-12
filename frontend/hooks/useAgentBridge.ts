@@ -20,6 +20,11 @@ export function useAgentBridge() {
   useEffect(() => {
     if (!room || !outboundSignal) return;
 
+    if (room.state !== "connected") {
+      console.error("[Bridge] Room is not connected");
+      return;
+    }
+
     const msg: UIToAgentMessage = {
       type: outboundSignal.type as any,
       payload: outboundSignal.payload,
@@ -30,6 +35,10 @@ export function useAgentBridge() {
       new TextEncoder().encode(JSON.stringify(msg)),
       { reliable: true, topic: UI_TO_AGENT_TOPIC_NAME }
     );
+
+    console.log("[Bridge] room state:", room.state);
+    console.log("[Bridge] participant:", room.localParticipant);
+
   }, [outboundSignal, room]);
 
   // 2. INCOMING: Agent -> Store/Action

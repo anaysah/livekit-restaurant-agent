@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "agent-starter-python"
 version = "1.0.0"
 description = "Simple voice AI assistant built with LiveKit Agents for Python"
-requires-python = "~=3.11"
+requires-python = ">=3.11,<3.12"
 
 dependencies = [
     "livekit-agents[mistralai]~=1.3",
