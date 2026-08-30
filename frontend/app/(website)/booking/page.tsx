@@ -59,35 +59,8 @@ export default function BookingPage() {
           <BookingForm />
         </div>
 
-        {/* Right — Interactive Seating Plan */}
-        <div
-          className="sticky top-24 rounded-xl border border-border p-6 bg-card"
-          style={{
-            minHeight: "500px",
-            background: "var(--color-background)",
-          }}
-        >
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h2 className="text-lg font-semibold text-foreground">Floor Plan</h2>
-              <p className="text-xs text-text-muted">Click an available table to select</p>
-            </div>
-            {selectedTableId && (
-              <button
-                type="button"
-                onClick={() =>
-                  updateForm(FORMS.BOOKING.id, {
-                    table_id: null,
-                    table_seats: null,
-                  })
-                }
-                className="text-xs font-medium px-2.5 py-1 rounded bg-primary/10 text-primary hover:bg-primary/20 transition-colors cursor-pointer border-none"
-              >
-                Clear Table ×
-              </button>
-            )}
-          </div>
-
+        {/* Right — Interactive Floor Plan (Sticky) */}
+        <div className="sticky top-24">
           <RestaurantLayout
             selectedTableId={selectedTableId}
             onTableSelect={(table) => {

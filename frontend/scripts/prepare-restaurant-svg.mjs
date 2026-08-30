@@ -25,7 +25,17 @@ if (!fs.existsSync(inputSvgPath)) {
 
 const svgContent = fs.readFileSync(inputSvgPath, 'utf8');
 
-// ─── 1. Robust SVG XML Tree Parser & Serializer ────────────────────────────────
+// ─── 1. Category Base Color Standards ──────────────────────────────────────────
+// Ensures all tables (including T2, T8, T17) have consistent base styling
+
+const CATEGORY_COLORS = {
+  2: { chairFill: '#FAEAE2', stroke: '#C4613A', tableFill: 'white' },
+  4: { chairFill: '#EDF0E1', stroke: '#6B7C45', tableFill: 'white' },
+  6: { chairFill: '#F5EDD8', stroke: '#9B7A3A', tableFill: 'white' },
+  8: { chairFill: '#EEE4DC', stroke: '#7A5C4A', tableFill: 'white' },
+};
+
+// ─── 2. Robust SVG XML Tree Parser & Serializer ────────────────────────────────
 
 function parseXml(xmlStr) {
   const tagRegex = /<(\/)?([a-zA-Z0-9_:-]+)([^>]*?)(\/)?>|([^<]+)/g;
@@ -108,7 +118,6 @@ function serializeNodeToJsx(node, indent = 0) {
   if (node.type === 'element') {
     const pad = '  '.repeat(indent);
 
-    // Map attribute names for JSX
     const attrMap = {
       'class': 'className',
       'stroke-width': 'strokeWidth',
@@ -145,7 +154,7 @@ function serializeNodeToJsx(node, indent = 0) {
   return '';
 }
 
-// ─── 2. Geometry & Bounding Box Calculation ───────────────────────────────────
+// ─── 3. Geometry & Bounding Box Calculation ───────────────────────────────────
 
 function getPathBBox(d) {
   if (!d) return null;
@@ -197,7 +206,7 @@ function getPathBBox(d) {
   };
 }
 
-// ─── 3. Transform AST & Extract Table Groups ───────────────────────────────────
+// ─── 4. Transform AST & Normalize Table Groups ─────────────────────────────────
 
 console.log('--- Preparing Restaurant Layout SVG ---');
 
@@ -272,16 +281,30 @@ for (const { tableNode, groupNode } of discoveredTables) {
   groupNode.attrs['data-status-y'] = statusY;
   groupNode.attrs['class'] = 'restaurant-table';
 
-  // Tag surface path
-  if (surfaceNode && surfaceNode.attrs) {
-    surfaceNode.attrs['data-role'] = 'table-surface';
+  // Normalize colors based on capacity so demo taken tables (T2, T8, T17) get pristine category colors
+  const catColors = CATEGORY_COLORS[capacity] || CATEGORY_COLORS[2];
+
+  for (let i = 0; i < tIndex; i++) {
+    const child = children[i];
+    if (child.type !== 'element') continue;
+
+    if (i === tIndex - 1) {
+      // Table Surface
+      child.attrs['data-role'] = 'table-surface';
+      child.attrs['fill'] = catColors.tableFill;
+      child.attrs['stroke'] = catColors.stroke;
+    } else {
+      // Chairs
+      child.attrs['fill'] = catColors.chairFill;
+      child.attrs['stroke'] = catColors.stroke;
+    }
   }
 
   // Remove static text outline paths (T# and seats/taken) so React text renders cleanly
   groupNode.children = children.slice(0, tIndex);
 }
 
-// ─── 4. Output Files ──────────────────────────────────────────────────────────
+// ─── 5. Output Files ──────────────────────────────────────────────────────────
 
 // 1. Prepared SVG
 const preparedSvg = serializeNodeToSvg(tree);

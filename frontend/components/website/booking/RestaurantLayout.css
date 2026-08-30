@@ -1,24 +1,196 @@
-.restaurant-layout {
-  --available-fill: #ffffff;
-  --available-stroke: #c4613a;
-  --available-hover-fill: #fff9f6;
-  --taken-fill: #f3ede3;
-  --taken-stroke: #d5c8b5;
-  --taken-opacity: 0.65;
-  --selected-fill: #faeae2;
-  --selected-stroke: #c4613a;
-  --label-color: #9a3f1f;
-  --label-selected-color: #782c11;
-  --label-taken-color: #c0ad97;
-  --status-color: #c0ad97;
-  --status-selected-color: #9a3f1f;
+/* ═══════════════════════════════════════════════════════════════════════════════
+   RESTAURANT SEATING LAYOUT - MODERN CSS DESIGN TOKENS & THEMING
+   ═══════════════════════════════════════════════════════════════════════════════ */
 
+/* ─── Light Mode Design Tokens (Default) ─────────────────────────────────────── */
+.restaurant-layout-card,
+.restaurant-layout {
+  /* Surfaces & Canvas */
+  --surface-fill: #ffffff;
+  --surface-hover-fill: #fff9f6;
+  --table-text-color: #1c1510;
+
+  /* Duo (2 Seats) */
+  --cat-2-color: #c4613a;
+  --cat-2-fill: #faeae2;
+  --cat-2-text: #9a3f1f;
+
+  /* Classic (4 Seats) */
+  --cat-4-color: #6b7c45;
+  --cat-4-fill: #edf0e1;
+  --cat-4-text: #4a5a28;
+
+  /* Social (6 Seats) */
+  --cat-6-color: #9b7a3a;
+  --cat-6-fill: #f5edd8;
+  --cat-6-text: #6d5218;
+
+  /* Banquet (8 Seats) */
+  --cat-8-color: #7a5c4a;
+  --cat-8-fill: #eee4dc;
+  --cat-8-text: #543c2c;
+
+  /* Taken State */
+  --taken-surface-fill: #f3ede3;
+  --taken-stroke: #d5c8b5;
+  --taken-chair-fill: #ede4d8;
+  --taken-text: #c0ad97;
+  --taken-opacity: 0.65;
+
+  /* Floor Canvas Artwork */
+  --floor-bg: #faf7f2;
+  --wall-color: #deccb8;
+  --divider-color: #ead9c6;
+  --zone-label-color: #c0a488;
+}
+
+/* ─── Dark Mode Tokens ([data-theme="dark"], [data-theme="dark-warm"], .dark) ── */
+[data-theme="dark"] .restaurant-layout-card,
+[data-theme="dark"] .restaurant-layout,
+[data-theme="dark-warm"] .restaurant-layout-card,
+[data-theme="dark-warm"] .restaurant-layout,
+.dark .restaurant-layout-card,
+.dark .restaurant-layout {
+  /* Surfaces & Canvas */
+  --surface-fill: #1e1710;
+  --surface-hover-fill: #2a1f16;
+  --table-text-color: #f2ede4;
+
+  /* Duo (2 Seats) */
+  --cat-2-color: #e07a52;
+  --cat-2-fill: #2d180e;
+  --cat-2-text: #f0a882;
+
+  /* Classic (4 Seats) */
+  --cat-4-color: #8a9e5c;
+  --cat-4-fill: #1c2210;
+  --cat-4-text: #b4c882;
+
+  /* Social (6 Seats) */
+  --cat-6-color: #c49a52;
+  --cat-6-fill: #261c08;
+  --cat-6-text: #dec088;
+
+  /* Banquet (8 Seats) */
+  --cat-8-color: #a87a62;
+  --cat-8-fill: #221510;
+  --cat-8-text: #d4a48a;
+
+  /* Taken State */
+  --taken-surface-fill: #1e1710;
+  --taken-stroke: #3a2e22;
+  --taken-chair-fill: #251d14;
+  --taken-text: #5e5044;
+  --taken-opacity: 0.55;
+
+  /* Floor Canvas Artwork */
+  --floor-bg: #141009;
+  --wall-color: #2c2218;
+  --divider-color: #251d14;
+  --zone-label-color: #8a7560;
+}
+
+/* ─── Neon Theme Tokens ([data-theme="neon"]) ────────────────────────────────── */
+[data-theme="neon"] .restaurant-layout-card,
+[data-theme="neon"] .restaurant-layout {
+  --surface-fill: #0f172a;
+  --surface-hover-fill: #1e293b;
+  --table-text-color: #f8fafc;
+
+  --cat-2-color: #f97316;
+  --cat-2-fill: #3b1d0e;
+  --cat-2-text: #fdba74;
+
+  --cat-4-color: #10b981;
+  --cat-4-fill: #063426;
+  --cat-4-text: #6ee7b7;
+
+  --cat-6-color: #f59e0b;
+  --cat-6-fill: #3b2a08;
+  --cat-6-text: #fcd34d;
+
+  --cat-8-color: #a855f7;
+  --cat-8-fill: #2e1065;
+  --cat-8-text: #d8b4fe;
+
+  --taken-surface-fill: #0f172a;
+  --taken-stroke: #334155;
+  --taken-chair-fill: #1e293b;
+  --taken-text: #64748b;
+  --taken-opacity: 0.55;
+
+  --floor-bg: #030712;
+  --wall-color: #1e293b;
+  --divider-color: #0f172a;
+  --zone-label-color: #94a3b8;
+}
+
+/* ─── Card Container ─────────────────────────────────────────────────────────── */
+.restaurant-layout-card {
+  display: flex;
+  flex-direction: column;
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-border, #e5e7eb);
+  background: var(--color-card, #ffffff);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  transition: background 250ms ease, border-color 250ms ease;
+  width: 100%;
+}
+
+/* ─── Filter Pills Header Bar ─────────────────────────────────────────────────── */
+.restaurant-layout__filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+  flex-wrap: wrap;
+  background: var(--color-card, #ffffff);
+  transition: background 250ms ease, border-color 250ms ease;
+}
+
+.restaurant-layout__filter-label {
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--color-text-muted, #9ca3af);
+  user-select: none;
+  margin-right: 0.25rem;
+}
+
+.restaurant-layout__filter-pill {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 0.3rem 0.85rem;
+  border-radius: 9999px;
+  border: 1px solid var(--color-border, #e5e7eb);
+  background: transparent;
+  color: var(--color-text-muted, #6b7280);
+  cursor: pointer;
+  transition: all 200ms ease;
+  user-select: none;
+}
+
+.restaurant-layout__filter-pill:hover {
+  border-color: var(--color-primary, #c4613a);
+  color: var(--color-foreground, #1f2937);
+}
+
+.restaurant-layout__filter-pill--active {
+  font-weight: 600;
+}
+
+/* ─── Floor Plan Viewport & SVG Container ─────────────────────────────────────── */
+.restaurant-layout {
   position: relative;
   width: 100%;
   max-width: 562px;
   aspect-ratio: 562 / 660;
   user-select: none;
   margin: 0 auto;
+  padding: 0.5rem;
 }
 
 .restaurant-layout__svg,
@@ -34,14 +206,95 @@
   pointer-events: none;
 }
 
-/* Base table group styling */
+/* ─── Floor Canvas Background Artwork ─────────────────────────────────────────── */
+.restaurant-layout [id="4 walls rect"] {
+  fill: var(--floor-bg);
+  stroke: var(--wall-color);
+  transition: fill 250ms ease, stroke 250ms ease;
+}
+
+.restaurant-layout [id="Wall windows left side"] path,
+.restaurant-layout [id="2 seaters windows"] path {
+  fill: var(--cat-2-fill);
+  stroke: var(--cat-2-color);
+  transition: fill 250ms ease, stroke 250ms ease;
+}
+
+.restaurant-layout [id="social border"] path:not([id="SOCIAL"]),
+.restaurant-layout [id="social border_2"] path:not([id="SOCIAL_2"]),
+.restaurant-layout [id="family border"] path:not([id="FAMILY"]),
+.restaurant-layout [id="banguet border"] path:not([id="BANGUET"]) {
+  stroke: var(--divider-color);
+  transition: stroke 250ms ease;
+}
+
+.restaurant-layout [id="SOCIAL"],
+.restaurant-layout [id="SOCIAL_2"],
+.restaurant-layout [id="FAMILY"],
+.restaurant-layout [id="BANGUET"] {
+  fill: var(--zone-label-color);
+  transition: fill 250ms ease;
+}
+
+.restaurant-layout [id="Entry Gate rect"] {
+  fill: var(--surface-fill);
+  stroke: var(--cat-8-color);
+  transition: fill 250ms ease, stroke 250ms ease;
+}
+
+.restaurant-layout [id="ENTRY"] {
+  fill: var(--zone-label-color);
+  transition: fill 250ms ease;
+}
+
+/* ─── Table Groups & Semantic SVG Styling ─────────────────────────────────────── */
 .restaurant-layout [data-table-group],
 .restaurant-layout .restaurant-table {
-  transition: opacity 180ms ease, transform 180ms ease;
+  transition: opacity 0.4s ease, transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
   transform-origin: center center;
 }
 
-/* Available state */
+.restaurant-layout [data-table-group] path {
+  transition: fill 250ms ease, stroke 250ms ease;
+}
+
+/* Table Surfaces by Capacity */
+.restaurant-layout [data-table-group][data-capacity="2"] [data-role="table-surface"] {
+  fill: var(--surface-fill);
+  stroke: var(--cat-2-color);
+}
+.restaurant-layout [data-table-group][data-capacity="4"] [data-role="table-surface"] {
+  fill: var(--surface-fill);
+  stroke: var(--cat-4-color);
+}
+.restaurant-layout [data-table-group][data-capacity="6"] [data-role="table-surface"] {
+  fill: var(--surface-fill);
+  stroke: var(--cat-6-color);
+}
+.restaurant-layout [data-table-group][data-capacity="8"] [data-role="table-surface"] {
+  fill: var(--surface-fill);
+  stroke: var(--cat-8-color);
+}
+
+/* Chairs by Capacity */
+.restaurant-layout [data-table-group][data-capacity="2"] path:not([data-role="table-surface"]) {
+  fill: var(--cat-2-fill);
+  stroke: var(--cat-2-color);
+}
+.restaurant-layout [data-table-group][data-capacity="4"] path:not([data-role="table-surface"]) {
+  fill: var(--cat-4-fill);
+  stroke: var(--cat-4-color);
+}
+.restaurant-layout [data-table-group][data-capacity="6"] path:not([data-role="table-surface"]) {
+  fill: var(--cat-6-fill);
+  stroke: var(--cat-6-color);
+}
+.restaurant-layout [data-table-group][data-capacity="8"] path:not([data-role="table-surface"]) {
+  fill: var(--cat-8-fill);
+  stroke: var(--cat-8-color);
+}
+
+/* Available State & Hover */
 .restaurant-layout [data-table-group][data-state='available'],
 .restaurant-layout .restaurant-table--available {
   cursor: pointer;
@@ -49,18 +302,10 @@
 
 .restaurant-layout [data-table-group][data-state='available']:hover [data-role='table-surface'],
 .restaurant-layout .restaurant-table--available:hover [data-role='table-surface'] {
-  fill: var(--available-hover-fill);
-  transition: all 180ms ease;
+  fill: var(--surface-hover-fill);
 }
 
-.restaurant-layout [data-table-group][data-state='available'] [data-role='table-surface'],
-.restaurant-layout .restaurant-table--available [data-role='table-surface'] {
-  fill: var(--available-fill);
-  stroke: var(--available-stroke);
-  transition: all 180ms ease;
-}
-
-/* Taken state */
+/* Taken State */
 .restaurant-layout [data-table-group][data-state='taken'],
 .restaurant-layout .restaurant-table--taken {
   cursor: not-allowed;
@@ -69,64 +314,113 @@
 
 .restaurant-layout [data-table-group][data-state='taken'] [data-role='table-surface'],
 .restaurant-layout .restaurant-table--taken [data-role='table-surface'] {
-  fill: var(--taken-fill) !important;
+  fill: var(--taken-surface-fill) !important;
   stroke: var(--taken-stroke) !important;
 }
 
-/* Selected state */
+.restaurant-layout [data-table-group][data-state='taken'] path:not([data-role='table-surface']) {
+  fill: var(--taken-chair-fill) !important;
+  stroke: var(--taken-stroke) !important;
+}
+
+/* Selected State */
 .restaurant-layout [data-table-group][data-state='selected'],
 .restaurant-layout .restaurant-table--selected {
   cursor: pointer;
 }
 
-.restaurant-layout [data-table-group][data-state='selected'] [data-role='table-surface'],
-.restaurant-layout .restaurant-table--selected [data-role='table-surface'] {
-  fill: var(--selected-fill) !important;
-  stroke: var(--selected-stroke) !important;
-  stroke-width: 2.5 !important;
+/* Filtered-out State */
+.restaurant-layout [data-table-group][data-filtered='true'],
+.restaurant-layout .restaurant-table--filtered-out {
+  opacity: 0 !important;
+  transform: scale(0.7) !important;
+  pointer-events: none !important;
 }
 
-/* Disabled state */
+/* Disabled State */
 .restaurant-layout [data-table-group][data-state='disabled'],
 .restaurant-layout .restaurant-table--disabled {
   pointer-events: none;
   opacity: 0.4;
 }
 
-/* Labels */
+/* ─── Dashed Selection Halo ──────────────────────────────────────────────────── */
+.restaurant-layout__selection-halo {
+  animation: haloPulse 2s ease-in-out infinite alternate;
+}
+
+@keyframes haloPulse {
+  0% {
+    opacity: 0.4;
+    stroke-width: 1.8;
+  }
+  100% {
+    opacity: 0.8;
+    stroke-width: 2.2;
+  }
+}
+
+/* ─── Dynamic Text Labels & Theming ──────────────────────────────────────────── */
+.restaurant-layout__label-group {
+  transition: opacity 0.4s ease, transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform-origin: center center;
+}
+
+.restaurant-layout__label-group--filtered-out {
+  opacity: 0 !important;
+  transform: scale(0.7) !important;
+}
+
 .restaurant-layout__table-label,
 .restaurant-layout__status-label {
   font-family: Inter, system-ui, -apple-system, sans-serif;
   dominant-baseline: middle;
-  transition: fill 180ms ease;
+  transition: fill 250ms ease;
 }
 
 .restaurant-layout__table-label {
-  fill: var(--label-color);
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.2px;
 }
 
 .restaurant-layout__status-label {
-  fill: var(--status-color);
   font-size: 9px;
   font-weight: 500;
   letter-spacing: 0.1px;
 }
 
-.restaurant-layout__label-group--selected .restaurant-layout__table-label {
-  fill: var(--label-selected-color);
-  font-weight: 700;
+/* Table Labels by Capacity */
+.restaurant-layout__label-group[data-capacity="2"] .restaurant-layout__table-label {
+  fill: var(--cat-2-text);
+}
+.restaurant-layout__label-group[data-capacity="4"] .restaurant-layout__table-label {
+  fill: var(--cat-4-text);
+}
+.restaurant-layout__label-group[data-capacity="6"] .restaurant-layout__table-label {
+  fill: var(--cat-6-text);
+}
+.restaurant-layout__label-group[data-capacity="8"] .restaurant-layout__table-label {
+  fill: var(--cat-8-text);
 }
 
-.restaurant-layout__label-group--selected .restaurant-layout__status-label {
-  fill: var(--status-selected-color);
-  font-weight: 500;
+/* Status Labels by Capacity */
+.restaurant-layout__label-group[data-capacity="2"] .restaurant-layout__status-label {
+  fill: var(--cat-2-color);
+}
+.restaurant-layout__label-group[data-capacity="4"] .restaurant-layout__status-label {
+  fill: var(--cat-4-color);
+}
+.restaurant-layout__label-group[data-capacity="6"] .restaurant-layout__status-label {
+  fill: var(--cat-6-color);
+}
+.restaurant-layout__label-group[data-capacity="8"] .restaurant-layout__status-label {
+  fill: var(--cat-8-color);
 }
 
+/* Taken Text Labels */
 .restaurant-layout__label-group--taken .restaurant-layout__table-label,
 .restaurant-layout__label-group--taken .restaurant-layout__status-label {
-  fill: var(--label-taken-color);
+  fill: var(--taken-text) !important;
   opacity: 0.8;
 }

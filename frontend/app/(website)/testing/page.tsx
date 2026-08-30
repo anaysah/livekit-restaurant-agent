@@ -31,14 +31,13 @@ export default function TestingPage() {
         <div>
           <h1 className="text-3xl font-bold">Restaurant Layout Pipeline Test</h1>
           <p className="text-sm text-text-muted mt-1">
-            Testing dynamic SVG preparation, event delegation, and real-time state synchronization.
+            Testing dynamic SVG preparation, seat category filtering, dashed selection halo, and state synchronization.
           </p>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8 items-start">
-          {/* Seating Layout Floor Plan */}
-          <div className="lg:col-span-2 bg-card border border-border rounded-xl p-6 shadow-sm">
-            <h2 className="text-lg font-semibold mb-4">Floor Plan Component</h2>
+          {/* Seating Layout Floor Plan with Filter Header */}
+          <div className="lg:col-span-2">
             <RestaurantLayout
               tables={tables}
               selectedTableId={selectedTableId}
