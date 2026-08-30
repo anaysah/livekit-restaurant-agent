@@ -3,3 +3,4 @@
 .vscode
 agent/reservation_details.yaml
 /examples/
+frontend/assets/restaurant-layout.prepared.svg

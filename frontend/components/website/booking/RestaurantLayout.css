@@ -1,0 +1,132 @@
+.restaurant-layout {
+  --available-fill: #ffffff;
+  --available-stroke: #c4613a;
+  --available-hover-fill: #fff9f6;
+  --taken-fill: #f3ede3;
+  --taken-stroke: #d5c8b5;
+  --taken-opacity: 0.65;
+  --selected-fill: #faeae2;
+  --selected-stroke: #c4613a;
+  --label-color: #9a3f1f;
+  --label-selected-color: #782c11;
+  --label-taken-color: #c0ad97;
+  --status-color: #c0ad97;
+  --status-selected-color: #9a3f1f;
+
+  position: relative;
+  width: 100%;
+  max-width: 562px;
+  aspect-ratio: 562 / 660;
+  user-select: none;
+  margin: 0 auto;
+}
+
+.restaurant-layout__svg,
+.restaurant-layout__overlay {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.restaurant-layout__overlay {
+  pointer-events: none;
+}
+
+/* Base table group styling */
+.restaurant-layout [data-table-group],
+.restaurant-layout .restaurant-table {
+  transition: opacity 180ms ease, transform 180ms ease;
+  transform-origin: center center;
+}
+
+/* Available state */
+.restaurant-layout [data-table-group][data-state='available'],
+.restaurant-layout .restaurant-table--available {
+  cursor: pointer;
+}
+
+.restaurant-layout [data-table-group][data-state='available']:hover [data-role='table-surface'],
+.restaurant-layout .restaurant-table--available:hover [data-role='table-surface'] {
+  fill: var(--available-hover-fill);
+  transition: all 180ms ease;
+}
+
+.restaurant-layout [data-table-group][data-state='available'] [data-role='table-surface'],
+.restaurant-layout .restaurant-table--available [data-role='table-surface'] {
+  fill: var(--available-fill);
+  stroke: var(--available-stroke);
+  transition: all 180ms ease;
+}
+
+/* Taken state */
+.restaurant-layout [data-table-group][data-state='taken'],
+.restaurant-layout .restaurant-table--taken {
+  cursor: not-allowed;
+  opacity: var(--taken-opacity);
+}
+
+.restaurant-layout [data-table-group][data-state='taken'] [data-role='table-surface'],
+.restaurant-layout .restaurant-table--taken [data-role='table-surface'] {
+  fill: var(--taken-fill) !important;
+  stroke: var(--taken-stroke) !important;
+}
+
+/* Selected state */
+.restaurant-layout [data-table-group][data-state='selected'],
+.restaurant-layout .restaurant-table--selected {
+  cursor: pointer;
+}
+
+.restaurant-layout [data-table-group][data-state='selected'] [data-role='table-surface'],
+.restaurant-layout .restaurant-table--selected [data-role='table-surface'] {
+  fill: var(--selected-fill) !important;
+  stroke: var(--selected-stroke) !important;
+  stroke-width: 2.5 !important;
+}
+
+/* Disabled state */
+.restaurant-layout [data-table-group][data-state='disabled'],
+.restaurant-layout .restaurant-table--disabled {
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+/* Labels */
+.restaurant-layout__table-label,
+.restaurant-layout__status-label {
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+  dominant-baseline: middle;
+  transition: fill 180ms ease;
+}
+
+.restaurant-layout__table-label {
+  fill: var(--label-color);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.restaurant-layout__status-label {
+  fill: var(--status-color);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+}
+
+.restaurant-layout__label-group--selected .restaurant-layout__table-label {
+  fill: var(--label-selected-color);
+  font-weight: 700;
+}
+
+.restaurant-layout__label-group--selected .restaurant-layout__status-label {
+  fill: var(--status-selected-color);
+  font-weight: 500;
+}
+
+.restaurant-layout__label-group--taken .restaurant-layout__table-label,
+.restaurant-layout__label-group--taken .restaurant-layout__status-label {
+  fill: var(--label-taken-color);
+  opacity: 0.8;
+}

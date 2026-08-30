@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "prepare:restaurant": "node scripts/prepare-restaurant-svg.mjs"
   },
   "dependencies": {
     "@livekit/components-core": "^0.12.13",

@@ -1,21 +1,25 @@
-"use client"
+"use client";
 
 // booking/page.tsx
 
-import React from 'react'
-import BookingForm from '@/components/website/booking-form'
-import SeatingPlan from '@/components/website/booking/seating-plan'
-import { useAppStore } from '@/lib/store/app-store'
-import { FORMS } from '@/lib/constants'
+import React from "react";
+import BookingForm from "@/components/website/booking-form";
+import { RestaurantLayout } from "@/components/website/booking/RestaurantLayout";
+import { useAppStore, selectFormData } from "@/lib/store/app-store";
+import { FORMS } from "@/lib/constants";
 
 export default function BookingPage() {
-  const updateForm = useAppStore((s) => s.updateForm)
+  const updateForm = useAppStore((s) => s.updateForm);
+  const formData = useAppStore(selectFormData(FORMS.BOOKING.id));
+
+  const selectedTableId = formData.table_id
+    ? String(formData.table_id).startsWith("T")
+      ? String(formData.table_id)
+      : `T${formData.table_id}`
+    : null;
 
   return (
-    <div
-      className="min-h-screen px-[5%] py-[100px]"
-      // style={{ background: "var(--color-background)" }}
-    >
+    <div className="min-h-screen px-[5%] py-[100px]">
       {/* ── Page Header ── */}
       <div className="mb-14">
         <p
@@ -41,7 +45,7 @@ export default function BookingPage() {
           className="text-[15px] leading-[1.75] font-light mt-3"
           style={{ color: "var(--color-text-secondary)", maxWidth: "480px" }}
         >
-          Choose your table from the floor plan, then fill in your details. We'll confirm within minutes.
+          Choose your table from the floor plan, then fill in your details. We&apos;ll confirm within minutes.
         </p>
       </div>
 
@@ -52,42 +56,47 @@ export default function BookingPage() {
       >
         {/* Left — Booking Form */}
         <div>
-          {/* Selected table pill */}
-          {/* {selectedTable && (
-            <div
-              className="flex items-center gap-3 rounded-xl px-4 py-3 mb-6 text-sm font-medium"
-              style={{
-                background: "color-mix(in srgb, var(--color-primary) 10%, var(--color-background))",
-                border: "1.5px solid color-mix(in srgb, var(--color-primary) 40%, transparent)",
-                color: "var(--color-primary)",
-              }}
-            >
-              <span className="text-base">🪑</span>
-              Table {selectedTable.id} selected — {selectedTable.seats} seats
-              <button
-                onClick={() => setSelectedTable(null)}
-                className="ml-auto text-xs opacity-60 hover:opacity-100 transition-opacity cursor-pointer bg-transparent border-none"
-                style={{ color: "var(--color-primary)" }}
-              >
-                Clear ×
-              </button>
-            </div>
-          )} */}
           <BookingForm />
         </div>
 
-        {/* Right — Seating Plan (sticky) */}
-        <div className="" style={{ 
-          height: "calc(100vh - 70px - 40px)" ,
-          background: "var(--color-background)",
-          }}>
-          <SeatingPlan
-            onSelect={(table: { id: number; seats: number } | null) =>
+        {/* Right — Interactive Seating Plan */}
+        <div
+          className="sticky top-24 rounded-xl border border-border p-6 bg-card"
+          style={{
+            minHeight: "500px",
+            background: "var(--color-background)",
+          }}
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-lg font-semibold text-foreground">Floor Plan</h2>
+              <p className="text-xs text-text-muted">Click an available table to select</p>
+            </div>
+            {selectedTableId && (
+              <button
+                type="button"
+                onClick={() =>
+                  updateForm(FORMS.BOOKING.id, {
+                    table_id: null,
+                    table_seats: null,
+                  })
+                }
+                className="text-xs font-medium px-2.5 py-1 rounded bg-primary/10 text-primary hover:bg-primary/20 transition-colors cursor-pointer border-none"
+              >
+                Clear Table ×
+              </button>
+            )}
+          </div>
+
+          <RestaurantLayout
+            selectedTableId={selectedTableId}
+            onTableSelect={(table) => {
+              const tableNumber = parseInt(table.id.replace(/\D/g, ""), 10);
               updateForm(FORMS.BOOKING.id, {
-                table_id:    table?.id    ?? null,
-                table_seats: table?.seats ?? null,
-              })
-            }
+                table_id: isNaN(tableNumber) ? table.id : tableNumber,
+                table_seats: table.capacity,
+              });
+            }}
           />
         </div>
       </div>
@@ -95,10 +104,9 @@ export default function BookingPage() {
       {/* Responsive */}
       <style>{`
         @media (max-width: 900px) {
-          .booking-grid { grid-template-columns: 1fr !important; }
+          .grid { grid-template-columns: 1fr !important; }
         }
       `}</style>
     </div>
-  )
+  );
 }
-
